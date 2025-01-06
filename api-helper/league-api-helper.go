@@ -114,7 +114,7 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 		summonerData.ID,
 		summonerData.PUUID,
 		rank,
-		rank,       // LastRank
+		rank,       // LastSoloRank
 		rankFlex,   // FlexRank
 		rankFlex,   // LastFlexRank
 		time.Now(), // Updated

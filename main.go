@@ -136,7 +136,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Summoner %v with Rank %v is now registered", summoner.GetNameTag(), summoner.Rank.ToString()),
+					Content: fmt.Sprintf("Summoner %v with Solo-Rank %v is now registered", summoner.GetNameTag(), summoner.SoloRank.ToString()),
 				},
 			})
 		},

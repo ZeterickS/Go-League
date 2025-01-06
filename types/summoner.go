@@ -12,24 +12,24 @@ type Summoner struct {
 	AccountID    string
 	ID           string
 	PUUID        string
-	Rank         common.Rank
-	LastRank     common.Rank
-	rankFlex     common.Rank
-	lastFlexRank common.Rank
+	SoloRank     common.Rank
+	LastSoloRank common.Rank
+	FlexRank     common.Rank
+	LastFlexRank common.Rank
 	Updated      time.Time
 }
 
 // NewSummoner creates a new Summoner instance with mandatory fields name, tagLine, accountID, ID, puuid, and Rank
-func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, rank common.Rank, lastRank common.Rank, rankFlex common.Rank, lastFlexRank common.Rank, updated time.Time) *Summoner {
+func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, soloRank common.Rank, lastSoloRank common.Rank, flexRank common.Rank, lastFlexRank common.Rank, updated time.Time) *Summoner {
 	summoner := &Summoner{
 		Name:         name,
 		TagLine:      tagLine,
 		AccountID:    accountID,
 		ID:           id,
 		PUUID:        puuid,
-		Rank:         rank,
-		LastRank:     lastRank,
-		RankFlex:     rankFlex,
+		SoloRank:         soloRank,
+		LastSoloRank:     lastSoloRank,
+		FlexRank:     flexRank,
 		LastFlexRank: lastFlexRank,
 		Updated:      updated,
 	}
@@ -43,8 +43,14 @@ func (s *Summoner) GetNameTag() string {
 }
 
 // UpdateRank updates the summoner's rank and last rank
-func (s *Summoner) UpdateRank(newRank common.Rank) {
-	s.LastRank = s.Rank
-	s.Rank = newRank
+func (s *Summoner) UpdateSoloRank(newSoloRank common.Rank) {
+	s.LastSoloRank = s.SoloRank
+	s.SoloRank = newSoloRank
+	s.Updated = time.Now()
+}
+
+func (s *Summoner) UpdateFlexRank(newFlexRank common.Rank) {
+	s.LastFlexRank = s.FlexRank
+	s.FlexRank = newFlexRank
 	s.Updated = time.Now()
 }

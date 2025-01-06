@@ -5,8 +5,10 @@
     "AccountID": "o9WEJunOmlGNIam5eb9EX-D2onsMLtZ7XWTj7Exm-PbSJtM",
     "ID": "BuP7VwbodobCVhl43kITl2-F8U7oZIo2bsYMNAwXRkSUaiA",
     "PUUID": "ftK2zEGFZ7QIhPKzGgRsATzUVorEo4ZTBXkcGqkk6jLyPfAPgXslwJ79vXiuwhiIAO9AmvkxS-DJsA",
-    "Rank": 1609,
-    "LastRank": 1659,
-    "Updated": "2025-01-06T21:25:48.189021991+01:00"
+    "SoloRank": 1609,
+    "LastSoloRank": 1639,
+    "FlexRank": 2000,
+    "LastFlexRank": 2010,
+    "Updated": "2025-01-06T21:41:20.124534977+01:00"
   }
 }
