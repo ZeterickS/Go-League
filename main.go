@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
+
+	apiHelper "discord-bot/api-helper"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -42,25 +45,79 @@ var (
 			Description: "Add a new Summoner",
 		},
 		{
+			Name:        "add2",
+			Description: "Add a new Summoner",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "name",
+					Description: "First number",
+					Required:    true,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "tag",
+					Description: "Second number",
+					Required:    true,
+				},
+			},
+		},
+		{
 			Name:        "ping",
 			Description: "Responds with Pong!",
+		},
+		{
+			Name:        "addnumbers",
+			Description: "Add two numbers",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Name:        "num1",
+					Description: "First number",
+					Required:    true,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Name:        "num2",
+					Description: "Second number",
+					Required:    true,
+				},
+			},
 		},
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"add": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Hey there! Congratulations, you just executed your first slash command",
-				},
-			})
-		},
 		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Pong!",
+				},
+			})
+		},
+		"addnumbers": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			options := i.ApplicationCommandData().Options
+			num1 := options[0].IntValue()
+			num2 := options[1].IntValue()
+			sum := num1 + num2
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf("The sum of %d and %d is %d", num1, num2, sum),
+				},
+			})
+		},
+		"add2": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			options := i.ApplicationCommandData().Options
+			name := options[0].StringValue()
+			tag := options[1].StringValue()
+			sum := name + tag
+			fmt.Println(apiHelper.GetSummonerByTag(name, tag))
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf("The sum of %d and %d is %d", name, tag, sum),
 				},
 			})
 		},
