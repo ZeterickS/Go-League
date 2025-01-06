@@ -53,3 +53,27 @@ func (r Rank) ToString() string {
 
 	return fmt.Sprintf("%s %02d LP", division, levelPoints)
 }
+
+func FromString(rankStr string) (Rank, error) {
+	var division string
+	var levelPoints int
+
+	_, err := fmt.Sscanf(rankStr, "%s %d LP", &division, &levelPoints)
+	if err != nil {
+		return 0, err
+	}
+
+	var divisionInt int
+	for key, value := range divisions {
+		if value == division {
+			divisionInt = key
+			break
+		}
+	}
+
+	if divisionInt == 0 && division != divisions[0] {
+		return 0, fmt.Errorf("invalid division: %s", division)
+	}
+
+	return Rank(divisionInt*100 + levelPoints), nil
+}

@@ -7,8 +7,41 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"discord-bot/types"
+	"discord-bot/apiHelper"
 )
 
+
+var ( RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not") )
+
+var s *discordgo.Session
+
+func init() { flag.Parse() }
+
+func init() {
+	var err error
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	BotToken := os.Getenv("TOKEN")
+	if BotToken == "" {
+		log.Fatal("Bot token not found in environment variables")
+	}
+
+	s, err = discordgo.New("Bot " + *BotToken)
+
+	if err != nil {
+		log.Fatalf("Invalid bot parameters: %v", err)
+	}
+}
+
+var (
+	commands = []*discordgo.ApplicationCommand{
+		Name: "add",
+		
+	}
+)
 
 func main() {
 
@@ -60,6 +93,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Println("Got summoner", )
 		
 	    summoner1 := types.NewSummoner("Test1", "2345", "AccouintID", "IDDiesundDas", "Ich bin eine ganz bes0ondere PUUID", 1305)
+
 		message := summoner1.Rank.ToString()
 		s.ChannelMessageSend(m.ChannelID, message)
 	}
