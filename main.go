@@ -12,6 +12,7 @@ import (
 	"discord-bot/features/onboarding"
 	"discord-bot/features/offboarding"
 	databaseHelper "discord-bot/database-helper"
+	"discord-bot/features/checkforsummonerupdate"
 )
 
 var (
@@ -208,6 +209,19 @@ func main() {
 		registeredCommands[i] = cmd
 		log.Printf("Command '%v' registered successfully", v.Name)
 	}
+
+
+    // Get the channel ID from the environment variables
+    ChannelID := os.Getenv("CHANNEL_ID")
+    if ChannelID == "" {
+        log.Fatal("Channel ID not found in environment variables")
+    }
+
+    // Initialize the checkforsummonerupdate package
+    checkforsummonerupdate.Initialize(s, ChannelID)
+
+    // Start the rank checking in a separate goroutine
+    go checkforsummonerupdate.CheckForUpdates()
 
 	defer s.Close()
 
