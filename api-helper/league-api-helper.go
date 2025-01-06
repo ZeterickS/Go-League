@@ -3,6 +3,7 @@ package apiHelper
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -42,7 +43,7 @@ func GetSummonerByTag(name, tagLine string) (*types.Summoner, error) {
 		return nil, fmt.Errorf("failed to fetch summoner data: %s", resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
