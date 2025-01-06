@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -106,7 +107,7 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 		return nil, err
 	}
 
-	rank, rankFlex, err := GetSummonerRank(summonerData.ID)
+	solorank, rankFlex, err := GetSummonerRank(summonerData.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -117,10 +118,10 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 		summonerData.AccountID,
 		summonerData.ID,
 		summonerData.PUUID,
-		rank,
-		rank,       // LastSoloRank
+		solorank,
+		0,          // LastSoloRank
 		rankFlex,   // FlexRank
-		rankFlex,   // LastFlexRank
+		0,          // LastFlexRank
 		time.Now(), // Updated
 	)
 	return summoner, nil
@@ -154,6 +155,9 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 		return 0, 0, err
 	}
 
+	// Log the response body for debugging
+	log.Printf("Response body: %s", string(body))
+
 	var rankData []struct {
 		QueueType    string `json:"queueType"`
 		Tier         string `json:"tier"`
@@ -170,10 +174,16 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 		return 0, 0, fmt.Errorf("no rank data found for summoner")
 	}
 
-	// Assuming the first entry is the desired rank
-	soloRankStr := fmt.Sprintf("%s %s %d LP", rankData[0].Tier, rankData[0].Rank, rankData[0].LeaguePoints)
-	soloRank := rank.FromString(soloRankStr)
-	rankFlexStr := fmt.Sprintf("%s %s %d LP", rankData[1].Tier, rankData[1].Rank, rankData[1].LeaguePoints)
-	rankFlex := rank.FromString(rankFlexStr)
-	return soloRank, rankFlex, nil
+	var soloRank, flexRank rank.Rank
+
+	for _, entry := range rankData {
+		rankStr := fmt.Sprintf("%s %s %d LP", entry.Tier, entry.Rank, entry.LeaguePoints)
+		if entry.QueueType == "RANKED_SOLO_5x5" {
+			soloRank = rank.FromString(rankStr)
+		} else if entry.QueueType == "RANKED_FLEX_SR" {
+			flexRank = rank.FromString(rankStr)
+		}
+	}
+
+	return soloRank, flexRank, nil
 }
