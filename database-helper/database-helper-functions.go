@@ -4,33 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"time"
 	"discord-bot/types"
-	"discord-bot/common"
 )
 
 const filename = "summoners.json"
 
 // SaveSummonersToFile saves a map of Summoner instances to a JSON file
-func SaveSummonersToFile(newSummoners map[string]*types.Summoner) error {
-	// Load existing summoners from the file
-	existingSummoners, err := LoadSummonersFromFile()
-	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to load existing summoners: %v", err)
-	}
-
-	// Merge new summoners with existing summoners
-	for name, summoner := range newSummoners {
-		existingSummoners[name] = summoner
-	}
-
-	// Marshal the combined summoners to JSON
-	data, err := json.MarshalIndent(existingSummoners, "", "  ")
+func SaveSummonersToFile(summoners map[string]*types.Summoner) error {
+	// Marshal the summoners to JSON
+	data, err := json.MarshalIndent(summoners, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal summoners: %v", err)
 	}
 
-	// Write the combined summoners to the file
+	// Write the summoners to the file
 	err = os.WriteFile(filename, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %v", err)
@@ -69,36 +56,4 @@ func GetSummonerByName(summoners map[string]*types.Summoner, name string) (*type
 		return nil, fmt.Errorf("summoner with name %s not found", name)
 	}
 	return summoner, nil
-}
-
-func main() {
-	// Example usage
-	summoners := make(map[string]*types.Summoner)
-	summoner := types.NewSummoner("Cedri22c2", "02010", "accountID", "id", "puuid", common.FromString("Gold IV"), common.FromString("Silver I"), time.Now())
-	if _, exists := summoners[summoner.Name]; !exists {
-		summoners[summoner.Name] = summoner
-	}
-
-	// Save the summoners to a file
-	err := SaveSummonersToFile(summoners)
-	if err != nil {
-		fmt.Println("Error saving summoners:", err)
-		return
-	}
-
-	// Load the summoners from the file
-	loadedSummoners, err := LoadSummonersFromFile()
-	if err != nil {
-		fmt.Println("Error loading summoners:", err)
-		return
-	}
-
-	// Retrieve a summoner by name
-	loadedSummoner, err := GetSummonerByName(loadedSummoners, "Cedri2c2")
-	if err != nil {
-		fmt.Println("Error retrieving summoner:", err)
-		return
-	}
-
-	fmt.Printf("Loaded Summoner: %+v\n", loadedSummoner)
 }

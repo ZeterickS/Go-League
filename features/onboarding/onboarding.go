@@ -21,11 +21,11 @@ func OnboardSummoner(name, tagLine string) (*types.Summoner, error) {
 		return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
 	}
 
-	if _, exists := summoners[summoner.Name]; exists {
-		return nil, fmt.Errorf("summoner with name %s already exists", summoner.Name)
+	if _, exists := summoners[summoner.GetNameTag()]; exists {
+		return nil, fmt.Errorf("summoner with name %s already exists", summoner.GetNameTag())
 	}
 
-	summoners[summoner.Name] = summoner
+	summoners[summoner.GetNameTag()] = summoner
 
 	// Better output of the summoners list
 	for name, summoner := range summoners {

@@ -141,9 +141,10 @@ var (
 		},
 		"delete": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
             options := i.ApplicationCommandData().Options
-            summonerName := options[0].StringValue()
+            summonerNameTag := options[0].StringValue()
+			log.Printf("Deleting summoner: %v", summonerNameTag)
 
-            err := offboarding.DeleteSummoner(summonerName)
+            err := offboarding.DeleteSummoner(summonerNameTag)
             if err != nil {
                 s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
                     Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -157,7 +158,7 @@ var (
             s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
                 Type: discordgo.InteractionResponseChannelMessageWithSource,
                 Data: &discordgo.InteractionResponseData{
-                    Content: fmt.Sprintf("Summoner %v has been deleted", summonerName),
+                    Content: fmt.Sprintf("Summoner %v has been deleted", summonerNameTag),
                 },
             })
         },
@@ -172,6 +173,7 @@ func getSummonerChoices() []*discordgo.ApplicationCommandOptionChoice {
     }
     choices := make([]*discordgo.ApplicationCommandOptionChoice, 0, len(summoners))
     for _, summoner := range summoners {
+		log.Printf("Summoner: %s, Data: %+v\n", summoner.GetNameTag(), summoner)
         choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
             Name:  summoner.GetNameTag(),
             Value: summoner.GetNameTag(),
