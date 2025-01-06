@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type Rank int 
+type Rank int
 
 // Division mapping for League of Legends
 var divisions = map[int]string{
@@ -54,27 +54,27 @@ func (r Rank) ToString() string {
 	return fmt.Sprintf("%s %02d LP", division, levelPoints)
 }
 
-func FromString(rankStr string) (Rank) {
-    var tier, rank string
-    var leaguePoints int
+func FromString(rankStr string) Rank {
+	var tier, rank string
+	var leaguePoints int
 
-    _, err := fmt.Sscanf(rankStr, "%s %s %d LP", &tier, &rank, &leaguePoints)
-    if err != nil {
-        return 0
-    }
+	_, err := fmt.Sscanf(rankStr, "%s %s %d LP", &tier, &rank, &leaguePoints)
+	if err != nil {
+		return 0
+	}
 
-    fullDivision := fmt.Sprintf("%s %s", tier, rank)
-    var divisionInt int
-    for key, value := range divisions {
-        if value == fullDivision {
-            divisionInt = key
-            break
-        }
-    }
+	fullDivision := fmt.Sprintf("%s %s", tier, rank)
+	var divisionInt int
+	for key, value := range divisions {
+		if value == fullDivision {
+			divisionInt = key
+			break
+		}
+	}
 
-    if divisionInt == 0 && fullDivision != divisions[0] {
-        return 0
-    }
+	if divisionInt == 0 && fullDivision != divisions[0] {
+		return 0
+	}
 
-    return Rank(divisionInt*100 + leaguePoints)
+	return Rank(divisionInt*100 + leaguePoints)
 }
