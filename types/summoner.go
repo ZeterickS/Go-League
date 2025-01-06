@@ -1,7 +1,7 @@
 package types
 
 import (
-	"discord-bot/common"
+	"discord-bot/rank"
 	"time"
 )
 
@@ -12,15 +12,15 @@ type Summoner struct {
 	AccountID    string
 	ID           string
 	PUUID        string
-	SoloRank     common.Rank
-	LastSoloRank common.Rank
-	FlexRank     common.Rank
-	LastFlexRank common.Rank
+	SoloRank     rank.Rank
+	LastSoloRank rank.Rank
+	FlexRank     rank.Rank
+	LastFlexRank rank.Rank
 	Updated      time.Time
 }
 
 // NewSummoner creates a new Summoner instance with mandatory fields name, tagLine, accountID, ID, puuid, and Rank
-func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, soloRank common.Rank, lastSoloRank common.Rank, flexRank common.Rank, lastFlexRank common.Rank, updated time.Time) *Summoner {
+func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, soloRank rank.Rank, lastSoloRank rank.Rank, flexRank rank.Rank, lastFlexRank rank.Rank, updated time.Time) *Summoner {
 	summoner := &Summoner{
 		Name:         name,
 		TagLine:      tagLine,
@@ -43,13 +43,13 @@ func (s *Summoner) GetNameTag() string {
 }
 
 // UpdateRank updates the summoner's rank and last rank
-func (s *Summoner) UpdateSoloRank(newSoloRank common.Rank) {
+func (s *Summoner) UpdateSoloRank(newSoloRank rank.Rank) {
 	s.LastSoloRank = s.SoloRank
 	s.SoloRank = newSoloRank
 	s.Updated = time.Now()
 }
 
-func (s *Summoner) UpdateFlexRank(newFlexRank common.Rank) {
+func (s *Summoner) UpdateFlexRank(newFlexRank rank.Rank) {
 	s.LastFlexRank = s.FlexRank
 	s.FlexRank = newFlexRank
 	s.Updated = time.Now()

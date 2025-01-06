@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"discord-bot/common"
+	"discord-bot/rank"
 )
 
 func setupEnv() {
@@ -70,7 +70,7 @@ func TestGetSummonerByTag(t *testing.T) {
 	if summoner.PUUID != "test-puuid" {
 		t.Errorf("Expected PUUID 'test-puuid', got '%s'", summoner.PUUID)
 	}
-	expectedRank := common.FromString("GOLD IV 50 LP")
+	expectedRank := rank.FromString("GOLD IV 50 LP")
 	if summoner.Rank != expectedRank {
 		t.Errorf("Expected rank '%s', got '%s'", expectedRank.ToString(), summoner.Rank.ToString())
 	}
@@ -124,7 +124,7 @@ func TestGetSummonerByPUUID(t *testing.T) {
 	if summoner.PUUID != "test-puuid" {
 		t.Errorf("Expected PUUID 'test-puuid', got '%s'", summoner.PUUID)
 	}
-	expectedRank := common.FromString("GOLD IV 50 LP")
+	expectedRank := rank.FromString("GOLD IV 50 LP")
 	if summoner.Rank != expectedRank {
 		t.Errorf("Expected rank '%s', got '%s'", expectedRank.ToString(), summoner.Rank.ToString())
 	}
