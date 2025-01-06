@@ -9,7 +9,9 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
-	onboarding "discord-bot/features"
+	"discord-bot/features/onboarding"
+	"discord-bot/features/offboarding"
+	databaseHelper "discord-bot/database-helper"
 )
 
 var (
@@ -79,6 +81,19 @@ var (
 				},
 			},
 		},
+		{
+            Name:        "delete",
+            Description: "Delete a summoner",
+            Options: []*discordgo.ApplicationCommandOption{
+                {
+                    Type:        discordgo.ApplicationCommandOptionString,
+                    Name:        "summoner",
+                    Description: "Summoner to delete",
+                    Required:    true,
+                    Choices:     getSummonerChoices(), // Function to get all summoner choices
+                },
+            },
+        },
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
@@ -124,24 +139,62 @@ var (
 				},
 			})
 		},
+		"delete": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+            options := i.ApplicationCommandData().Options
+            summonerName := options[0].StringValue()
+
+            err := offboarding.DeleteSummoner(summonerName)
+            if err != nil {
+                s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+                    Type: discordgo.InteractionResponseChannelMessageWithSource,
+                    Data: &discordgo.InteractionResponseData{
+                        Content: fmt.Sprintf("Failed to delete summoner: %v", err),
+                    },
+                })
+                return
+            }
+
+            s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+                Type: discordgo.InteractionResponseChannelMessageWithSource,
+                Data: &discordgo.InteractionResponseData{
+                    Content: fmt.Sprintf("Summoner %v has been deleted", summonerName),
+                },
+            })
+        },
 	}
 )
 
+func getSummonerChoices() []*discordgo.ApplicationCommandOptionChoice {
+    summoners, err := databaseHelper.LoadSummonersFromFile() // Function to get all summoners
+    if err != nil {
+        log.Printf("failed to load File: %v", err)
+        return []*discordgo.ApplicationCommandOptionChoice{}
+    }
+    choices := make([]*discordgo.ApplicationCommandOptionChoice, 0, len(summoners))
+    for _, summoner := range summoners {
+        choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+            Name:  summoner.GetNameTag(),
+            Value: summoner.GetNameTag(),
+        })
+    }
+    return choices
+}
+
 func main() {
-	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
-	})
+    s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+        log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
+    })
 
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
-		}
-	})
+    s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+        if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+            h(s, i)
+        }
+    })
 
-	err := s.Open()
-	if err != nil {
-		log.Fatalf("Cannot open the session: %v", err)
-	}
+    err := s.Open()
+    if err != nil {
+        log.Fatalf("Cannot open the session: %v", err)
+    }
 
 	log.Println("Adding commands...")
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
