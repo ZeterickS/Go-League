@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"log"
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
@@ -14,18 +15,18 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	token := os.Getenv("DISCORD_BOT_TOKEN")
+	token := os.Getenv("TOKEN")
 	if token == "" {
 		log.Fatal("Bot token not found in environment variables")
 	}
 
-	session, err := discordgo.New("Bot " + Token)
+	session, err := discordgo.New("Bot " + token)
 	if err != nil {
 		fmt.Println("Error creating Discord session:", err)
 		return
 	}
 
-	session.AddMessageCreateHandler(messageCreate)
+	session.AddHandler(messageCreate)
 
 	err = session.Open()
 	if err != nil {
