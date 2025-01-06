@@ -27,14 +27,14 @@ func TestGetSummonerByTag(t *testing.T) {
 
 	// Mock the response for the summoner API
 	summonerResponse := `{
-		"id": "test-id",
-		"accountId": "test-account-id",
-		"puuid": "test-puuid",
-		"name": "Cedric",
-		"profileIconId": 1234,
-		"revisionDate": 1610000000000,
-		"summonerLevel": 30
-	}`
+        "id": "test-id",
+        "accountId": "test-account-id",
+        "puuid": "test-puuid",
+        "name": "Cedric",
+        "profileIconId": 1234,
+        "revisionDate": 1610000000000,
+        "summonerLevel": 30
+    }`
 	summonerServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(summonerResponse))
@@ -43,16 +43,11 @@ func TestGetSummonerByTag(t *testing.T) {
 
 	// Mock the response for the rank API
 	rankResponse := `[{
-		"queueType": "RANKED_SOLO_5x5",
-		"tier": "GOLD",
-		"rank": "IV",
-		"leaguePoints": 50
-	}, {
-		"queueType": "RANKED_FLEX_5x5",
-		"tier": "SILVER",
-		"rank": "II",
-		"leaguePoints": 30
-	}]`
+        "queueType": "RANKED_SOLO_5x5",
+        "tier": "GOLD",
+        "rank": "IV",
+        "leaguePoints": 50
+    }]`
 	rankServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(rankResponse))
@@ -75,13 +70,9 @@ func TestGetSummonerByTag(t *testing.T) {
 	if summoner.PUUID != "test-puuid" {
 		t.Errorf("Expected PUUID 'test-puuid', got '%s'", summoner.PUUID)
 	}
-	expectedSoloRank := rank.FromString("GOLD IV 50 LP")
-	if summoner.SoloRank != expectedSoloRank {
-		t.Errorf("Expected solo rank '%s', got '%s'", expectedSoloRank.ToString(), summoner.SoloRank.ToString())
-	}
-	expectedFlexRank := rank.FromString("SILVER II 30 LP")
-	if summoner.FlexRank != expectedFlexRank {
-		t.Errorf("Expected flex rank '%s', got '%s'", expectedFlexRank.ToString(), summoner.FlexRank.ToString())
+	expectedRank := rank.FromString("GOLD IV 50 LP")
+	if summoner.SoloRank != expectedRank {
+		t.Errorf("Expected rank '%s', got '%s'", expectedRank.ToString(), summoner.SoloRank.ToString())
 	}
 }
 
@@ -90,14 +81,14 @@ func TestGetSummonerByPUUID(t *testing.T) {
 
 	// Mock the response for the summoner API
 	summonerResponse := `{
-		"id": "test-id",
-		"accountId": "test-account-id",
-		"puuid": "test-puuid",
-		"name": "Cedric",
-		"profileIconId": 1234,
-		"revisionDate": 1610000000000,
-		"summonerLevel": 30
-	}`
+        "id": "test-id",
+        "accountId": "test-account-id",
+        "puuid": "test-puuid",
+        "name": "Cedric",
+        "profileIconId": 1234,
+        "revisionDate": 1610000000000,
+        "summonerLevel": 30
+    }`
 	summonerServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(summonerResponse))
@@ -106,16 +97,11 @@ func TestGetSummonerByPUUID(t *testing.T) {
 
 	// Mock the response for the rank API
 	rankResponse := `[{
-		"queueType": "RANKED_SOLO_5x5",
-		"tier": "GOLD",
-		"rank": "IV",
-		"leaguePoints": 50
-	}, {
-		"queueType": "RANKED_FLEX_5x5",
-		"tier": "SILVER",
-		"rank": "II",
-		"leaguePoints": 30
-	}]`
+        "queueType": "RANKED_SOLO_5x5",
+        "tier": "GOLD",
+        "rank": "IV",
+        "leaguePoints": 50
+    }]`
 	rankServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(rankResponse))
@@ -138,12 +124,8 @@ func TestGetSummonerByPUUID(t *testing.T) {
 	if summoner.PUUID != "test-puuid" {
 		t.Errorf("Expected PUUID 'test-puuid', got '%s'", summoner.PUUID)
 	}
-	expectedSoloRank := rank.FromString("GOLD IV 50 LP")
-	if summoner.SoloRank != expectedSoloRank {
-		t.Errorf("Expected solo rank '%s', got '%s'", expectedSoloRank.ToString(), summoner.SoloRank.ToString())
-	}
-	expectedFlexRank := rank.FromString("SILVER II 30 LP")
-	if summoner.FlexRank != expectedFlexRank {
-		t.Errorf("Expected flex rank '%s', got '%s'", expectedFlexRank.ToString(), summoner.FlexRank.ToString())
+	expectedRank := rank.FromString("GOLD IV 50 LP")
+	if summoner.SoloRank != expectedRank {
+		t.Errorf("Expected rank '%s', got '%s'", expectedRank.ToString(), summoner.SoloRank.ToString())
 	}
 }

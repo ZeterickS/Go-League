@@ -17,6 +17,9 @@ import (
 
 // LoadEnv loads environment variables from a .env file
 func LoadEnv() error {
+	if os.Getenv("ROPT_API_TOKEN") != "" {
+		return nil
+	}
 	return godotenv.Load()
 }
 
