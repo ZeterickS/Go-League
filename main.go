@@ -10,10 +10,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 var (
 	RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not")
-	GuildID        = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally") 
+	GuildID        = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
 )
 
 var s *discordgo.Session
@@ -26,7 +25,7 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 
-	BotToken := os.Getenv("TOKEN")
+	BotToken := os.Getenv("DISCORD_BOT_TOKEN")
 	if BotToken == "" {
 		log.Fatal("Bot token not found in environment variables")
 	}
@@ -41,7 +40,7 @@ func init() {
 var (
 	commands = []*discordgo.ApplicationCommand{
 		{
-			Name: "add",
+			Name:        "add",
 			Description: "Add a new Summoner",
 		},
 	}
@@ -65,7 +64,6 @@ func init() {
 		}
 	})
 }
-
 
 func main() {
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
