@@ -1,4 +1,4 @@
-package types
+package common
 
 import (
 	"fmt"
@@ -42,14 +42,14 @@ var divisions = map[int]string{
 }
 
 // String method to format the Rank value
-func (r Rank) String() string {
-    divisionInt := int(r) / 100
-    levelPoints := int(r) % 100
+func (r Rank) ToString() string {
+	divisionInt := int(r) / 100
+	levelPoints := int(r) % 100
 
-    division, exists := divisions[divisionInt]
-    if !exists {
-        division = "Unknown"
-    }
+	division, exists := divisions[divisionInt]
+	if !exists {
+		division = "Unknown"
+	}
 
-    return fmt.Sprintf("Division: %s, LevelPoints: %02d", division, levelPoints)
+	return fmt.Sprintf("%s %02d LP", division, levelPoints)
 }

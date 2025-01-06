@@ -12,6 +12,7 @@ import (
 
 func main() {
 
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -57,6 +58,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if m.Content == "summoner" {
 		fmt.Println("Got summoner", )
-		s.ChannelMessageSend(m.ChannelID, "summoner")
+		
+	    summoner1 := types.NewSummoner("Test1", "2345", "AccouintID", "IDDiesundDas", "Ich bin eine ganz bes0ondere PUUID", 1305)
+		message := summoner1.Rank.ToString()
+		s.ChannelMessageSend(m.ChannelID, message)
 	}
 }
