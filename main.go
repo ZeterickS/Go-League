@@ -43,21 +43,17 @@ var (
 		{
 			Name:        "add",
 			Description: "Add a new Summoner",
-		},
-		{
-			Name:        "add2",
-			Description: "Add a new Summoner",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        "name",
-					Description: "First number",
+					Description: "Ingame Name",
 					Required:    true,
 				},
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        "tag",
-					Description: "Second number",
+					Description: "Your Riot Tag",
 					Required:    true,
 				},
 			},
@@ -108,11 +104,11 @@ var (
 				},
 			})
 		},
-		"add2": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"add": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			options := i.ApplicationCommandData().Options
 			name := options[0].StringValue()
 			tag := options[1].StringValue()
-			sum := name + tag
+			// TODO: ADD Onboarding 
 			fmt.Println(apiHelper.GetSummonerByTag(name, tag))
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
