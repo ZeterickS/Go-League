@@ -11,15 +11,14 @@ import (
 )
 
 var (
-	RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not")
+	RemoveCommands = flag.Bool("rmcmd", false, "Remove all commands after shutdowning or not")
 	GuildID        = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
 )
 
 var s *discordgo.Session
 
-func init() { flag.Parse() }
-
 func init() {
+	flag.Parse()
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -31,7 +30,6 @@ func init() {
 	}
 
 	s, err = discordgo.New("Bot " + BotToken)
-
 	if err != nil {
 		log.Fatalf("Invalid bot parameters: %v", err)
 	}
@@ -42,6 +40,10 @@ var (
 		{
 			Name:        "add",
 			Description: "Add a new Summoner",
+		},
+		{
+			Name:        "ping",
+			Description: "Responds with Pong!",
 		},
 	}
 
@@ -54,21 +56,28 @@ var (
 				},
 			})
 		},
+		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Pong!",
+				},
+			})
+		},
 	}
 )
-
-func init() {
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
-		}
-	})
-}
 
 func main() {
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
+
+	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+			h(s, i)
+		}
+	})
+
 	err := s.Open()
 	if err != nil {
 		log.Fatalf("Cannot open the session: %v", err)
@@ -82,6 +91,7 @@ func main() {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		}
 		registeredCommands[i] = cmd
+		log.Printf("Command '%v' registered successfully", v.Name)
 	}
 
 	defer s.Close()
@@ -93,22 +103,12 @@ func main() {
 
 	if *RemoveCommands {
 		log.Println("Removing commands...")
-		// // We need to fetch the commands, since deleting requires the command ID.
-		// // We are doing this from the returned commands on line 375, because using
-		// // this will delete all the commands, which might not be desirable, so we
-		// // are deleting only the commands that we added.
-		// registeredCommands, err := s.ApplicationCommands(s.State.User.ID, *GuildID)
-		// if err != nil {
-		// 	log.Fatalf("Could not fetch registered commands: %v", err)
-		// }
-
 		for _, v := range registeredCommands {
 			err := s.ApplicationCommandDelete(s.State.User.ID, *GuildID, v.ID)
 			if err != nil {
 				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
 			}
 		}
-
 	}
 
 	log.Println("Gracefully shutting down.")
