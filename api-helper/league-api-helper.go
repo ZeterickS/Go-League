@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"discord-bot/types"
+	"discord-bot/common"
 
 	"github.com/joho/godotenv"
 )
@@ -120,31 +121,31 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 }
 
 // GetSummonerRank fetches the rank and division of a summoner by their ID from the League of Legends API
-func GetSummonerRank(summonerID string) (string, error) {
+func GetSummonerRank(summonerID string) (common.Rank, error) {
 	err := LoadEnv()
 	if err != nil {
-		return "", fmt.Errorf("error loading .env file")
+		return 0, fmt.Errorf("error loading .env file")
 	}
 
 	apiKey := os.Getenv("ROPT_API_TOKEN")
 	if apiKey == "" {
-		return "", fmt.Errorf("API token not found in environment variables")
+		return 0, fmt.Errorf("API token not found in environment variables")
 	}
 
 	url := fmt.Sprintf("https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/%s?api_key=%s", summonerID, apiKey)
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to fetch summoner rank: %s", resp.Status)
+		return 0, fmt.Errorf("failed to fetch summoner rank: %s", resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	var rankData []struct {
@@ -156,13 +157,15 @@ func GetSummonerRank(summonerID string) (string, error) {
 
 	err = json.Unmarshal(body, &rankData)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	if len(rankData) == 0 {
-		return "", fmt.Errorf("no rank data found for summoner")
+		return 0, fmt.Errorf("no rank data found for summoner")
 	}
 
 	// Assuming the first entry is the desired rank
-	return fmt.Sprintf("%s %s (%d LP)", rankData[0].Tier, rankData[0].Rank, rankData[0].LeaguePoints), nil
+	rankStr := fmt.Sprintf("%s %s %d LP", rankData[0].Tier, rankData[0].Rank, rankData[0].LeaguePoints)
+	rank := common.FromString(rankStr)
+	return rank, nil
 }

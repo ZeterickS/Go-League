@@ -2,6 +2,7 @@ package types
 
 import (
 	"time"
+    "discord-bot/common"
 )
 
 // Summoner represents a user with various attributes
@@ -11,13 +12,13 @@ type Summoner struct {
 	AccountID string
 	ID        string
 	PUUID     string
-	Rank      string
-	LastRank  string
+	Rank      common.Rank
+	LastRank  common.Rank
 	Updated   time.Time
 }
 
 // NewSummoner creates a new Summoner instance with mandatory fields name, tagLine, accountID, ID, puuid, and Rank
-func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, rank string, lastRank string, updated time.Time) *Summoner {
+func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, rank common.Rank, lastRank common.Rank, updated time.Time) *Summoner {
 	summoner := &Summoner{
 		Name:      name,
 		TagLine:   tagLine,
@@ -38,7 +39,7 @@ func (s *Summoner) GetNameTag() string {
 }
 
 // UpdateRank updates the summoner's rank and last rank
-func (s *Summoner) UpdateRank(newRank string) {
+func (s *Summoner) UpdateRank(newRank common.Rank) {
 	s.LastRank = s.Rank
 	s.Rank = newRank
 	s.Updated = time.Now()

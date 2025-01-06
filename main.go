@@ -7,10 +7,9 @@ import (
 	"os"
 	"os/signal"
 
-	apiHelper "discord-bot/api-helper"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	onboarding "discord-bot/features"
 )
 
 var (
@@ -108,12 +107,20 @@ var (
 			options := i.ApplicationCommandData().Options
 			name := options[0].StringValue()
 			tag := options[1].StringValue()
-			// TODO: ADD Onboarding 
-			fmt.Println(apiHelper.GetSummonerByTag(name, tag))
+			summoner, err := onboarding.OnboardSummoner(name, tag)
+			if err != nil {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf("Failed to onboard summoner: %v", err),
+					},
+				})
+				return
+			}
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("The sum of %d and %d is %d", name, tag, sum),
+					Content: fmt.Sprintf("Summoner %v with Rank %v is now registered", summoner.GetNameTag(), summoner.Rank.ToString()),
 				},
 			})
 		},

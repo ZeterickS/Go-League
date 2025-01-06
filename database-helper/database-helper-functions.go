@@ -1,12 +1,12 @@
-package common
+package databaseHelper
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 	"time"
-
 	"discord-bot/types"
+	"discord-bot/common"
 )
 
 const filename = "summoners.json"
@@ -41,18 +41,25 @@ func SaveSummonersToFile(newSummoners map[string]*types.Summoner) error {
 
 // LoadSummonersFromFile loads a map of Summoner instances from a JSON file
 func LoadSummonersFromFile() (map[string]*types.Summoner, error) {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %v", err)
-	}
+    data, err := os.ReadFile(filename)
+    if err != nil {
+        if os.IsNotExist(err) {
+            return make(map[string]*types.Summoner), nil
+        }
+        return nil, fmt.Errorf("failed to read file: %v", err)
+    }
 
-	var summoners map[string]*types.Summoner
-	err = json.Unmarshal(data, &summoners)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal summoners: %v", err)
-	}
+    if len(data) == 0 {
+        return make(map[string]*types.Summoner), nil
+    }
 
-	return summoners, nil
+    var summoners map[string]*types.Summoner
+    err = json.Unmarshal(data, &summoners)
+    if err != nil {
+        return nil, fmt.Errorf("failed to unmarshal summoners: %v", err)
+    }
+
+    return summoners, nil
 }
 
 // GetSummonerByName retrieves a Summoner instance by name from the map
@@ -67,7 +74,7 @@ func GetSummonerByName(summoners map[string]*types.Summoner, name string) (*type
 func main() {
 	// Example usage
 	summoners := make(map[string]*types.Summoner)
-	summoner := types.NewSummoner("Cedri22c2", "02010", "accountID", "id", "puuid", "Gold IV", "Silver I", time.Now())
+	summoner := types.NewSummoner("Cedri22c2", "02010", "accountID", "id", "puuid", common.FromString("Gold IV"), common.FromString("Silver I"), time.Now())
 	if _, exists := summoners[summoner.Name]; !exists {
 		summoners[summoner.Name] = summoner
 	}
