@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"discord-bot/common"
+	"discord-bot/rank"
 	"discord-bot/types"
 
 	"github.com/joho/godotenv"
@@ -114,7 +114,7 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 		summonerData.ID,
 		summonerData.PUUID,
 		rank,
-		rank,       // LastRank
+		rank,       // LastSoloRank
 		rankFlex,   // FlexRank
 		rankFlex,   // LastFlexRank
 		time.Now(), // Updated
@@ -123,7 +123,7 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 }
 
 // GetSummonerRank fetches the rank and division of a summoner by their ID from the League of Legends API
-func GetSummonerRank(summonerID string) (common.Rank, common.Rank, error) {
+func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	err := LoadEnv()
 	if err != nil {
 		return 0, 0, fmt.Errorf("error loading .env file")
@@ -167,9 +167,9 @@ func GetSummonerRank(summonerID string) (common.Rank, common.Rank, error) {
 	}
 
 	// Assuming the first entry is the desired rank
-	rankStr := fmt.Sprintf("%s %s %d LP", rankData[0].Tier, rankData[0].Rank, rankData[0].LeaguePoints)
-	rank := common.FromString(rankStr)
+	soloRankStr := fmt.Sprintf("%s %s %d LP", rankData[0].Tier, rankData[0].Rank, rankData[0].LeaguePoints)
+	soloRank := rank.FromString(soloRankStr)
 	rankFlexStr := fmt.Sprintf("%s %s %d LP", rankData[1].Tier, rankData[1].Rank, rankData[1].LeaguePoints)
-	rankFlex := common.FromString(rankFlexStr)
-	return rank, rankFlex, nil
+	rankFlex := rank.FromString(rankFlexStr)
+	return soloRank, rankFlex, nil
 }

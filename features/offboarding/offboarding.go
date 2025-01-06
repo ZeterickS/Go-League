@@ -1,4 +1,3 @@
-// FILE: offboarding/offboarding.go
 package offboarding
 
 import (

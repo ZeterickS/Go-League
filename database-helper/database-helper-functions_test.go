@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"discord-bot/common"
+	"discord-bot/rank"
 	"discord-bot/types"
 )
 
@@ -26,7 +26,7 @@ func TestSaveAndLoadSummoners(t *testing.T) {
 	defer teardown()
 
 	summoners := make(map[string]*types.Summoner)
-	summoner := types.NewSummoner("Cedric", "0010", "accountID", "id", "puuid", common.FromString("GOLD IV 50 LP"), common.FromString("SILVER I 0 LP"), time.Now())
+	summoner := types.NewSummoner("Cedric", "0010", "accountID", "id", "puuid", rank.FromString("GOLD IV 50 LP"), rank.FromString("SILVER I 0 LP"), time.Now())
 	summoners[summoner.Name] = summoner
 
 	// Save the summoners to a file

@@ -38,29 +38,53 @@ func CheckForUpdates() {
                 continue
             }
 
-            if currentSummoner.Rank != summoner.Rank {
-                // Post a message about the rank change
-				rankchange := currentSummoner.Rank - summoner.Rank
-				rankchangeString := ""
-				if rankchange < 0 {
-					rankchangeString = fmt.Sprintf("%v", rankchange)
+			// Check for SoloRank updates
+			if currentSummoner.SoloRank != summoner.SoloRank {
+				rankChange := currentSummoner.SoloRank - summoner.SoloRank
+				rankChangeString := ""
+				if rankChange < 0 {
+					rankChangeString = fmt.Sprintf("%v", rankChange)
 				} else {
-					rankchangeString = fmt.Sprintf("+%v", rankchange)
+					rankChangeString = fmt.Sprintf("+%v", rankChange)
 				}
-                message := fmt.Sprintf("Summoner %v has a new rank: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.Rank.ToString(), rankchangeString)
-                log.Println(message)
-                if discordSession != nil && channelID != "" {
-                    _, err := discordSession.ChannelMessageSend(channelID, message)
-                    if err != nil {
-                        log.Printf("Failed to send message to Discord channel: %v", err)
-                    }
-                }
+				message := fmt.Sprintf("Summoner %v has a new SoloRank: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.SoloRank.ToString(), rankChangeString)
+				log.Println(message)
+				if discordSession != nil && channelID != "" {
+					_, err := discordSession.ChannelMessageSend(channelID, message)
+					if err != nil {
+						log.Printf("Failed to send message to Discord channel: %v", err)
+					}
+				}
 
-                // Update the stored rank
-                summoner.LastRank = summoner.Rank
-                summoner.Rank = currentSummoner.Rank
-                summoner.Updated = time.Now()
-            }
+				// Update the stored SoloRank
+				summoner.LastSoloRank = summoner.SoloRank
+				summoner.SoloRank = currentSummoner.SoloRank
+				summoner.Updated = time.Now()
+			}
+
+			// Check for FlexRank updates
+			if currentSummoner.FlexRank != summoner.FlexRank {
+				rankChange := currentSummoner.FlexRank - summoner.FlexRank
+				rankChangeString := ""
+				if rankChange < 0 {
+					rankChangeString = fmt.Sprintf("%v", rankChange)
+				} else {
+					rankChangeString = fmt.Sprintf("+%v", rankChange)
+				}
+				message := fmt.Sprintf("Summoner %v has a new FlexRank: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.FlexRank.ToString(), rankChangeString)
+				log.Println(message)
+				if discordSession != nil && channelID != "" {
+					_, err := discordSession.ChannelMessageSend(channelID, message)
+					if err != nil {
+						log.Printf("Failed to send message to Discord channel: %v", err)
+					}
+				}
+
+				// Update the stored FlexRank
+				summoner.LastFlexRank = summoner.FlexRank
+				summoner.FlexRank = currentSummoner.FlexRank
+				summoner.Updated = time.Now()
+			}
         }
 
         // Save the updated summoners to file
