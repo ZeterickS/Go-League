@@ -1,33 +1,37 @@
 package types
 
 import (
+	"discord-bot/common"
 	"time"
-    "discord-bot/common"
 )
 
 // Summoner represents a user with various attributes
 type Summoner struct {
-	Name      string
-	TagLine   string
-	AccountID string
-	ID        string
-	PUUID     string
-	Rank      common.Rank
-	LastRank  common.Rank
-	Updated   time.Time
+	Name         string
+	TagLine      string
+	AccountID    string
+	ID           string
+	PUUID        string
+	Rank         common.Rank
+	LastRank     common.Rank
+	rankFlex     common.Rank
+	lastFlexRank common.Rank
+	Updated      time.Time
 }
 
 // NewSummoner creates a new Summoner instance with mandatory fields name, tagLine, accountID, ID, puuid, and Rank
-func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, rank common.Rank, lastRank common.Rank, updated time.Time) *Summoner {
+func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, rank common.Rank, lastRank common.Rank, rankFlex common.Rank, lastFlexRank common.Rank, updated time.Time) *Summoner {
 	summoner := &Summoner{
-		Name:      name,
-		TagLine:   tagLine,
-		AccountID: accountID,
-		ID:        id,
-		PUUID:     puuid,
-		Rank:      rank,
-		LastRank:  lastRank,
-		Updated:   updated,
+		Name:         name,
+		TagLine:      tagLine,
+		AccountID:    accountID,
+		ID:           id,
+		PUUID:        puuid,
+		Rank:         rank,
+		LastRank:     lastRank,
+		RankFlex:     rankFlex,
+		LastFlexRank: lastFlexRank,
+		Updated:      updated,
 	}
 
 	return summoner

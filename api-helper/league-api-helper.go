@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"discord-bot/types"
 	"discord-bot/common"
+	"discord-bot/types"
 
 	"github.com/joho/godotenv"
 )
@@ -102,7 +102,7 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 		return nil, err
 	}
 
-	rank, err := GetSummonerRank(summonerData.ID)
+	rank, rankFlex, err := GetSummonerRank(summonerData.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -115,37 +115,39 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 		summonerData.PUUID,
 		rank,
 		rank,       // LastRank
+		rankFlex,   // FlexRank
+		rankFlex,   // LastFlexRank
 		time.Now(), // Updated
 	)
 	return summoner, nil
 }
 
 // GetSummonerRank fetches the rank and division of a summoner by their ID from the League of Legends API
-func GetSummonerRank(summonerID string) (common.Rank, error) {
+func GetSummonerRank(summonerID string) (common.Rank, common.Rank, error) {
 	err := LoadEnv()
 	if err != nil {
-		return 0, fmt.Errorf("error loading .env file")
+		return 0, 0, fmt.Errorf("error loading .env file")
 	}
 
 	apiKey := os.Getenv("ROPT_API_TOKEN")
 	if apiKey == "" {
-		return 0, fmt.Errorf("API token not found in environment variables")
+		return 0, 0, fmt.Errorf("API token not found in environment variables")
 	}
 
 	url := fmt.Sprintf("https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/%s?api_key=%s", summonerID, apiKey)
 	resp, err := http.Get(url)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("failed to fetch summoner rank: %s", resp.Status)
+		return 0, 0, fmt.Errorf("failed to fetch summoner rank: %s", resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	var rankData []struct {
@@ -157,15 +159,17 @@ func GetSummonerRank(summonerID string) (common.Rank, error) {
 
 	err = json.Unmarshal(body, &rankData)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
 	if len(rankData) == 0 {
-		return 0, fmt.Errorf("no rank data found for summoner")
+		return 0, 0, fmt.Errorf("no rank data found for summoner")
 	}
 
 	// Assuming the first entry is the desired rank
 	rankStr := fmt.Sprintf("%s %s %d LP", rankData[0].Tier, rankData[0].Rank, rankData[0].LeaguePoints)
 	rank := common.FromString(rankStr)
-	return rank, nil
+	rankFlexStr := fmt.Sprintf("%s %s %d LP", rankData[1].Tier, rankData[1].Rank, rankData[1].LeaguePoints)
+	rankFlex := common.FromString(rankFlexStr)
+	return rank, rankFlex, nil
 }
