@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  main:
+    container_name: myapp
+    build:
+      context: .
+      dockerfile: ./Dockerfile

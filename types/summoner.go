@@ -14,8 +14,8 @@ type Summoner struct {
 	PUUID        string
 	Rank         common.Rank
 	LastRank     common.Rank
-	rankFlex     common.Rank
-	lastFlexRank common.Rank
+	RankFlex     common.Rank
+	LastFlexRank common.Rank
 	Updated      time.Time
 }
 
