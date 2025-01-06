@@ -26,7 +26,7 @@ func TestSaveAndLoadSummoners(t *testing.T) {
 	defer teardown()
 
 	summoners := make(map[string]*types.Summoner)
-	summoner := types.NewSummoner("Cedric", "0010", "accountID", "id", "puuid", rank.FromString("GOLD IV 50 LP"), rank.FromString("SILVER I 0 LP"), time.Now())
+	summoner := types.NewSummoner("Cedric", "0010", "accountID", "id", "puuid", rank.FromString("GOLD IV 50 LP"), rank.FromString("SILVER I 0 LP"), rank.FromString("GOLD IV 50 LP"), rank.FromString("GOLD IV 50 LP"), time.Now())
 	summoners[summoner.Name] = summoner
 
 	// Save the summoners to a file
@@ -47,7 +47,7 @@ func TestSaveAndLoadSummoners(t *testing.T) {
 		t.Fatalf("Summoner %s not found in loaded summoners", summoner.Name)
 	}
 
-	if loadedSummoner.Name != summoner.Name || loadedSummoner.TagLine != summoner.TagLine || loadedSummoner.AccountID != summoner.AccountID || loadedSummoner.ID != summoner.ID || loadedSummoner.PUUID != summoner.PUUID || loadedSummoner.Rank.ToString() != summoner.Rank.ToString() || loadedSummoner.LastRank.ToString() != summoner.LastRank.ToString() {
+	if loadedSummoner.Name != summoner.Name || loadedSummoner.TagLine != summoner.TagLine || loadedSummoner.AccountID != summoner.AccountID || loadedSummoner.ID != summoner.ID || loadedSummoner.PUUID != summoner.PUUID || loadedSummoner.SoloRank.ToString() != summoner.LastSoloRank.ToString() || loadedSummoner.FlexRank.ToString() != summoner.LastFlexRank.ToString() {
 		t.Fatalf("Loaded summoner does not match original summoner")
 	}
 }
