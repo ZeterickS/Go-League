@@ -33,14 +33,14 @@ func NewSummoner(name string, tagLine string, accountID string, id string, puuid
     return summoner
 }
 
-// GetNameTag returns the name and tagline of the summoner in <name>#<tagline> format
-func GetNameTag() string {
-	return Name + "#" + TagLine
+// toNameTag returns the name and tagline of the summoner in <name>#<tagline> format
+func (s Summoner) toNameTag() string {
+    return s.name + "#" + s.tagLine
 }
 
 // UpdateRank updates the summoner's rank and last rank
 func (s *Summoner) UpdateRank(newRank int) {
-    s.LastRank = s.Rank
-    s.Rank = newRank
-    s.Updated = time.Now()
+    s.lastRank = s.rank
+    s.rank = newRank
+    s.updated = time.Now()
 }

@@ -1,9 +1,7 @@
 package types
 
 import (
-    "time"
 	"fmt"
-	"strconv"
 )
 
 type Rank int 
