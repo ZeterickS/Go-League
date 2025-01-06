@@ -40,7 +40,14 @@ func CheckForUpdates() {
 
             if currentSummoner.Rank != summoner.Rank {
                 // Post a message about the rank change
-                message := fmt.Sprintf("Summoner %v has a new rank: %v (was %v)", summoner.Name, currentSummoner.Rank, summoner.Rank)
+				rankchange := currentSummoner.Rank - summoner.Rank
+				rankchangeString := ""
+				if rankchange < 0 {
+					rankchangeString = fmt.Sprintf("%v", rankchange)
+				} else {
+					rankchangeString = fmt.Sprintf("+%v", rankchange)
+				}
+                message := fmt.Sprintf("Summoner %v has a new rank: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.Rank.ToString(), rankchangeString)
                 log.Println(message)
                 if discordSession != nil && channelID != "" {
                     _, err := discordSession.ChannelMessageSend(channelID, message)
@@ -50,8 +57,8 @@ func CheckForUpdates() {
                 }
 
                 // Update the stored rank
+                summoner.LastRank = summoner.Rank
                 summoner.Rank = currentSummoner.Rank
-                summoner.LastRank = currentSummoner.Rank
                 summoner.Updated = time.Now()
             }
         }
