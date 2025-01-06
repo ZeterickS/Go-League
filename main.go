@@ -6,7 +6,9 @@ import (
 	"log"
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	"discord-bot/types"
 )
+
 
 func main() {
 
@@ -48,6 +50,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if m.Content == "ping" {
+		fmt.Println("Got ping", )
 		s.ChannelMessageSend(m.ChannelID, "pong")
+
+	}
+
+	if m.Content == "summoner" {
+		fmt.Println("Got summoner", )
+		s.ChannelMessageSend(m.ChannelID, "summoner")
 	}
 }
