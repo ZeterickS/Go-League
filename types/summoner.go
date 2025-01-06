@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
     "time"
@@ -17,15 +17,15 @@ type Summoner struct {
 }
 
 // NewSummoner creates a new Summoner instance with mandatory fields name, tagLine, accountID, ID, puuid, and Rank
-func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, rank int) *Summoner {#
+func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, rank int) *Summoner {
 
     summoner := &Summoner{
-        name:    name,
+        name: name,
 		tagLine: tagLine,
 		accountID: accountID,
 		id : id,
 		puuid: puuid,
-		rank:    rank,
+		rank: rank,
 		lastRank: rank,
         updated: time.Now(),
     }
