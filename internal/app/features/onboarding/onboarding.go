@@ -6,6 +6,7 @@ import (
 	"discord-bot/types/summoner"
 	"fmt"
 	"log"
+	"strings"
 )
 
 // OnboardSummoner fetches summoner data by tag and saves it to the database
@@ -14,6 +15,17 @@ func OnboardSummoner(name, tagLine string) (*summoner.Summoner, error) {
 	summoners, err := databaseHelper.LoadSummonersFromFile()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load summoner data: %v", err)
+	}
+
+	// Convert name and tagLine to lowercase for case-insensitive comparison
+	nameTag := fmt.Sprintf("%s#%s", name, tagLine)
+	lowerNameTag := strings.ToLower(nameTag)
+
+	// Check if the summoner already exists in a case-insensitive manner
+	for existingNameTag := range summoners {
+		if strings.ToLower(existingNameTag) == lowerNameTag {
+			return nil, fmt.Errorf("summoner with name %s already exists", existingNameTag)
+		}
 	}
 
 	summonerData, err := apiHelper.GetSummonerByTag(name, tagLine)
