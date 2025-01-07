@@ -5,11 +5,11 @@
     "AccountID": "zf9TqTAOKy2sxF0a580zZzYxa2cM5ZaPGVO7JgbMq3oZZw",
     "ID": "UDWAnyKOpmoJS12QpI0h0WW4BCu91NBi68et0UOL4ItIuUM",
     "PUUID": "_t0WTt0moYqrQY6bChRXP5bPyLQLoiHi3GQ5YEJw9K1EWICxqCey3A3QuGKbkF2IyXKdrQDZf3wYpw",
-    "SoloRank": 1449,
-    "LastSoloRank": 1398,
+    "SoloRank": 1434,
+    "LastSoloRank": 0,
     "FlexRank": 2000,
-    "LastFlexRank": 1500,
-    "Updated": "2025-01-07T00:22:08.523170966+01:00"
+    "LastFlexRank": 2000,
+    "Updated": "2025-01-07T16:30:23.177227517Z"
   },
   "cedric#0010": {
     "Name": "cedric",
@@ -18,9 +18,9 @@
     "ID": "BuP7VwbodobCVhl43kITl2-F8U7oZIo2bsYMNAwXRkSUaiA",
     "PUUID": "ftK2zEGFZ7QIhPKzGgRsATzUVorEo4ZTBXkcGqkk6jLyPfAPgXslwJ79vXiuwhiIAO9AmvkxS-DJsA",
     "SoloRank": 1609,
-    "LastSoloRank": 22,
+    "LastSoloRank": 0,
     "FlexRank": 2000,
     "LastFlexRank": 2000,
-    "Updated": "2025-01-07T12:20:29.8927075+01:00"
+    "Updated": "2025-01-07T16:30:24.065064802Z"
   }
 }
