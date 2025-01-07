@@ -10,14 +10,13 @@ import (
 	"discord-bot/internal/app/features/checkforsummonerupdate"
 	"discord-bot/internal/app/features/offboarding"
 	"discord-bot/internal/app/features/onboarding"
-	databaseHelper "discord-bot/internal/app/helper/database"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
 
 var (
-	RemoveCommands = flag.Bool("rmcmd", false, "Remove all commands after shutdowning or not")
+	RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not")
 )
 
 var s *discordgo.Session
@@ -93,10 +92,15 @@ var (
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "summoner",
-					Description: "Summoner to delete",
+					Name:        "name",
+					Description: "Ingame Name",
 					Required:    true,
-					Choices:     getSummonerChoices(), // Function to get all summoner choices
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "tag",
+					Description: "Your Riot Tag",
+					Required:    true,
 				},
 			},
 		},
@@ -147,7 +151,9 @@ var (
 		},
 		"delete": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			options := i.ApplicationCommandData().Options
-			summonerNameTag := options[0].StringValue()
+			gameName := options[0].StringValue()
+			tag := options[1].StringValue()
+			summonerNameTag := fmt.Sprintf("%s#%s", gameName, tag)
 			log.Printf("Deleting summoner: %v", summonerNameTag)
 
 			err := offboarding.DeleteSummoner(summonerNameTag)
@@ -170,23 +176,6 @@ var (
 		},
 	}
 )
-
-func getSummonerChoices() []*discordgo.ApplicationCommandOptionChoice {
-	summoners, err := databaseHelper.LoadSummonersFromFile() // Function to get all summoners
-	if err != nil {
-		log.Printf("failed to load File: %v", err)
-		return []*discordgo.ApplicationCommandOptionChoice{}
-	}
-	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0, len(summoners))
-	for _, summoner := range summoners {
-		log.Printf("Summoner: %s, Data: %+v\n", summoner.GetNameTag(), summoner)
-		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  summoner.GetNameTag(),
-			Value: summoner.GetNameTag(),
-		})
-	}
-	return choices
-}
 
 func main() {
 
