@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/signal"
 
-	databaseHelper "discord-bot/database-helper"
-	"discord-bot/features/checkforsummonerupdate"
-	"discord-bot/features/offboarding"
-	"discord-bot/features/onboarding"
+	"discord-bot/internal/app/features/checkforsummonerupdate"
+	"discord-bot/internal/app/features/offboarding"
+	"discord-bot/internal/app/features/onboarding"
+	databaseHelper "discord-bot/internal/app/helper/database"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"

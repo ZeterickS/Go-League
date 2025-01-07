@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	apiHelper "discord-bot/api-helper"
-	databaseHelper "discord-bot/database-helper"
+	apiHelper "discord-bot/internal/app/helper/api"
+	databaseHelper "discord-bot/internal/app/helper/database"
 
 	"github.com/bwmarrin/discordgo"
 )

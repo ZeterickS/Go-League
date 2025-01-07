@@ -1,8 +1,8 @@
 package onboarding
 
 import (
-	apiHelper "discord-bot/api-helper"
-	databaseHelper "discord-bot/database-helper"
+	apiHelper "discord-bot/internal/app/helper/api"
+	databaseHelper "discord-bot/internal/app/helper/database"
 	"discord-bot/types/summoner"
 	"fmt"
 	"log"
