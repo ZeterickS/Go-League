@@ -1,16 +1,16 @@
 package databaseHelper
 
 import (
+	"discord-bot/types/summoner"
 	"encoding/json"
 	"fmt"
 	"os"
-	"discord-bot/types"
 )
 
 const filename = "summoners.json"
 
 // SaveSummonersToFile saves a map of Summoner instances to a JSON file
-func SaveSummonersToFile(summoners map[string]*types.Summoner) error {
+func SaveSummonersToFile(summoners map[string]*summoner.Summoner) error {
 	// Marshal the summoners to JSON
 	data, err := json.MarshalIndent(summoners, "", "  ")
 	if err != nil {
@@ -27,30 +27,30 @@ func SaveSummonersToFile(summoners map[string]*types.Summoner) error {
 }
 
 // LoadSummonersFromFile loads a map of Summoner instances from a JSON file
-func LoadSummonersFromFile() (map[string]*types.Summoner, error) {
-    data, err := os.ReadFile(filename)
-    if err != nil {
-        if os.IsNotExist(err) {
-            return make(map[string]*types.Summoner), nil
-        }
-        return nil, fmt.Errorf("failed to read file: %v", err)
-    }
+func LoadSummonersFromFile() (map[string]*summoner.Summoner, error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return make(map[string]*summoner.Summoner), nil
+		}
+		return nil, fmt.Errorf("failed to read file: %v", err)
+	}
 
-    if len(data) == 0 {
-        return make(map[string]*types.Summoner), nil
-    }
+	if len(data) == 0 {
+		return make(map[string]*summoner.Summoner), nil
+	}
 
-    var summoners map[string]*types.Summoner
-    err = json.Unmarshal(data, &summoners)
-    if err != nil {
-        return nil, fmt.Errorf("failed to unmarshal summoners: %v", err)
-    }
+	var summoners map[string]*summoner.Summoner
+	err = json.Unmarshal(data, &summoners)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal summoners: %v", err)
+	}
 
-    return summoners, nil
+	return summoners, nil
 }
 
 // GetSummonerByName retrieves a Summoner instance by name from the map
-func GetSummonerByName(summoners map[string]*types.Summoner, name string) (*types.Summoner, error) {
+func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*summoner.Summoner, error) {
 	summoner, exists := summoners[name]
 	if !exists {
 		return nil, fmt.Errorf("summoner with name %s not found", name)

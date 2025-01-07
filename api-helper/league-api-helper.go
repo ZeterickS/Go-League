@@ -10,8 +10,8 @@ import (
 	"os"
 	"time"
 
-	"discord-bot/rank"
-	"discord-bot/types"
+	"discord-bot/types/rank"
+	"discord-bot/types/summoner"
 
 	"github.com/joho/godotenv"
 )
@@ -25,7 +25,7 @@ func LoadEnv() error {
 }
 
 // GetSummonerByTag fetches summoner data by tag from the League of Legends API
-func GetSummonerByTag(name, tagLine string) (*types.Summoner, error) {
+func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 	err := LoadEnv()
 	if err != nil {
 		return nil, fmt.Errorf("error loading .env file")
@@ -65,7 +65,7 @@ func GetSummonerByTag(name, tagLine string) (*types.Summoner, error) {
 }
 
 // GetSummonerByPUUID fetches summoner data by PUUID from the League of Legends API
-func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
+func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error) {
 	err := LoadEnv()
 	if err != nil {
 		return nil, fmt.Errorf("error loading .env file")
@@ -112,7 +112,7 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*types.Summoner, error) {
 		return nil, err
 	}
 
-	summoner := types.NewSummoner(
+	summoner := summoner.NewSummoner(
 		name,
 		tagLine, // TagLine
 		summonerData.AccountID,

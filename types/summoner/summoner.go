@@ -1,7 +1,7 @@
-package types
+package summoner
 
 import (
-	"discord-bot/rank"
+	"discord-bot/types/rank"
 	"time"
 )
 

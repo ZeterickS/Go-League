@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"discord-bot/rank"
-	"discord-bot/types"
+	"discord-bot/types/rank"
+	"discord-bot/types/summoner"
 )
 
 const testFilename = "test_summoners.json"
@@ -25,8 +25,8 @@ func TestSaveAndLoadSummoners(t *testing.T) {
 	setup()
 	defer teardown()
 
-	summoners := make(map[string]*types.Summoner)
-	summoner := types.NewSummoner("Cedric", "0010", "accountID", "id", "puuid", rank.FromString("GOLD IV 50 LP"), rank.FromString("SILVER I 0 LP"), rank.FromString("GOLD IV 50 LP"), rank.FromString("GOLD IV 50 LP"), time.Now())
+	summoners := make(map[string]*summoner.Summoner)
+	summoner := summoner.NewSummoner("Cedric", "0010", "accountID", "id", "puuid", rank.FromString("GOLD IV 50 LP"), rank.FromString("SILVER I 0 LP"), rank.FromString("GOLD IV 50 LP"), rank.FromString("GOLD IV 50 LP"), time.Now())
 	summoners[summoner.Name] = summoner
 
 	// Save the summoners to a file
