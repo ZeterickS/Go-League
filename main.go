@@ -45,7 +45,14 @@ func init() {
 }
 
 var (
+	// commands is a slice of ApplicationCommand pointers that defines the available commands for the Discord bot.
+	// The following commands are included:
+	// - add: Adds a new summoner with the required options "name" (Ingame Name) and "tag" (Your Riot Tag).
+	// - ping: Responds with "Pong!".
+	// - delete: Deletes a summoner with the required options "name" (Ingame Name) and "tag" (Your Riot Tag).
 	commands = []*discordgo.ApplicationCommand{
+
+		// - add: Adds a new summoner with the required options "name" (Ingame Name) and "tag" (Your Riot Tag).
 		{
 			Name:        "add",
 			Description: "Add a new Summoner",
@@ -64,28 +71,14 @@ var (
 				},
 			},
 		},
+
+		// - ping: Responds with "Pong!".
 		{
 			Name:        "ping",
 			Description: "Responds with Pong!",
 		},
-		{
-			Name:        "addnumbers",
-			Description: "Add two numbers",
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Type:        discordgo.ApplicationCommandOptionInteger,
-					Name:        "num1",
-					Description: "First number",
-					Required:    true,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionInteger,
-					Name:        "num2",
-					Description: "Second number",
-					Required:    true,
-				},
-			},
-		},
+
+		// - delete: Deletes a summoner with the required options "name" (Ingame Name) and "tag" (Your Riot Tag).
 		{
 			Name:        "delete",
 			Description: "Delete a summoner",
@@ -107,27 +100,6 @@ var (
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Pong!",
-				},
-			})
-		},
-		"addnumbers": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			options := i.ApplicationCommandData().Options
-			num1 := options[0].IntValue()
-			num2 := options[1].IntValue()
-			sum := num1 + num2
-
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("The sum of %d and %d is %d", num1, num2, sum),
-				},
-			})
-		},
 		"add": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			options := i.ApplicationCommandData().Options
 			name := options[0].StringValue()
@@ -146,6 +118,14 @@ var (
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: fmt.Sprintf("Summoner %v with Solo-Rank %v is now registered", summoner.GetNameTag(), summoner.SoloRank.ToString()),
+				},
+			})
+		},
+		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Pong!",
 				},
 			})
 		},
