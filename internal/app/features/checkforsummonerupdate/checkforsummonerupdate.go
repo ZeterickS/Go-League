@@ -3,6 +3,7 @@ package checkforsummonerupdate
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	apiHelper "discord-bot/internal/app/helper/api"
@@ -37,22 +38,39 @@ func CheckForUpdates() {
 				log.Printf("Failed to fetch summoner data for %v: %v", name, err)
 				continue
 			}
-
 			// Check for SoloRank updates
 			if currentSummoner.SoloRank != summoner.SoloRank {
 				rankChange := currentSummoner.SoloRank - summoner.SoloRank
 				rankChangeString := ""
+				message := ""
 				if rankChange < 0 {
 					rankChangeString = fmt.Sprintf("%v", rankChange)
+					message = fmt.Sprintf("%v has lost a Game: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.SoloRank.ToString(), rankChangeString)
 				} else {
 					rankChangeString = fmt.Sprintf("+%v", rankChange)
+					message = fmt.Sprintf("%v has lost a Game: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.SoloRank.ToString(), rankChangeString)
 				}
-				message := fmt.Sprintf("Summoner %v has a new SoloRank: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.SoloRank.ToString(), rankChangeString)
-				log.Println(message)
+				color := 0x00ff00 // Green color for LP gain
+				if rankChange < 0 {
+					color = 0xff0000 // Red color for LP loss
+				}
+				rankTier := strings.Split(currentSummoner.SoloRank.ToString(), " ")[0]
+				rankTier = strings.ToLower(rankTier)
+				fmt.Println(rankTier)
+				embed := &discordgo.MessageEmbed{
+					Title:       "Rank Update Solo/Duo",
+					Description: message,
+					Color:       color,
+					Thumbnail: &discordgo.MessageEmbedThumbnail{
+						URL: fmt.Sprintf("https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/%v.png", rankTier),
+					},
+				}
+
+				log.Println(embed.Description)
 				if discordSession != nil && channelID != "" {
-					_, err := discordSession.ChannelMessageSend(channelID, message)
+					_, err := discordSession.ChannelMessageSendEmbed(channelID, embed)
 					if err != nil {
-						log.Printf("Failed to send message to Discord channel: %v", err)
+						log.Printf("Failed to send embed message to Discord channel: %v", err)
 					}
 				}
 
@@ -60,23 +78,54 @@ func CheckForUpdates() {
 				summoner.LastSoloRank = summoner.SoloRank
 				summoner.SoloRank = currentSummoner.SoloRank
 				summoner.Updated = time.Now()
-			}
 
-			// Check for FlexRank updates
-			if currentSummoner.FlexRank != summoner.FlexRank {
-				rankChange := currentSummoner.FlexRank - summoner.FlexRank
-				rankChangeString := ""
-				if rankChange < 0 {
-					rankChangeString = fmt.Sprintf("%v", rankChange)
-				} else {
-					rankChangeString = fmt.Sprintf("+%v", rankChange)
+				// Check for FlexRank updates
+				if currentSummoner.FlexRank != summoner.FlexRank {
+					rankChange := currentSummoner.FlexRank - summoner.FlexRank
+					rankChangeString := ""
+					message := ""
+					if rankChange < 0 {
+						rankChangeString = fmt.Sprintf("%v", rankChange)
+						message = fmt.Sprintf("%v has lost a Game: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.FlexRank.ToString(), rankChangeString)
+					} else {
+						rankChangeString = fmt.Sprintf("+%v", rankChange)
+						message = fmt.Sprintf("%v has lost a Game: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.FlexRank.ToString(), rankChangeString)
+					}
+					color := 0x00ff00 // Green color for LP gain
+					if rankChange < 0 {
+						color = 0xff0000 // Red color for LP loss
+					}
+					rankTier := strings.Split(currentSummoner.FlexRank.ToString(), " ")[0]
+					rankTier = strings.ToLower(rankTier)
+					fmt.Println(rankTier)
+					embed := &discordgo.MessageEmbed{
+						Title:       "Rank Update Flex",
+						Description: message,
+						Color:       color,
+						Thumbnail: &discordgo.MessageEmbedThumbnail{
+							URL: fmt.Sprintf("https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/%v.png", rankTier),
+						},
+					}
+
+					log.Println(embed.Description)
+					if discordSession != nil && channelID != "" {
+						_, err := discordSession.ChannelMessageSendEmbed(channelID, embed)
+						if err != nil {
+							log.Printf("Failed to send embed message to Discord channel: %v", err)
+						}
+					}
+
+					// Update the stored FlexRank
+					summoner.LastFlexRank = summoner.FlexRank
+					summoner.FlexRank = currentSummoner.FlexRank
+					summoner.Updated = time.Now()
 				}
-				message := fmt.Sprintf("Summoner %v has a new FlexRank: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.FlexRank.ToString(), rankChangeString)
-				log.Println(message)
+
+				log.Println(embed.Description)
 				if discordSession != nil && channelID != "" {
-					_, err := discordSession.ChannelMessageSend(channelID, message)
+					_, err := discordSession.ChannelMessageSendEmbed(channelID, embed)
 					if err != nil {
-						log.Printf("Failed to send message to Discord channel: %v", err)
+						log.Printf("Failed to send embed message to Discord channel: %v", err)
 					}
 				}
 

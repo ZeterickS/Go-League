@@ -187,3 +187,44 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 
 	return soloRank, flexRank, nil
 }
+
+// GetLastRankedMatch fetches the last ranked match of a summoner by their PUUID from the League of Legends API
+func GetLastRankedMatch(puuid string) (string, error) {
+	err := LoadEnv()
+	if err != nil {
+		return "", fmt.Errorf("error loading .env file")
+	}
+
+	apiKey := os.Getenv("ROPT_API_TOKEN")
+	if apiKey == "" {
+		return "", fmt.Errorf("API token not found in environment variables")
+	}
+
+	url := fmt.Sprintf("https://euw1.api.riotgames.com/lol/match/v5/matches/by-puuid/%s/ids?type=ranked&start=0&count=1&api_key=%s", puuid, apiKey)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to fetch last ranked match: %s", resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var matchIDs []string
+	err = json.Unmarshal(body, &matchIDs)
+	if err != nil {
+		return "", err
+	}
+
+	if len(matchIDs) == 0 {
+		return "", fmt.Errorf("no ranked matches found for summoner")
+	}
+
+	return matchIDs[0], nil
+}
