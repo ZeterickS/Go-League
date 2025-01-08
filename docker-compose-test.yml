@@ -2,7 +2,7 @@ version: "3"
 
 services:
   main:
-    container_name: GoL-Tracker
+    container_name: GoL-Tracker-Test
     build:
       context: .
       dockerfile: ./Dockerfile
