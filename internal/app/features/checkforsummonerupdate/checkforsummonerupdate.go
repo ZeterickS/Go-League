@@ -91,7 +91,7 @@ func CheckForUpdates() {
 					message = fmt.Sprintf("%v has lost a Game: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.FlexRank.ToString(), rankChangeString)
 				} else {
 					rankChangeString = fmt.Sprintf("+%v", rankChange)
-					message = fmt.Sprintf("%v has lost a Game: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.FlexRank.ToString(), rankChangeString)
+					message = fmt.Sprintf("%v has won a Game: %v. (%v LP)", summoner.GetNameTag(), currentSummoner.FlexRank.ToString(), rankChangeString)
 				}
 				color := 0x00ff00 // Green color for LP gain
 				if rankChange < 0 {
@@ -122,11 +122,6 @@ func CheckForUpdates() {
 				summoner.FlexRank = currentSummoner.FlexRank
 				summoner.Updated = time.Now()
 			}
-
-			// Update the stored FlexRank
-			summoner.LastFlexRank = summoner.FlexRank
-			summoner.FlexRank = currentSummoner.FlexRank
-			summoner.Updated = time.Now()
 		}
 
 		// Save the updated summoners to file
