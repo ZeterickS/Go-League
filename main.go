@@ -117,9 +117,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Summoner %v is now registered", name+"#"+tag),
-					Embeds:  message.Embeds,
-					Files:   message.Files,
+					Embeds: []*discordgo.MessageEmbed{message},
 				},
 			})
 		},
