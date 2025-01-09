@@ -8,6 +8,7 @@ import (
 	"time"
 
 	apiHelper "discord-bot/internal/app/helper/api"
+	"discord-bot/internal/app/helper/cdragon"
 	databaseHelper "discord-bot/internal/app/helper/database"
 	"discord-bot/types/embed"
 	"discord-bot/types/rank"
@@ -67,18 +68,8 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 		}
 		defer rankfile.Close()
 
-		profilefile, err := os.Open(fmt.Sprintf("assets/profileicon/%v.png", currentSummoner.ProfileIconID))
-		if err != nil {
-			log.Printf("Failed to open image file: %v", err)
-			return err
-		}
-		defer profilefile.Close()
-
-		authorstring := fmt.Sprintf("attachment://%v.png", currentSummoner.ProfileIconID)
-		log.Printf("Author string: %v", authorstring)
-
 		embedmessage := embed.NewEmbed().
-			SetAuthor(currentSummoner.Name, authorstring).
+			SetAuthor(currentSummoner.Name, cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
 			SetTitle(fmt.Sprintf("Rank Update %v", rankType)).
 			SetDescription(message).
 			AddField("Rank Change", rankChangeString).
@@ -92,11 +83,6 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 					Name:        fmt.Sprintf("%v.png", rankTier),
 					ContentType: "image/png",
 					Reader:      rankfile,
-				},
-				{
-					Name:        authorstring,
-					ContentType: "image/png",
-					Reader:      profilefile,
 				},
 			},
 		}
