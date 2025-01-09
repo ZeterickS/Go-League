@@ -45,13 +45,12 @@ func OnboardSummoner(name, tagLine string) (*discordgo.MessageEmbed, error) {
 	}
 
 	embedMessage := embed.NewEmbed().
-		SetAuthor(summonerData.Name, cdragon.GetProfileIconURL(summonerData.ProfileIconID), "").
 		SetTitle("Summoner Onboarded").
 		SetDescription(fmt.Sprintf("Summoner %v is now registered", summonerData.GetNameTag())).
 		AddField("Solo-Rank", summonerData.SoloRank.ToString()).
 		AddField("Flex-Rank", summonerData.FlexRank.ToString()).
 		SetThumbnail(cdragon.GetProfileIconURL(summonerData.ProfileIconID)).
-		SetColor(0x00ff00).MessageEmbed
+		SetColor(0x00ff00).InlineAllFields().MessageEmbed
 
 	return embedMessage, nil
 }
