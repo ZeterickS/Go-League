@@ -8,37 +8,38 @@ type Rank int
 
 // Division mapping for League of Legends
 var divisions = map[int]string{
-	0:  "IRON IV",
-	1:  "IRON III",
-	2:  "IRON II",
-	3:  "IRON I",
-	4:  "BRONZE IV",
-	5:  "BRONZE III",
-	6:  "BRONZE II",
-	7:  "BRONZE I",
-	8:  "SILVER IV",
-	9:  "SILVER III",
-	10: "SILVER II",
-	11: "SILVER I",
-	12: "GOLD IV",
-	13: "GOLD III",
-	14: "GOLD II",
-	15: "GOLD I",
-	16: "PLATINUM IV",
-	17: "PLATINUM III",
-	18: "PLATINUM II",
-	19: "PLATINUM I",
-	20: "EMERALD IV",
-	21: "EMERALD III",
-	22: "EMERALD II",
-	23: "EMERALD I",
-	24: "DIAMOND IV",
-	25: "DIAMOND III",
-	26: "DIAMOND II",
-	27: "DIAMOND I",
-	28: "MASTER I",
-	29: "GRANDMASTER I",
-	30: "CHALLENGER I",
+	0:  "UNRANKED",
+	1:  "IRON IV",
+	2:  "IRON III",
+	3:  "IRON II",
+	4:  "IRON I",
+	5:  "BRONZE IV",
+	6:  "BRONZE III",
+	7:  "BRONZE II",
+	8:  "BRONZE I",
+	9:  "SILVER IV",
+	10: "SILVER III",
+	11: "SILVER II",
+	12: "SILVER I",
+	13: "GOLD IV",
+	14: "GOLD III",
+	15: "GOLD II",
+	16: "GOLD I",
+	17: "PLATINUM IV",
+	18: "PLATINUM III",
+	19: "PLATINUM II",
+	20: "PLATINUM I",
+	21: "EMERALD IV",
+	22: "EMERALD III",
+	23: "EMERALD II",
+	24: "EMERALD I",
+	25: "DIAMOND IV",
+	26: "DIAMOND III",
+	27: "DIAMOND II",
+	28: "DIAMOND I",
+	29: "MASTER I",
+	30: "GRANDMASTER I",
+	31: "CHALLENGER I",
 }
 
 // String method to format the Rank value
@@ -49,6 +50,10 @@ func (r Rank) ToString() string {
 	division, exists := divisions[divisionInt]
 	if !exists {
 		division = "Unknown"
+	}
+
+	if divisionInt == 0 {
+		return "UNRANKED"
 	}
 
 	return fmt.Sprintf("%s %02d LP", division, levelPoints)

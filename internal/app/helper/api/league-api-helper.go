@@ -53,7 +53,9 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 	}
 
 	var accountData struct {
-		PUUID string `json:"puuid"`
+		PUUID   string `json:"puuid"`
+		Name    string `json:"gameName"`
+		TagLine string `json:"tagLine"`
 	}
 
 	err = json.Unmarshal(body, &accountData)
@@ -61,7 +63,7 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 		return nil, err
 	}
 
-	return GetSummonerByPUUID(accountData.PUUID, name, tagLine)
+	return GetSummonerByPUUID(accountData.PUUID, accountData.Name, accountData.TagLine)
 }
 
 // GetSummonerByPUUID fetches summoner data by PUUID from the League of Legends API
@@ -92,9 +94,6 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error)
 		return nil, err
 	}
 
-	// Log the response body for debugging
-	log.Printf("Response body: %s", string(body))
-
 	var summonerData struct {
 		ID            string `json:"id"`
 		AccountID     string `json:"accountId"`
@@ -104,14 +103,10 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error)
 		SummonerLevel int    `json:"summonerLevel"`
 	}
 
-	log.Printf("ProfileIconID: %d", summonerData.ProfileIconID)
-
 	err = json.Unmarshal(body, &summonerData)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("ProfileIconID: %d", summonerData.ProfileIconID)
 
 	solorank, rankFlex, err := GetSummonerRank(summonerData.ID)
 
@@ -120,7 +115,7 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error)
 		tagLine, // TagLine
 		summonerData.AccountID,
 		summonerData.ID,
-		summonerData.PUUID,
+		puuid,
 		summonerData.ProfileIconID,
 		solorank,
 		rankFlex,   // FlexRank
@@ -178,10 +173,10 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	}
 
 	if len(rankData) == 0 {
-		return 0, 0, fmt.Errorf("no rank data found for summoner")
+		return 0, 0, nil
 	}
 
-	var soloRank, flexRank rank.Rank
+	var soloRank, flexRank rank.Rank = 0, 0
 
 	for _, entry := range rankData {
 		rankStr := fmt.Sprintf("%s %s %d LP", entry.Tier, entry.Rank, entry.LeaguePoints)
