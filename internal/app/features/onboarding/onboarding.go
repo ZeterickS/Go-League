@@ -12,7 +12,7 @@ import (
 )
 
 // OnboardSummoner fetches summoner data by tag and saves it to the database
-func OnboardSummoner(name, tagLine string) (*discordgo.MessageSend, error) {
+func OnboardSummoner(name, tagLine string) (*discordgo.MessageEmbed, error) {
 
 	summoners, err := databaseHelper.LoadSummonersFromFile()
 	if err != nil {
@@ -53,9 +53,5 @@ func OnboardSummoner(name, tagLine string) (*discordgo.MessageSend, error) {
 		SetThumbnail(cdragon.GetProfileIconURL(summonerData.ProfileIconID)).
 		SetColor(0x00ff00).MessageEmbed
 
-	messageSend := &discordgo.MessageSend{
-		Embeds: []*discordgo.MessageEmbed{embedMessage},
-	}
-
-	return messageSend, nil
+	return embedMessage, nil
 }
