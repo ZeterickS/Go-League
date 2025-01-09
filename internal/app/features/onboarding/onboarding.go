@@ -2,15 +2,17 @@ package onboarding
 
 import (
 	apiHelper "discord-bot/internal/app/helper/api"
+	"discord-bot/internal/app/helper/cdragon"
 	databaseHelper "discord-bot/internal/app/helper/database"
-	"discord-bot/types/summoner"
+	"discord-bot/types/embed"
 	"fmt"
-	"log"
 	"strings"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // OnboardSummoner fetches summoner data by tag and saves it to the database
-func OnboardSummoner(name, tagLine string) (*summoner.Summoner, error) {
+func OnboardSummoner(name, tagLine string) (*discordgo.MessageSend, error) {
 
 	summoners, err := databaseHelper.LoadSummonersFromFile()
 	if err != nil {
@@ -29,25 +31,31 @@ func OnboardSummoner(name, tagLine string) (*summoner.Summoner, error) {
 	}
 
 	summonerData, err := apiHelper.GetSummonerByTag(name, tagLine)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
-	}
 
-	if _, exists := summoners[summonerData.GetNameTag()]; exists {
-		return nil, fmt.Errorf("summoner with name %s already exists", summonerData.GetNameTag())
 	}
 
 	summoners[summonerData.GetNameTag()] = summonerData
-
-	// Better output of the summoners list
-	for name, summoner := range summoners {
-		log.Printf("Summoner: %s, Data: %+v\n", name, summoner)
-	}
 
 	err = databaseHelper.SaveSummonersToFile(summoners)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save summoner data: %v", err)
 	}
 
-	return summonerData, nil
+	embedMessage := embed.NewEmbed().
+		SetAuthor(summonerData.Name, cdragon.GetProfileIconURL(summonerData.ProfileIconID), "").
+		SetTitle("Summoner Onboarded").
+		SetDescription(fmt.Sprintf("Summoner %v is now registered", summonerData.GetNameTag())).
+		AddField("Solo-Rank", summonerData.SoloRank.ToString()).
+		AddField("Flex-Rank", summonerData.FlexRank.ToString()).
+		SetThumbnail(cdragon.GetProfileIconURL(summonerData.ProfileIconID)).
+		SetColor(0x00ff00).MessageEmbed
+
+	messageSend := &discordgo.MessageSend{
+		Embeds: []*discordgo.MessageEmbed{embedMessage},
+	}
+
+	return messageSend, nil
 }
