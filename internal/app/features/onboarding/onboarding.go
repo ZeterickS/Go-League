@@ -50,7 +50,7 @@ func OnboardSummoner(name, tagLine string) (*discordgo.MessageEmbed, error) {
 		AddField("Solo-Rank", summonerData.SoloRank.ToString()).
 		AddField("Flex-Rank", summonerData.FlexRank.ToString()).
 		SetThumbnail(cdragon.GetProfileIconURL(summonerData.ProfileIconID)).
-		SetColor(0x00ff00).InlineAllFields().MessageEmbed
+		InlineAllFields().MessageEmbed
 
 	return embedMessage, nil
 }
