@@ -104,7 +104,7 @@ var (
 			options := i.ApplicationCommandData().Options
 			name := options[0].StringValue()
 			tag := options[1].StringValue()
-			summoner, err := onboarding.OnboardSummoner(name, tag)
+			message, err := onboarding.OnboardSummoner(name, tag)
 			if err != nil {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -117,7 +117,9 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Summoner %v is now registered", summoner.GetNameTag()),
+					Content: fmt.Sprintf("Summoner %v is now registered", name+"#"+tag),
+					Embeds:  message.Embeds,
+					Files:   message.Files,
 				},
 			})
 		},
@@ -164,6 +166,8 @@ func main() {
 	if GuildID == "" {
 		log.Fatal("Guild ID not found in environment variables")
 	}
+
+	//s.Debug = true
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)

@@ -92,25 +92,28 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error)
 		return nil, err
 	}
 
+	// Log the response body for debugging
+	log.Printf("Response body: %s", string(body))
+
 	var summonerData struct {
 		ID            string `json:"id"`
 		AccountID     string `json:"accountId"`
 		PUUID         string `json:"puuid"`
-		Name          string `json:"name"`
 		ProfileIconID int    `json:"profileIconId"`
 		RevisionDate  int64  `json:"revisionDate"`
 		SummonerLevel int    `json:"summonerLevel"`
 	}
+
+	log.Printf("ProfileIconID: %d", summonerData.ProfileIconID)
 
 	err = json.Unmarshal(body, &summonerData)
 	if err != nil {
 		return nil, err
 	}
 
+	log.Printf("ProfileIconID: %d", summonerData.ProfileIconID)
+
 	solorank, rankFlex, err := GetSummonerRank(summonerData.ID)
-	if err != nil {
-		return nil, err
-	}
 
 	summoner := summoner.NewSummoner(
 		name,
@@ -118,12 +121,16 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error)
 		summonerData.AccountID,
 		summonerData.ID,
 		summonerData.PUUID,
+		summonerData.ProfileIconID,
 		solorank,
-		0,          // LastSoloRank
 		rankFlex,   // FlexRank
-		0,          // LastFlexRank
 		time.Now(), // Updated
 	)
+
+	if err != nil {
+		return summoner, err
+	}
+
 	return summoner, nil
 }
 

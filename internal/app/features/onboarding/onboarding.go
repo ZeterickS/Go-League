@@ -3,14 +3,17 @@ package onboarding
 import (
 	apiHelper "discord-bot/internal/app/helper/api"
 	databaseHelper "discord-bot/internal/app/helper/database"
-	"discord-bot/types/summoner"
+	"discord-bot/types/embed"
 	"fmt"
 	"log"
+	"os"
 	"strings"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // OnboardSummoner fetches summoner data by tag and saves it to the database
-func OnboardSummoner(name, tagLine string) (*summoner.Summoner, error) {
+func OnboardSummoner(name, tagLine string) (*discordgo.MessageSend, error) {
 
 	summoners, err := databaseHelper.LoadSummonersFromFile()
 	if err != nil {
@@ -30,11 +33,11 @@ func OnboardSummoner(name, tagLine string) (*summoner.Summoner, error) {
 
 	summonerData, err := apiHelper.GetSummonerByTag(name, tagLine)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
-	}
-
-	if _, exists := summoners[summonerData.GetNameTag()]; exists {
-		return nil, fmt.Errorf("summoner with name %s already exists", summonerData.GetNameTag())
+		if summonerData.SoloRank == 0 && summonerData.FlexRank == 0 {
+			log.Printf("No rank available for summoner: %v", nameTag)
+		} else {
+			return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
+		}
 	}
 
 	summoners[summonerData.GetNameTag()] = summonerData
@@ -49,5 +52,31 @@ func OnboardSummoner(name, tagLine string) (*summoner.Summoner, error) {
 		return nil, fmt.Errorf("failed to save summoner data: %v", err)
 	}
 
-	return summonerData, nil
+	// Prepare the embed message with profile icon as thumbnail
+	profileIconPath := fmt.Sprintf("assets/profileicon/%v.png", summonerData.ProfileIconID)
+	profileFile, err := os.Open(profileIconPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open profile icon file: %v", err)
+	}
+	defer profileFile.Close()
+
+	embedMessage := embed.NewEmbed().
+		SetAuthor(summonerData.Name, fmt.Sprintf("attachment://%v.png", summonerData.ProfileIconID), "").
+		SetTitle("Summoner Onboarded").
+		SetDescription(fmt.Sprintf("Summoner %v is now registered", summonerData.GetNameTag())).
+		SetThumbnail(fmt.Sprintf("attachment://%v.png", summonerData.ProfileIconID)).
+		SetColor(0x00ff00).MessageEmbed
+
+	messageSend := &discordgo.MessageSend{
+		Embeds: []*discordgo.MessageEmbed{embedMessage},
+		Files: []*discordgo.File{
+			{
+				Name:        fmt.Sprintf("%v.png", summonerData.ProfileIconID),
+				ContentType: "image/png",
+				Reader:      profileFile,
+			},
+		},
+	}
+
+	return messageSend, nil
 }
