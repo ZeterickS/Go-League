@@ -3,6 +3,7 @@ package offboarding
 import (
 	databaseHelper "discord-bot/internal/app/helper/database"
 	"errors"
+	"strings"
 )
 
 // DeleteSummoner deletes a summoner by name.
@@ -13,7 +14,15 @@ func DeleteSummoner(summonerNameTag string) error {
 	}
 
 	// Check if the summoner exists in the map
-	if _, exists := summoners[summonerNameTag]; !exists {
+	var foundKey string
+	for key := range summoners {
+		if strings.EqualFold(key, summonerNameTag) {
+			foundKey = key
+			break
+		}
+	}
+
+	if foundKey == "" {
 		return errors.New("summoner not found")
 	}
 
