@@ -157,6 +157,40 @@ var (
 	}
 )
 
+func removeCommands(s *discordgo.Session, GuildID string) {
+	log.Println("Removing commands...")
+
+	// Fetch all existing commands
+	commands, err := s.ApplicationCommands(s.State.User.ID, GuildID)
+	if err != nil {
+		log.Panicf("Cannot fetch commands: %v", err)
+	}
+
+	// Delete each command
+	for _, v := range commands {
+		err := s.ApplicationCommandDelete(s.State.User.ID, GuildID, v.ID)
+		log.Printf("Deleting command: %v", v.Name)
+		if err != nil {
+			log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
+		}
+	}
+}
+
+func addCommands(s *discordgo.Session, GuildID string, commands []*discordgo.ApplicationCommand) error {
+	log.Println("Adding commands...")
+	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
+	for i, v := range commands {
+		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, GuildID, v)
+		if err != nil {
+			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
+			return err
+		}
+		registeredCommands[i] = cmd
+		log.Printf("Command '%v' registered successfully", v.Name)
+	}
+	return nil
+}
+
 func main() {
 
 	// Get the guild ID from the environment variables
@@ -182,53 +216,17 @@ func main() {
 		log.Fatalf("Cannot open the session: %v", err)
 	}
 
-	if *RemoveCommands {
-		log.Println("Removing commands...")
-
-		// Fetch all existing commands
-		commands, err := s.ApplicationCommands(s.State.User.ID, GuildID)
-		if err != nil {
-			log.Panicf("Cannot fetch commands: %v", err)
-		}
-
-		// Delete each command
-		for _, v := range commands {
-			err := s.ApplicationCommandDelete(s.State.User.ID, GuildID, v.ID)
-			log.Printf("Deleting command: %v", v.Name)
-			if err != nil {
-				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
-			}
-		}
+	if *RemoveCommands && GuildID != "" {
+		removeCommands(s, GuildID)
 	}
 
-	if *RemoveCommands {
-		log.Println("Removing commands...")
-
-		// Fetch all existing commands
-		commands, err := s.ApplicationCommands(s.State.User.ID, "")
+	if GuildID != "" {
+		err = addCommands(s, GuildID, commands)
 		if err != nil {
-			log.Panicf("Cannot fetch commands: %v", err)
+			log.Fatalf("Failed to add commands: %v", err)
 		}
-
-		// Delete each command
-		for _, v := range commands {
-			err := s.ApplicationCommandDelete(s.State.User.ID, "", v.ID)
-			log.Printf("Deleting command: %v", v.Name)
-			if err != nil {
-				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
-			}
-		}
-	}
-
-	log.Println("Adding commands...")
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
-	for i, v := range commands {
-		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, GuildID, v)
-		if err != nil {
-			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
-		}
-		registeredCommands[i] = cmd
-		log.Printf("Command '%v' registered successfully", v.Name)
+	} else {
+		log.Println("Guild ID is not set. Skipping command registration.")
 	}
 
 	// Get the channel ID from the environment variables
@@ -250,14 +248,8 @@ func main() {
 	log.Println("Press Ctrl+C to exit")
 	<-stop
 
-	if *RemoveCommands {
-		log.Println("Removing commands...")
-		for _, v := range registeredCommands {
-			err := s.ApplicationCommandDelete(s.State.User.ID, GuildID, v.ID)
-			if err != nil {
-				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
-			}
-		}
+	if *RemoveCommands && GuildID != "" {
+		removeCommands(s, GuildID)
 	}
 
 	log.Println("Gracefully shutting down.")

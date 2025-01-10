@@ -26,8 +26,9 @@ func DeleteSummoner(summonerNameTag string) error {
 		return errors.New("summoner not found")
 	}
 
-	// Delete the summoner from the map
-	delete(summoners, summonerNameTag)
+	if foundKey != "" {
+		delete(summoners, foundKey)
+	}
 
 	// Save the updated map back to the file
 	err = databaseHelper.SaveSummonersToFile(summoners)

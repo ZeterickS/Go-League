@@ -47,13 +47,10 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 	if currentRank != previousRank {
 		rankChange := currentRank - previousRank
 		rankChangeString := ""
-		//message := ""
 		if rankChange < 0 {
 			rankChangeString = fmt.Sprintf("%v", rankChange)
-			//message = fmt.Sprintf("You Lost your game and so you lost %v LP!", rankChange)
 		} else {
 			rankChangeString = fmt.Sprintf("+%v", rankChange)
-			//message = fmt.Sprintf("Your Team Won the game and so you gained %v LP!", rankChange)
 		}
 		color := 0x00ff00 // Green color for LP gain
 		if rankChange < 0 {
@@ -82,7 +79,6 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 			embedmessage := embed.NewEmbed().
 				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
 				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-				//SetDescription(message).
 				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
 				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
 				SetThumbnail(fmt.Sprintf("attachment://%v.png", rankTier)).
@@ -109,7 +105,6 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 			embedmessage := embed.NewEmbed().
 				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
 				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-				//SetDescription(message).
 				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
 				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
 				SetThumbnail(rankTierURL).
