@@ -17,8 +17,9 @@ type Team struct {
 }
 
 type OngoingMatch struct {
-	GameID int64
-	Teams  [2]Team
+	GameID   int64
+	Teams    [2]Team
+	GameType string // "Solo/Duo" or "Flex"
 }
 
 type Perks struct {

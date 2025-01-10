@@ -258,7 +258,8 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 	}
 
 	var apiResponse struct {
-		GameID       int64 `json:"gameId"`
+		GameID       int64  `json:"gameId"`
+		GameMode     string `json:"gameMode"`
 		Participants []struct {
 			PUUID      string      `json:"puuid"`
 			TeamID     int         `json:"teamId"`
@@ -273,9 +274,15 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
 
+	gameType := "Flex"
+	if apiResponse.GameMode == "CLASSIC" {
+		gameType = "Solo/Duo"
+	}
+
 	ongoingMatch := &match.OngoingMatch{
-		GameID: apiResponse.GameID,
-		Teams:  [2]match.Team{},
+		GameID:   apiResponse.GameID,
+		Teams:    [2]match.Team{},
+		GameType: gameType,
 	}
 
 	var summonerTeamID int

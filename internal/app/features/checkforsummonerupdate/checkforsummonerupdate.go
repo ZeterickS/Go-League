@@ -138,15 +138,30 @@ func CheckForOngoingGame(discordSession *discordgo.Session, channelID string, su
 		}
 	}
 
+	var rank rank.Rank
+	if currentOngoingMatch.GameType == "Solo/Duo" {
+		rank = summoner.SoloRank
+	} else if currentOngoingMatch.GameType == "Flex" {
+		rank = summoner.FlexRank
+	}
+
+	rankTier := strings.Split(rank.ToString(), " ")[0]
+	rankTier = strings.ToLower(rankTier)
+	fmt.Println(rankTier)
+
+	// Get the ranked picture URL
+	rankTierURL := cdragon.GetRankedPictureURL(rankTier)
+
 	// If there is an ongoing match and it's not already stored in the database
 	if ongoingMatch == nil || currentOngoingMatch.GameID != ongoingMatch.GameID {
 		// Send a message to the Discord channel
 		embedmessage := embed.NewEmbed().
 			SetAuthor(summoner.GetNameTag(), cdragon.GetProfileIconURL(summoner.ProfileIconID)).
-			SetTitle("A Rankmatch has started!").
+			SetTitle(fmt.Sprintf("A %v-Rankmatch has started!", currentOngoingMatch.GameType)).
 			AddField("Your Team Average Rank", currentOngoingMatch.Teams[0].AverageRank().ToString()).
 			AddField("Enemy Team Average Rank", currentOngoingMatch.Teams[1].AverageRank().ToString()).
 			SetThumbnail(cdragon.GetChampionSquareURL(championID)).
+			SetFooter(rank.ToString(), rankTierURL).
 			InlineAllFields().MessageEmbed
 
 		messageSend := &discordgo.MessageSend{
