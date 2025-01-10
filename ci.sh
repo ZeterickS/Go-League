@@ -12,6 +12,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
 # Determine the Docker image tag based on the DEVELOPMENT variable
 if [ "$DEVELOPMENT" = "True" ]; then
     export IMAGE_TAG="test"
+    export TEST="true"
 else
     export IMAGE_TAG="main"
 fi
