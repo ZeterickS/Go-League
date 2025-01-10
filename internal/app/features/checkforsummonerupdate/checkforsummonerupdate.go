@@ -3,7 +3,6 @@ package checkforsummonerupdate
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -64,61 +63,23 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 		// Get the ranked picture URL
 		rankTierURL := cdragon.GetRankedPictureURL(rankTier)
 
-		// Check if the URL exists
-		resp, err := http.Head(rankTierURL)
-		if err != nil || resp.StatusCode != http.StatusOK {
-			// Fallback to local asset if URL is not accessible
-			imagePath := fmt.Sprintf("assets/rank_images/%v.png", rankTier)
-			rankfile, err := os.Open(imagePath)
-			if err != nil {
-				log.Printf("Failed to open image file: %v", err)
-				return err
-			}
-			defer rankfile.Close()
+		// Use the URL directly
+		embedmessage := embed.NewEmbed().
+			SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
+			SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
+			AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
+			AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
+			SetThumbnail(rankTierURL).
+			SetColor(color).InlineAllFields().MessageEmbed
 
-			embedmessage := embed.NewEmbed().
-				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
-				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
-				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
-				SetThumbnail(fmt.Sprintf("attachment://%v.png", rankTier)).
-				SetColor(color).InlineAllFields().MessageEmbed
+		messageSend := &discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{embedmessage},
+		}
 
-			messageSend := &discordgo.MessageSend{
-				Embeds: []*discordgo.MessageEmbed{embedmessage},
-				Files: []*discordgo.File{
-					{
-						Name:        fmt.Sprintf("%v.png", rankTier),
-						ContentType: "image/png",
-						Reader:      rankfile,
-					},
-				},
-			}
-
-			_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
-			if err != nil {
-				log.Printf("Failed to send embed message with file to Discord channel: %v", err)
-				return err
-			}
-		} else {
-			// Use the URL if accessible
-			embedmessage := embed.NewEmbed().
-				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
-				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
-				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
-				SetThumbnail(rankTierURL).
-				SetColor(color).InlineAllFields().MessageEmbed
-
-			messageSend := &discordgo.MessageSend{
-				Embeds: []*discordgo.MessageEmbed{embedmessage},
-			}
-
-			_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
-			if err != nil {
-				log.Printf("Failed to send embed message to Discord channel: %v", err)
-				return err
-			}
+		_, err := discordSession.ChannelMessageSendComplex(channelID, messageSend)
+		if err != nil {
+			log.Printf("Failed to send embed message to Discord channel: %v", err)
+			return err
 		}
 
 		// Update the stored rank
@@ -132,6 +93,76 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 		return nil
 	} else {
 		return nil
+	}
+}
+
+// hasSummonerChanged compares two summoners and returns true if they are different
+func hasSummonerChanged(oldSummoner, newSummoner *summoner.Summoner) bool {
+	return oldSummoner.Name != newSummoner.Name ||
+		oldSummoner.TagLine != newSummoner.TagLine ||
+		oldSummoner.AccountID != newSummoner.AccountID ||
+		oldSummoner.ID != newSummoner.ID ||
+		oldSummoner.PUUID != newSummoner.PUUID ||
+		oldSummoner.ProfileIconID != newSummoner.ProfileIconID ||
+		oldSummoner.SoloRank != newSummoner.SoloRank ||
+		oldSummoner.FlexRank != newSummoner.FlexRank
+}
+
+// CheckForOngoingGame checks for an ongoing game for a specific summoner and sends a message to the Discord channel if an ongoing game, which is not already stored in the database, is detected.
+func CheckForOngoingGame(discordSession *discordgo.Session, channelID string, summoner *summoner.Summoner) {
+	// Load ongoing match from file
+	ongoingMatch, err := databaseHelper.LoadOngoingFromFile()
+	if err != nil {
+		log.Printf("Failed to load ongoing match: %v", err)
+		return
+	}
+
+	// Fetch ongoing match data for the summoner
+	currentOngoingMatch, err := apiHelper.GetOngoingMatchByPUUID(summoner.PUUID, os.Getenv("ROPT_API_TOKEN"))
+	if err != nil {
+		log.Printf("Failed to fetch ongoing match data: %v", err)
+		return
+	}
+
+	// If there is no ongoing match, log and return
+	if currentOngoingMatch == nil {
+		log.Printf("No ongoing game found for summoner: %s", summoner.Name)
+		return
+	}
+
+	var championID int
+	for _, participant := range currentOngoingMatch.Teams[0].Participants {
+		if participant.Summoner.PUUID == summoner.PUUID {
+			championID = participant.ChampionID
+			break
+		}
+	}
+
+	// If there is an ongoing match and it's not already stored in the database
+	if ongoingMatch == nil || currentOngoingMatch.GameID != ongoingMatch.GameID {
+		// Send a message to the Discord channel
+		embedmessage := embed.NewEmbed().
+			SetAuthor(summoner.GetNameTag(), cdragon.GetProfileIconURL(summoner.ProfileIconID)).
+			SetTitle("A Rankmatch has started!").
+			AddField("Your Team Average Rank", currentOngoingMatch.Teams[0].AverageRank().ToString()).
+			AddField("Enemy Team Average Rank", currentOngoingMatch.Teams[1].AverageRank().ToString()).
+			SetThumbnail(cdragon.GetChampionSquareURL(championID)).
+			InlineAllFields().MessageEmbed
+
+		messageSend := &discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{embedmessage},
+		}
+
+		_, err := discordSession.ChannelMessageSendComplex(channelID, messageSend)
+		if err != nil {
+			log.Printf("Failed to send embed message to Discord channel: %v", err)
+		}
+
+		// Save the ongoing match to file
+		err = databaseHelper.SaveOngoingToFile(currentOngoingMatch)
+		if err != nil {
+			log.Printf("Failed to save ongoing match to file: %v", err)
+		}
 	}
 }
 
@@ -150,11 +181,13 @@ func CheckForUpdates() {
 		updated := false
 
 		for name, summoner := range summoners {
-			currentSummoner, err := apiHelper.GetSummonerByPUUID(summoner.PUUID, summoner.Name, summoner.TagLine)
+			currentSummoner, err := apiHelper.GetSummonerByPUUID(summoner.PUUID)
 			if err != nil {
 				log.Printf("Failed to fetch summoner data for %v: %v", name, err)
 				continue
 			}
+
+			CheckForOngoingGame(discordSession, channelID, currentSummoner)
 
 			// Compare summoners and process only if something changed
 			if hasSummonerChanged(summoner, currentSummoner) {
@@ -184,16 +217,4 @@ func CheckForUpdates() {
 		// Sleep for a specified interval before checking again
 		time.Sleep(30 * time.Second)
 	}
-}
-
-// hasSummonerChanged compares two summoners and returns true if they are different
-func hasSummonerChanged(oldSummoner, newSummoner *summoner.Summoner) bool {
-	return oldSummoner.Name != newSummoner.Name ||
-		oldSummoner.TagLine != newSummoner.TagLine ||
-		oldSummoner.AccountID != newSummoner.AccountID ||
-		oldSummoner.ID != newSummoner.ID ||
-		oldSummoner.PUUID != newSummoner.PUUID ||
-		oldSummoner.ProfileIconID != newSummoner.ProfileIconID ||
-		oldSummoner.SoloRank != newSummoner.SoloRank ||
-		oldSummoner.FlexRank != newSummoner.FlexRank
 }

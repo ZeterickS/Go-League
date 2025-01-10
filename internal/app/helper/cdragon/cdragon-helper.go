@@ -15,4 +15,9 @@ func GetRankedPictureURL(rank string) string {
 	return fmt.Sprintf("%s/%s.png", baseRankedURL, rank)
 }
 
+// GetChampionSquareURL generates the URL for a given champion ID
+func GetChampionSquareURL(championID int) string {
+	return fmt.Sprintf("%s/champion/%d/square", baseCDNURL, championID)
+}
+
 // Add more functions for other resources as needed
