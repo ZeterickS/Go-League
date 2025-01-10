@@ -22,6 +22,8 @@ echo "Checking for new version of ghcr.io/zetericks/go-league:$IMAGE_TAG"
 docker pull ghcr.io/zetericks/go-league:$IMAGE_TAG
 LOCAL_IMAGE_ID=$(docker images -q ghcr.io/zetericks/go-league:$IMAGE_TAG)
 REMOTE_IMAGE_ID=$(docker inspect --format='{{.Id}}' ghcr.io/zetericks/go-league:$IMAGE_TAG)
+echo "Local image ID: $LOCAL_IMAGE_ID"
+echo "Remote image ID: $REMOTE_IMAGE_ID"
 
 if [ "$LOCAL_IMAGE_ID" != "$REMOTE_IMAGE_ID" ]; then
     echo "New version detected, running docker compose up"
