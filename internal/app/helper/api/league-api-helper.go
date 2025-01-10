@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -156,9 +155,6 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-
-	// Log the response body for debugging
-	log.Printf("Response body: %s", string(body))
 
 	var rankData []struct {
 		QueueType    string `json:"queueType"`

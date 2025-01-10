@@ -127,7 +127,6 @@ func CheckForUpdates() {
 
 		for name, summoner := range summoners {
 			currentSummoner, err := apiHelper.GetSummonerByPUUID(summoner.PUUID, summoner.Name, summoner.TagLine)
-			log.Printf("Current summoner data for %v: %+v", name, currentSummoner)
 			if err != nil {
 				log.Printf("Failed to fetch summoner data for %v: %v", name, err)
 				continue
@@ -143,7 +142,7 @@ func CheckForUpdates() {
 				}
 				err = checkAndSendRankUpdate(discordSession, channelID, currentSummoner, summoner, "Flex")
 				if err != nil {
-					log.Printf("Failed to check and send rank update for Solo: %v", err)
+					log.Printf("Failed to check and send rank update for Flex: %v", err)
 				}
 			}
 			// Update the summoner data
