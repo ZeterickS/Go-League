@@ -7,31 +7,29 @@ import (
 
 // Summoner represents a user with various attributes
 type Summoner struct {
-	Name         string
-	TagLine      string
-	AccountID    string
-	ID           string
-	PUUID        string
-	SoloRank     rank.Rank
-	LastSoloRank rank.Rank
-	FlexRank     rank.Rank
-	LastFlexRank rank.Rank
-	Updated      time.Time
+	Name          string
+	TagLine       string
+	AccountID     string
+	ID            string
+	PUUID         string
+	ProfileIconID int
+	SoloRank      rank.Rank
+	FlexRank      rank.Rank
+	Updated       time.Time
 }
 
 // NewSummoner creates a new Summoner instance with mandatory fields name, tagLine, accountID, ID, puuid, and Rank
-func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, soloRank rank.Rank, lastSoloRank rank.Rank, flexRank rank.Rank, lastFlexRank rank.Rank, updated time.Time) *Summoner {
+func NewSummoner(name string, tagLine string, accountID string, id string, puuid string, profileIconId int, soloRank rank.Rank, flexRank rank.Rank, updated time.Time) *Summoner {
 	summoner := &Summoner{
-		Name:         name,
-		TagLine:      tagLine,
-		AccountID:    accountID,
-		ID:           id,
-		PUUID:        puuid,
-		SoloRank:     soloRank,
-		LastSoloRank: lastSoloRank,
-		FlexRank:     flexRank,
-		LastFlexRank: lastFlexRank,
-		Updated:      updated,
+		Name:          name,
+		TagLine:       tagLine,
+		AccountID:     accountID,
+		ID:            id,
+		PUUID:         puuid,
+		ProfileIconID: profileIconId,
+		SoloRank:      soloRank,
+		FlexRank:      flexRank,
+		Updated:       updated,
 	}
 
 	return summoner
@@ -44,13 +42,11 @@ func (s *Summoner) GetNameTag() string {
 
 // UpdateRank updates the summoner's rank and last rank
 func (s *Summoner) UpdateSoloRank(newSoloRank rank.Rank) {
-	s.LastSoloRank = s.SoloRank
 	s.SoloRank = newSoloRank
 	s.Updated = time.Now()
 }
 
 func (s *Summoner) UpdateFlexRank(newFlexRank rank.Rank) {
-	s.LastFlexRank = s.FlexRank
 	s.FlexRank = newFlexRank
 	s.Updated = time.Now()
 }

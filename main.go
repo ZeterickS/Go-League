@@ -25,7 +25,7 @@ func init() {
 	flag.Parse()
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	BotToken := os.Getenv("DISCORD_BOT_TOKEN")
@@ -104,7 +104,7 @@ var (
 			options := i.ApplicationCommandData().Options
 			name := options[0].StringValue()
 			tag := options[1].StringValue()
-			summoner, err := onboarding.OnboardSummoner(name, tag)
+			message, err := onboarding.OnboardSummoner(name, tag)
 			if err != nil {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -117,7 +117,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Summoner %v is now registered", summoner.GetNameTag()),
+					Embeds: []*discordgo.MessageEmbed{message},
 				},
 			})
 		},
@@ -164,6 +164,8 @@ func main() {
 	if GuildID == "" {
 		log.Fatal("Guild ID not found in environment variables")
 	}
+
+	//s.Debug = true
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)

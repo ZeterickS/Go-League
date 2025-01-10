@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -16,7 +15,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// LoadEnv loads environment variables from a .env file
+// LoadEnv loads environment variables from a .env file if they are not already set
 func LoadEnv() error {
 	if os.Getenv("ROPT_API_TOKEN") != "" {
 		return nil
@@ -53,7 +52,9 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 	}
 
 	var accountData struct {
-		PUUID string `json:"puuid"`
+		PUUID   string `json:"puuid"`
+		Name    string `json:"gameName"`
+		TagLine string `json:"tagLine"`
 	}
 
 	err = json.Unmarshal(body, &accountData)
@@ -61,7 +62,7 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 		return nil, err
 	}
 
-	return GetSummonerByPUUID(accountData.PUUID, name, tagLine)
+	return GetSummonerByPUUID(accountData.PUUID, accountData.Name, accountData.TagLine)
 }
 
 // GetSummonerByPUUID fetches summoner data by PUUID from the League of Legends API
@@ -96,7 +97,6 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error)
 		ID            string `json:"id"`
 		AccountID     string `json:"accountId"`
 		PUUID         string `json:"puuid"`
-		Name          string `json:"name"`
 		ProfileIconID int    `json:"profileIconId"`
 		RevisionDate  int64  `json:"revisionDate"`
 		SummonerLevel int    `json:"summonerLevel"`
@@ -108,22 +108,23 @@ func GetSummonerByPUUID(puuid, name, tagLine string) (*summoner.Summoner, error)
 	}
 
 	solorank, rankFlex, err := GetSummonerRank(summonerData.ID)
-	if err != nil {
-		return nil, err
-	}
 
 	summoner := summoner.NewSummoner(
 		name,
 		tagLine, // TagLine
 		summonerData.AccountID,
 		summonerData.ID,
-		summonerData.PUUID,
+		puuid,
+		summonerData.ProfileIconID,
 		solorank,
-		0,          // LastSoloRank
 		rankFlex,   // FlexRank
-		0,          // LastFlexRank
 		time.Now(), // Updated
 	)
+
+	if err != nil {
+		return summoner, err
+	}
+
 	return summoner, nil
 }
 
@@ -155,9 +156,6 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 		return 0, 0, err
 	}
 
-	// Log the response body for debugging
-	log.Printf("Response body: %s", string(body))
-
 	var rankData []struct {
 		QueueType    string `json:"queueType"`
 		Tier         string `json:"tier"`
@@ -171,10 +169,10 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	}
 
 	if len(rankData) == 0 {
-		return 0, 0, fmt.Errorf("no rank data found for summoner")
+		return 0, 0, nil
 	}
 
-	var soloRank, flexRank rank.Rank
+	var soloRank, flexRank rank.Rank = 0, 0
 
 	for _, entry := range rankData {
 		rankStr := fmt.Sprintf("%s %s %d LP", entry.Tier, entry.Rank, entry.LeaguePoints)
