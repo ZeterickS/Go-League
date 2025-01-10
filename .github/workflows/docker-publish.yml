@@ -15,9 +15,9 @@ on:
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: 
-      - "main"
-      - "test"
+    #branches: 
+    #  - "main"
+    #  - "test"
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -84,8 +84,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO }}:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO }}:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
