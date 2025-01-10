@@ -16,7 +16,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// LoadEnv loads environment variables from a .env file
+// LoadEnv loads environment variables from a .env file if they are not already set
 func LoadEnv() error {
 	if os.Getenv("ROPT_API_TOKEN") != "" {
 		return nil
