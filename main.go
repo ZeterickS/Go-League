@@ -194,6 +194,7 @@ func main() {
 		// Delete each command
 		for _, v := range commands {
 			err := s.ApplicationCommandDelete(s.State.User.ID, GuildID, v.ID)
+			log.Printf("Deleting command: %v", v.Name)
 			if err != nil {
 				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
 			}
