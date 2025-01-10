@@ -74,7 +74,6 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 			SetDescription(message).
 			AddField("Rank Change", rankChangeString).
 			SetThumbnail(fmt.Sprintf("attachment://%v.png", rankTier)).
-			SetImage("https://cdn.discordapp.com/attachments/1325814158658113556/1327058639697215589/image.png?ex=6781af2b&is=67805dab&hm=26c7c49eccb9dab501933405f985aa904ad464390ab83b29be9103eed52dbb9d&").
 			SetColor(color).MessageEmbed
 
 		messageSend := &discordgo.MessageSend{
