@@ -117,7 +117,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Embeds: []*discordgo.MessageEmbed{message},
+					Embeds: []*discordgo.MessageEmbed{message, message},
 				},
 			})
 		},
