@@ -35,3 +35,13 @@ if [ "$LOCAL_IMAGE_ID" != "${REMOTE_IMAGE_ID_STRIPPED:0:12}" ]; then
 else
     echo "No new version detected, skipping docker compose up"
 fi
+
+# Check if the Docker Compose service is running
+SERVICE_STATUS=$(docker inspect -f '{{.State.Status}}' GoL-Tracker${TEST:+-test})
+
+if [ "$SERVICE_STATUS" != "running" ]; then
+    echo "Service is not running, restarting docker compose"
+    docker compose --env-file .env up -d --build
+else
+    echo "Service is running"
+fi
