@@ -3,6 +3,7 @@ package checkforsummonerupdate
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -63,38 +64,66 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 		rankTier = strings.ToLower(rankTier)
 		fmt.Println(rankTier)
 
-		imagePath := fmt.Sprintf("assets/rank_images/%v.png", rankTier)
-		rankfile, err := os.Open(imagePath)
-		if err != nil {
-			log.Printf("Failed to open image file: %v", err)
-			return err
-		}
-		defer rankfile.Close()
+		// Get the ranked picture URL
+		rankTierURL := cdragon.GetRankedPictureURL(rankTier)
 
-		embedmessage := embed.NewEmbed().
-			SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
-			SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-			SetDescription(message).
-			AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
-			AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
-			SetThumbnail(fmt.Sprintf("attachment://%v.png", rankTier)).
-			SetColor(color).InlineAllFields().MessageEmbed
+		// Check if the URL exists
+		resp, err := http.Head(rankTierURL)
+		if err != nil || resp.StatusCode != http.StatusOK {
+			// Fallback to local asset if URL is not accessible
+			imagePath := fmt.Sprintf("assets/rank_images/%v.png", rankTier)
+			rankfile, err := os.Open(imagePath)
+			if err != nil {
+				log.Printf("Failed to open image file: %v", err)
+				return err
+			}
+			defer rankfile.Close()
 
-		messageSend := &discordgo.MessageSend{
-			Embeds: []*discordgo.MessageEmbed{embedmessage},
-			Files: []*discordgo.File{
-				{
-					Name:        fmt.Sprintf("%v.png", rankTier),
-					ContentType: "image/png",
-					Reader:      rankfile,
+			embedmessage := embed.NewEmbed().
+				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
+				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
+				SetDescription(message).
+				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
+				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
+				SetThumbnail(fmt.Sprintf("attachment://%v.png", rankTier)).
+				SetColor(color).InlineAllFields().MessageEmbed
+
+			messageSend := &discordgo.MessageSend{
+				Embeds: []*discordgo.MessageEmbed{embedmessage},
+				Files: []*discordgo.File{
+					{
+						Name:        fmt.Sprintf("%v.png", rankTier),
+						ContentType: "image/png",
+						Reader:      rankfile,
+					},
 				},
-			},
-		}
+			}
 
-		_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
-		if err != nil {
-			log.Printf("Failed to send embed message with file to Discord channel: %v", err)
-			return err
+			_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
+			if err != nil {
+				log.Printf("Failed to send embed message with file to Discord channel: %v", err)
+				return err
+			}
+		} else {
+			// Use the URL if accessible
+			embedmessage := embed.NewEmbed().
+				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
+				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
+				SetDescription(message).
+				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
+				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
+				SetThumbnail(rankTierURL).
+				SetColor(color).InlineAllFields().MessageEmbed
+
+			messageSend := &discordgo.MessageSend{
+				Embeds: []*discordgo.MessageEmbed{embedmessage},
+			}
+
+			_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
+			if err != nil {
+				log.Printf("Failed to send embed message to Discord channel: %v", err)
+				return err
+			}
 		}
 
 		// Update the stored rank
