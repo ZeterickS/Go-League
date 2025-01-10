@@ -47,13 +47,13 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 	if currentRank != previousRank {
 		rankChange := currentRank - previousRank
 		rankChangeString := ""
-		message := ""
+		//message := ""
 		if rankChange < 0 {
 			rankChangeString = fmt.Sprintf("%v", rankChange)
-			message = fmt.Sprintf("You Lost your game and so you lost %v LP!", rankChange)
+			//message = fmt.Sprintf("You Lost your game and so you lost %v LP!", rankChange)
 		} else {
 			rankChangeString = fmt.Sprintf("+%v", rankChange)
-			message = fmt.Sprintf("Your Team Won the game and so you gained %v LP!", rankChange)
+			//message = fmt.Sprintf("Your Team Won the game and so you gained %v LP!", rankChange)
 		}
 		color := 0x00ff00 // Green color for LP gain
 		if rankChange < 0 {
