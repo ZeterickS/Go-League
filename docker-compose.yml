@@ -2,7 +2,7 @@ version: "3"
 
 services:
   main:
-    container_name: GoL-Tracker${DEVELOPMENT:+-test}
+    container_name: ${DEVELOPMENT:-False} == "False" && echo "GoL-Tracker" || echo "GoL-Tracker-test"
     image: ghcr.io/zetericks/go-league:${IMAGE_TAG}
     volumes:
       - ./summoners.json:/app/summoners.json
