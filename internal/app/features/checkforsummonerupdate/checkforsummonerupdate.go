@@ -28,13 +28,16 @@ func Initialize(session *discordgo.Session, chID string) {
 
 func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string, currentSummoner, summoner *summoner.Summoner, rankType string) error {
 	var currentRank, previousRank rank.Rank
+	var pretttyRank string = ""
 	switch rankType {
 	case "Solo":
 		currentRank = currentSummoner.SoloRank
 		previousRank = summoner.SoloRank
+		pretttyRank = "Solo/Duo"
 	case "Flex":
 		currentRank = currentSummoner.FlexRank
 		previousRank = summoner.FlexRank
+		pretttyRank = "Flex"
 	default:
 		log.Printf("Unknown rank type: %v", rankType)
 		return fmt.Errorf("unknown rank type: %v", rankType)
@@ -46,10 +49,10 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 		message := ""
 		if rankChange < 0 {
 			rankChangeString = fmt.Sprintf("%v", rankChange)
-			message = fmt.Sprintf("%v has lost a Game: %v. (%v LP)", summoner.GetNameTag(), currentRank.ToString(), rankChangeString)
+			message = fmt.Sprintf("A Game was lost!")
 		} else {
 			rankChangeString = fmt.Sprintf("+%v", rankChange)
-			message = fmt.Sprintf("%v has won a Game: %v. (%v LP)", summoner.GetNameTag(), currentRank.ToString(), rankChangeString)
+			message = fmt.Sprintf("A Game was won!")
 		}
 		color := 0x00ff00 // Green color for LP gain
 		if rankChange < 0 {
@@ -69,12 +72,13 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 		defer rankfile.Close()
 
 		embedmessage := embed.NewEmbed().
-			SetAuthor(currentSummoner.Name, cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
-			SetTitle(fmt.Sprintf("Rank Update %v", rankType)).
+			SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
+			SetTitle(fmt.Sprintf("Rank Update %v-Queue | %v", pretttyRank, rankChangeString)).
 			SetDescription(message).
-			AddField("Rank Change", rankChangeString).
+			AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
+			AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
 			SetThumbnail(fmt.Sprintf("attachment://%v.png", rankTier)).
-			SetColor(color).MessageEmbed
+			SetColor(color).InlineAllFields().MessageEmbed
 
 		messageSend := &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{embedmessage},
