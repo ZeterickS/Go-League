@@ -13,7 +13,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
 if [ "$DEVELOPMENT" = "True" ]; then
     export IMAGE_TAG="test"
 else
-    export IMAGE_TAG="latest"
+    export IMAGE_TAG="main"
 fi
 
 # Check if there is a new version of the Docker image
@@ -24,7 +24,7 @@ REMOTE_IMAGE_ID=$(docker inspect --format='{{.Id}}' ghcr.io/zetericks/go-league:
 
 if [ "$LOCAL_IMAGE_ID" != "$REMOTE_IMAGE_ID" ]; then
     echo "New version detected, running docker compose up"
-    docker compose -f docker-compose.yml up -d --build
+    docker compose --env-file .env up -d --build
 else
     echo "No new version detected, skipping docker compose up"
 fi
