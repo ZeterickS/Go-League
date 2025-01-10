@@ -82,7 +82,7 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 			embedmessage := embed.NewEmbed().
 				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
 				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-				SetDescription(message).
+				//SetDescription(message).
 				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
 				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
 				SetThumbnail(fmt.Sprintf("attachment://%v.png", rankTier)).
@@ -109,7 +109,7 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 			embedmessage := embed.NewEmbed().
 				SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
 				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-				SetDescription(message).
+				//SetDescription(message).
 				AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
 				AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
 				SetThumbnail(rankTierURL).
