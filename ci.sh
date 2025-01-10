@@ -27,7 +27,7 @@ echo "Local image ID: $LOCAL_IMAGE_ID"
 echo "Remote image ID: $REMOTE_IMAGE_ID"
 echo "Remote image ID stripped: $REMOTE_IMAGE_ID_STRIPPED"
 
-if [ "$LOCAL_IMAGE_ID" != "${$REMOTE_IMAGE_ID_STRIPPED:0:12}" ]; then
+if [ "$LOCAL_IMAGE_ID" != "${REMOTE_IMAGE_ID_STRIPPED:0:12}" ]; then
     echo "New version detected, running docker compose up"
     docker compose --env-file .env up -d --build
 else
