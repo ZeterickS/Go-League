@@ -17,10 +17,12 @@ else
     export IMAGE_TAG="main"
 fi
 
+LOCAL_IMAGE_ID=$(docker images -q ghcr.io/zetericks/go-league:$IMAGE_TAG)
+
 # Check if there is a new version of the Docker image
 echo "Checking for new version of ghcr.io/zetericks/go-league:$IMAGE_TAG"
 docker pull ghcr.io/zetericks/go-league:$IMAGE_TAG
-LOCAL_IMAGE_ID=$(docker images -q ghcr.io/zetericks/go-league:$IMAGE_TAG)
+
 REMOTE_IMAGE_ID=$(docker inspect --format='{{.Id}}' ghcr.io/zetericks/go-league:$IMAGE_TAG)
 REMOTE_IMAGE_ID_STRIPPED=${REMOTE_IMAGE_ID#sha256:}
 echo "Local image ID: $LOCAL_IMAGE_ID"
