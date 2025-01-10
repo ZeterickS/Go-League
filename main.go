@@ -201,6 +201,25 @@ func main() {
 		}
 	}
 
+	if *RemoveCommands {
+		log.Println("Removing commands...")
+
+		// Fetch all existing commands
+		commands, err := s.ApplicationCommands(s.State.User.ID, "")
+		if err != nil {
+			log.Panicf("Cannot fetch commands: %v", err)
+		}
+
+		// Delete each command
+		for _, v := range commands {
+			err := s.ApplicationCommandDelete(s.State.User.ID, "", v.ID)
+			log.Printf("Deleting command: %v", v.Name)
+			if err != nil {
+				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
+			}
+		}
+	}
+
 	log.Println("Adding commands...")
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
 	for i, v := range commands {
