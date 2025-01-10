@@ -2,9 +2,7 @@ version: "3"
 
 services:
   main:
-    container_name: GoL-Tracker
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    container_name: GoL-Tracker${DEVELOPMENT:+-test}
+    image: ghcr.io/zetericks/go-league:${IMAGE_TAG}
     volumes:
       - ./summoners.json:/app/summoners.json
