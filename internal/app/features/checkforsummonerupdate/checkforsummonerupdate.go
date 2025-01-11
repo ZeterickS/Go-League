@@ -110,10 +110,10 @@ func hasSummonerChanged(oldSummoner, newSummoner *summoner.Summoner) bool {
 
 // CheckForOngoingGame checks for an ongoing game for a specific summoner and sends a message to the Discord channel if an ongoing game, which is not already stored in the database, is detected.
 func CheckForOngoingGame(discordSession *discordgo.Session, channelID string, summoner *summoner.Summoner) {
-	// Load ongoing match from file
-	ongoingMatch, err := databaseHelper.LoadOngoingFromFile()
+	// Load ongoing matches from file
+	ongoingMatches, err := databaseHelper.LoadOngoingFromFile()
 	if err != nil {
-		log.Printf("Failed to load ongoing match: %v", err)
+		log.Printf("Failed to load ongoing matches: %v", err)
 		return
 	}
 
@@ -128,6 +128,18 @@ func CheckForOngoingGame(discordSession *discordgo.Session, channelID string, su
 	if currentOngoingMatch == nil {
 		log.Printf("No ongoing game found for summoner: %s", summoner.Name)
 		return
+	}
+
+	// Check if the match is already stored
+	if ongoingMatches[currentOngoingMatch.GameID] == nil {
+		// Save the new ongoing match
+		ongoingMatches[currentOngoingMatch.GameID] = currentOngoingMatch
+		err = databaseHelper.SaveOngoingToFile(currentOngoingMatch)
+		if err != nil {
+			log.Printf("Failed to save ongoing match: %v", err)
+			return
+		}
+		log.Printf("New ongoing game saved for summoner: %s", summoner.Name)
 	}
 
 	var championID int
@@ -152,8 +164,17 @@ func CheckForOngoingGame(discordSession *discordgo.Session, channelID string, su
 	// Get the ranked picture URL
 	rankTierURL := cdragon.GetRankedPictureURL(rankTier)
 
+	// Check if the current ongoing match is already known
+	matchKnown := false
+	for _, match := range ongoingMatches {
+		if currentOngoingMatch.GameID == match.GameID {
+			matchKnown = true
+			break
+		}
+	}
+
 	// If there is an ongoing match and it's not already stored in the database
-	if ongoingMatch == nil || currentOngoingMatch.GameID != ongoingMatch.GameID {
+	if !matchKnown {
 		// Send a message to the Discord channel
 		embedmessage := embed.NewEmbed().
 			SetAuthor(summoner.GetNameTag(), cdragon.GetProfileIconURL(summoner.ProfileIconID)).

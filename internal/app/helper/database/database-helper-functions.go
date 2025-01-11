@@ -63,13 +63,34 @@ func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*s
 
 // SaveOngoingToFile saves an OngoingMatch instance to a JSON file
 func SaveOngoingToFile(ongoingMatch *match.OngoingMatch) error {
-	// Marshal the ongoing match to JSON
-	data, err := json.MarshalIndent(ongoingMatch, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal ongoing match: %v", err)
+	var ongoingMatches map[int64]*match.OngoingMatch
+
+	// Load existing matches if the file exists
+	data, err := os.ReadFile(ongoingFilename)
+	if err == nil {
+		err = json.Unmarshal(data, &ongoingMatches)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal existing matches: %v", err)
+		}
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read file: %v", err)
 	}
 
-	// Write the ongoing match to the file
+	// Initialize the map if it is nil
+	if ongoingMatches == nil {
+		ongoingMatches = make(map[int64]*match.OngoingMatch)
+	}
+
+	// Add or update the match in the map
+	ongoingMatches[ongoingMatch.GameID] = ongoingMatch
+
+	// Marshal the ongoing matches to JSON
+	data, err = json.MarshalIndent(ongoingMatches, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal ongoing matches: %v", err)
+	}
+
+	// Write the ongoing matches to the file
 	err = os.WriteFile(ongoingFilename, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %v", err)
@@ -78,8 +99,10 @@ func SaveOngoingToFile(ongoingMatch *match.OngoingMatch) error {
 	return nil
 }
 
-// LoadOngoingFromFile loads an OngoingMatch instance from a JSON file
-func LoadOngoingFromFile() (*match.OngoingMatch, error) {
+// LoadOngoingFromFile loads an array of OngoingMatch instances from a JSON file
+func LoadOngoingFromFile() ([]*match.OngoingMatch, error) {
+	var ongoingMatches []*match.OngoingMatch
+
 	data, err := os.ReadFile(ongoingFilename)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -88,15 +111,10 @@ func LoadOngoingFromFile() (*match.OngoingMatch, error) {
 		return nil, fmt.Errorf("failed to read file: %v", err)
 	}
 
-	if len(data) == 0 {
-		return nil, nil // Empty file
-	}
-
-	var ongoingMatch match.OngoingMatch
-	err = json.Unmarshal(data, &ongoingMatch)
+	err = json.Unmarshal(data, &ongoingMatches)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal ongoing match: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal ongoing matches: %v", err)
 	}
 
-	return &ongoingMatch, nil
+	return ongoingMatches, nil
 }
