@@ -68,7 +68,7 @@ func waitForRateLimiters() {
 	log.Println("Waiting for rate limiters...")
 	starttime := time.Now()
 	for !rateLimiterPerSecond.Check() || !rateLimiterPer2Minutes.Check() {
-		time.Sleep(time.Second)
+		time.Sleep(2 * time.Second)
 	}
 	rateLimiterPer2Minutes.Allow()
 	rateLimiterPerSecond.Allow()
