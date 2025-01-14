@@ -7,6 +7,8 @@ import (
 
 type Participant struct {
 	Summoner   summoner.Summoner
+	Items      Items
+	Spells     Spells
 	Perks      Perks
 	ChampionID int
 }
@@ -16,7 +18,7 @@ type Team struct {
 	Participants []Participant
 }
 
-type OngoingMatch struct {
+type Match struct {
 	GameID   int64
 	Teams    [2]Team
 	GameType string // "Solo/Duo" or "Flex"
@@ -26,6 +28,14 @@ type Perks struct {
 	PerkIDs      []int
 	PerkStyle    int
 	PerkSubStyle int
+}
+
+type Items struct {
+	ItemIDs []int
+}
+
+type Spells struct {
+	SpellIDs []int
 }
 
 // AverageRank calculates the average rank of the team

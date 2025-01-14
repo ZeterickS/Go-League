@@ -256,7 +256,7 @@ func GetLastRankedMatch(puuid string) (string, error) {
 }
 
 // GetOngoingMatchByPUUID checks if there is an ongoing match for the given summoner's PUUID
-func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
+func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 	waitForRateLimiters()
 
 	url := fmt.Sprintf("%s/by-summoner/%s?api_key=%s", riotSpectatorBaseURL, puuid, apiKey)
@@ -282,6 +282,8 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 			ChampionID int         `json:"championId"`
 			Perks      match.Perks `json:"perks"`
 			SummonerID string      `json:"summonerId"`
+			Spell1ID   int         `json:"spell1Id"`
+			Spell2ID   int         `json:"spell2Id"`
 		} `json:"participants"`
 	}
 
@@ -298,15 +300,15 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 	}
 
 	gameType := "Flex"
-	/* if apiResponse.QueueID == 440 {
+	if apiResponse.QueueID == 440 {
 		gameType = "Flex"
 	} else if apiResponse.QueueID == 420 {
 		gameType = "Solo/Duo"
 	} else {
-		return nil, fmt.Errorf("no game type found for queue id: %d", apiResponse.QueueID)
-	} */
+		gameType = "UNRANKED"
+	}
 
-	ongoingMatch := &match.OngoingMatch{
+	ongoingMatch := &match.Match{
 		GameID:   apiResponse.GameID,
 		Teams:    [2]match.Team{{TeamID: 100}, {TeamID: 200}},
 		GameType: gameType,
@@ -330,6 +332,10 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 			Summoner:   *summoner,
 			Perks:      participant.Perks,
 			ChampionID: participant.ChampionID,
+			Items:      match.Items{},
+			Spells: match.Spells{
+				SpellIDs: []int{participant.Spell1ID, participant.Spell2ID},
+			},
 		})
 	}
 

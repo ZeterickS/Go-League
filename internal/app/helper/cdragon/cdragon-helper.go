@@ -2,7 +2,7 @@ package cdragon
 
 import "fmt"
 
-const baseCDNURL = "https://cdn.communitydragon.org/15.1.1"
+const baseCDNURL = "https://cdn.communitydragon.org/latest"
 const baseRankedURL = "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests"
 
 // GetProfileIconURL generates the URL for a given profile icon ID
