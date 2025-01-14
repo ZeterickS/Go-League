@@ -119,6 +119,7 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 
 	// Iterate over each summoner to check for ongoing matches
 	for _, summoner := range summoners {
+		log.Printf("Checking for ongoing games for summoner: %s", summoner.Name)
 		// Fetch ongoing match data for the summoner
 		currentOngoingMatch, err := apiHelper.GetOngoingMatchByPUUID(summoner.PUUID, os.Getenv("ROPT_API_TOKEN"))
 		if err != nil {
