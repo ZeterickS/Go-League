@@ -274,8 +274,8 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 	}
 
 	var apiResponse struct {
-		GameID       int64  `json:"gameId"`
-		GameMode     string `json:"gameMode"`
+		GameID       int64 `json:"gameId"`
+		QueueID      int   `json:"gameQueueConfigId"`
 		Participants []struct {
 			PUUID      string      `json:"puuid"`
 			TeamID     int         `json:"teamId"`
@@ -285,53 +285,55 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 		} `json:"participants"`
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&apiResponse)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode response: %v", err)
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	fmt.Println("Response Body:", string(body))
+
+	err = json.Unmarshal(body, &apiResponse)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response body: %v", err)
 	}
 
 	gameType := "Flex"
-	if apiResponse.GameMode == "CLASSIC" {
+	/* if apiResponse.QueueID == 440 {
+		gameType = "Flex"
+	} else if apiResponse.QueueID == 420 {
 		gameType = "Solo/Duo"
-	}
+	} else {
+		return nil, fmt.Errorf("no game type found for queue id: %d", apiResponse.QueueID)
+	} */
 
 	ongoingMatch := &match.OngoingMatch{
 		GameID:   apiResponse.GameID,
-		Teams:    [2]match.Team{},
+		Teams:    [2]match.Team{{TeamID: 100}, {TeamID: 200}},
 		GameType: gameType,
 	}
 
-	var summonerTeamID int
+	// Populate teams and participants
+	for _, participant := range apiResponse.Participants {
+		teamIndex := 0
+		if participant.TeamID == 200 {
+			teamIndex = 1
+		}
 
-	for _, participantData := range apiResponse.Participants {
-		summonerData, err := GetSummonerByPUUID(participantData.PUUID)
+		summoner, err := GetSummonerByPUUID(participant.PUUID)
+
+		fmt.Printf("Summoner: %+v\n", summoner)
 		if err != nil {
-			return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
+			return nil, fmt.Errorf("failed to get summoner by PUUID: %v", err)
 		}
 
-		participant := match.Participant{
-			Summoner:   *summonerData,
-			Perks:      participantData.Perks,
-			ChampionID: participantData.ChampionID,
-		}
-
-		if participantData.PUUID == puuid {
-			summonerTeamID = participantData.TeamID
-		}
-
-		if participantData.TeamID == 100 {
-			ongoingMatch.Teams[0].TeamID = 100
-			ongoingMatch.Teams[0].Participants = append(ongoingMatch.Teams[0].Participants, participant)
-		} else if participantData.TeamID == 200 {
-			ongoingMatch.Teams[1].TeamID = 200
-			ongoingMatch.Teams[1].Participants = append(ongoingMatch.Teams[1].Participants, participant)
-		}
+		ongoingMatch.Teams[teamIndex].Participants = append(ongoingMatch.Teams[teamIndex].Participants, match.Participant{
+			Summoner:   *summoner,
+			Perks:      participant.Perks,
+			ChampionID: participant.ChampionID,
+		})
 	}
 
-	// Ensure the summoner's team is at index [0]
-	if summonerTeamID == 200 {
-		ongoingMatch.Teams[0], ongoingMatch.Teams[1] = ongoingMatch.Teams[1], ongoingMatch.Teams[0]
-	}
+	fmt.Printf("Ongoing Match: %+v\n", ongoingMatch)
 
 	return ongoingMatch, nil
 }

@@ -100,8 +100,8 @@ func SaveOngoingToFile(ongoingMatch *match.OngoingMatch) error {
 }
 
 // LoadOngoingFromFile loads an array of OngoingMatch instances from a JSON file
-func LoadOngoingFromFile() ([]*match.OngoingMatch, error) {
-	var ongoingMatches []*match.OngoingMatch
+func LoadOngoingFromFile() (map[int64]*match.OngoingMatch, error) {
+	var ongoingMatches map[int64]*match.OngoingMatch
 
 	data, err := os.ReadFile(ongoingFilename)
 	if err != nil {

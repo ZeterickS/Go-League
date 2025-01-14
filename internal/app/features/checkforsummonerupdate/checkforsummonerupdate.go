@@ -65,7 +65,7 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 
 		// Use the URL directly
 		embedmessage := embed.NewEmbed().
-			SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID)).
+			SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
 			SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
 			AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
 			AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
@@ -131,15 +131,19 @@ func CheckForOngoingGame(discordSession *discordgo.Session, channelID string, su
 	}
 
 	// Check if the match is already stored
-	if ongoingMatches[currentOngoingMatch.GameID] == nil {
-		// Save the new ongoing match
-		ongoingMatches[currentOngoingMatch.GameID] = currentOngoingMatch
-		err = databaseHelper.SaveOngoingToFile(currentOngoingMatch)
-		if err != nil {
-			log.Printf("Failed to save ongoing match: %v", err)
+	if len(ongoingMatches) != 0 {
+		if ongoingMatches[currentOngoingMatch.GameID] != nil {
 			return
+		} else {
+			// Save the new ongoing match
+			ongoingMatches[currentOngoingMatch.GameID] = currentOngoingMatch
+			err = databaseHelper.SaveOngoingToFile(currentOngoingMatch)
+			if err != nil {
+				log.Printf("Failed to save ongoing match: %v", err)
+				return
+			}
+			log.Printf("New ongoing game saved for summoner: %s", summoner.Name)
 		}
-		log.Printf("New ongoing game saved for summoner: %s", summoner.Name)
 	}
 
 	var championID int
@@ -177,7 +181,7 @@ func CheckForOngoingGame(discordSession *discordgo.Session, channelID string, su
 	if !matchKnown {
 		// Send a message to the Discord channel
 		embedmessage := embed.NewEmbed().
-			SetAuthor(summoner.GetNameTag(), cdragon.GetProfileIconURL(summoner.ProfileIconID)).
+			SetAuthor(summoner.GetNameTag(), cdragon.GetProfileIconURL(summoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", summoner.Name, summoner.TagLine)).
 			SetTitle(fmt.Sprintf("A %v-Rankmatch has started!", currentOngoingMatch.GameType)).
 			AddField("Your Team Average Rank", currentOngoingMatch.Teams[0].AverageRank().ToString()).
 			AddField("Enemy Team Average Rank", currentOngoingMatch.Teams[1].AverageRank().ToString()).
