@@ -193,6 +193,7 @@ func addCommands(s *discordgo.Session, GuildID string, commands []*discordgo.App
 }
 
 func main() {
+	// Sleep for 2 minutes to allow the RIOT API Rate Limit to Reset
 	time.Sleep(120 * time.Second)
 
 	// Get the guild ID from the environment variables

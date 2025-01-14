@@ -260,7 +260,5 @@ func CheckForUpdates() {
 				log.Printf("Failed to save summoners: %v", err)
 			}
 		}
-
-		time.Sleep(10 * time.Second)
 	}
 }
