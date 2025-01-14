@@ -97,7 +97,7 @@ func makeRequest(url string) (*http.Response, error) {
 		log.Printf("Request URL: %s", url)
 		log.Printf("Response: %s", resp.Status)
 		log.Printf("Request failed with status code: %d", resp.StatusCode)
-		if resp != nil && resp.StatusCode == 429 && retries == 0 {
+		if resp.StatusCode == 429 && retries == 0 {
 			resp.Body.Close()
 			time.Sleep(10 * time.Second)
 			log.Println("Rate limit exceeded, waiting 10 seconds...")
