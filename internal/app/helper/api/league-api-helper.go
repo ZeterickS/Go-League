@@ -67,7 +67,7 @@ func LoadEnv() error {
 func waitForRateLimiters() {
 	starttime := time.Now()
 	for !rateLimiterPerSecond.Check() || !rateLimiterPer2Minutes.Check() {
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 	rateLimiterPer2Minutes.Allow()
 	rateLimiterPerSecond.Allow()
@@ -91,16 +91,19 @@ func waitForRateLimiters() {
 //
 //	This function makes an HTTP GET request and waits for 10 seconds if the rate limit is exceeded.
 func makeRequest(url string) (*http.Response, error) {
-	waitForRateLimiters()
 	for retries := 0; retries < 2; retries++ {
+		waitForRateLimiters()
 		resp, err := http.Get(url)
-		if err != nil {
-			if resp != nil && resp.StatusCode == http.StatusTooManyRequests {
-				resp.Body.Close()
-				time.Sleep(10 * time.Second)
-				log.Println("Rate limit exceeded, waiting 10 seconds...")
-				continue
-			}
+		log.Printf("Request URL: %s", url)
+		log.Printf("Response: %s", resp.Status)
+		log.Printf("Request failed with status code: %d", resp.StatusCode)
+		if resp.StatusCode == 429 && retries == 0 {
+			resp.Body.Close()
+			time.Sleep(10 * time.Second)
+			log.Println("Rate limit exceeded, waiting 10 seconds...")
+			continue
+		}
+		if err != nil || resp.StatusCode != http.StatusOK {
 			if retries == 1 {
 				return nil, fmt.Errorf("failed to make request after retries: %w", err)
 			}

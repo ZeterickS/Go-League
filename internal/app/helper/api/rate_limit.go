@@ -2,6 +2,8 @@ package apiHelper
 
 import (
 	"log"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -65,5 +67,13 @@ func (rl *RateLimiter) cleanup(now time.Time) {
 	rl.requests = rl.requests[i:]
 }
 
-var rateLimiterPerSecond = NewRateLimiter(10, time.Second)      // 10 requests per second
-var rateLimiterPer2Minutes = NewRateLimiter(100, 2*time.Minute) // 100 requests per 2 minutes
+func getEnvAsInt(name string, defaultValue int) int {
+	valueStr := os.Getenv(name)
+	if value, err := strconv.Atoi(valueStr); err == nil {
+		return value
+	}
+	return defaultValue
+}
+
+var rateLimiterPerSecond = NewRateLimiter(getEnvAsInt("API_RATE_LIMIT_SECOND", 5), time.Second)        // 8 requests per second
+var rateLimiterPer2Minutes = NewRateLimiter(getEnvAsInt("API_RATE_LIMIT_2_MINUTE", 50), 2*time.Minute) // 80 requests per 2 minutes
