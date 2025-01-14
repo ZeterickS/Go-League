@@ -121,7 +121,6 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 
 	// Iterate over each summoner to check for ongoing matches
 	for _, summoner := range summoners {
-		log.Printf("Checking for ongoing games for summoner: %s", summoner.Name)
 		// Fetch ongoing match data for the summoner
 		currentOngoingMatch, err := apiHelper.GetOngoingMatchByPUUID(summoner.PUUID, os.Getenv("ROPT_API_TOKEN"))
 		if err != nil {
@@ -131,7 +130,6 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 
 		// If there is no ongoing match, log and continue
 		if currentOngoingMatch == nil {
-			log.Printf("No ongoing game found for summoner: %s", summoner.Name)
 			continue
 		}
 
@@ -146,7 +144,6 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 					log.Printf("Failed to save ongoing match: %v", err)
 					continue
 				}
-				log.Printf("New ongoing game saved for summoner: %s", summoner.Name)
 			}
 		}
 
@@ -161,18 +158,13 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 
 		// If the match is not known, send a message to the Discord channel
 		if !matchKnown {
-			log.Printf("Match known: %v", matchKnown)
 			// Iterate over each team in the ongoing match
 			for teamid, team := range currentOngoingMatch.Teams {
-				log.Printf("Team ID: %v", teamid)
 				// Iterate over each participant in the team
 				for _, participant := range team.Participants {
-					log.Printf("Participant: %v", participant.Summoner.Name)
 					// Iterate over each summoner to see if the participant is known as summoner
 					for _, s := range summoners {
-						log.Printf("Participant PUUID: %s, Summoner PUUID: %s", participant.Summoner.PUUID, s.PUUID)
 						if participant.Summoner.PUUID == s.PUUID {
-							log.Printf("Participant found: %s", s.Name)
 							var rank rank.Rank
 							if currentOngoingMatch.GameType == "Solo/Duo" {
 								rank = s.SoloRank
@@ -196,7 +188,7 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 							// Send a message to the Discord channel
 							embedmessage := embed.NewEmbed().
 								SetAuthor(rank.ToString(), rankTierURL).
-								SetTitle(fmt.Sprintf("A %v-Rankmatch has started!", currentOngoingMatch.GameType)).
+								SetTitle(fmt.Sprintf("A %v-Match has started!", currentOngoingMatch.GameType)).
 								AddField("Your Team Average Rank", currentOngoingMatch.Teams[teamid].AverageRank().ToString()).
 								AddField("Enemy Team Average Rank", currentOngoingMatch.Teams[enemyteamid].AverageRank().ToString()).
 								SetThumbnail(cdragon.GetChampionSquareURL(participant.ChampionID)).

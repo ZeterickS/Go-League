@@ -31,7 +31,10 @@ func (rl *RateLimiter) Check() bool {
 	now := time.Now()
 	rl.cleanup(now)
 
-	log.Printf("RateLimiter Check: tokens=%d, maxTokens=%d, requests=%d", rl.tokens, rl.maxTokens, len(rl.requests))
+	if len(rl.requests) > 0 {
+		oldestTokenAge := now.Sub(rl.requests[0])
+		log.Printf("Oldest token age: %v", oldestTokenAge)
+	}
 
 	return len(rl.requests) < rl.maxTokens
 }
@@ -46,7 +49,6 @@ func (rl *RateLimiter) Allow() bool {
 
 	if len(rl.requests) < rl.maxTokens {
 		rl.requests = append(rl.requests, now)
-		log.Printf("RateLimiter Allow: tokens=%d, maxTokens=%d, requests=%d", rl.tokens, rl.maxTokens, len(rl.requests))
 		return true
 	}
 
