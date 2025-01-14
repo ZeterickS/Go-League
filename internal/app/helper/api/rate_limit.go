@@ -1,6 +1,7 @@
 package apiHelper
 
 import (
+	"log"
 	"sync"
 	"time"
 )
@@ -36,6 +37,8 @@ func (rl *RateLimiter) Allow() bool {
 		rl.tokens = rl.maxTokens
 	}
 
+	log.Printf("RateLimiter status: tokens=%d, maxTokens=%d, elapsed=%v", rl.tokens, rl.maxTokens, elapsed)
+
 	if rl.tokens > 0 {
 		rl.tokens--
 		return true
@@ -44,5 +47,5 @@ func (rl *RateLimiter) Allow() bool {
 	return false
 }
 
-var rateLimiterPerSecond = NewRateLimiter(10, time.Second)      // 20 requests per second
+var rateLimiterPerSecond = NewRateLimiter(10, time.Second)      // 10 requests per second
 var rateLimiterPer2Minutes = NewRateLimiter(100, 2*time.Minute) // 100 requests per 2 minutes

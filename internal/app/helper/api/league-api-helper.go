@@ -128,8 +128,6 @@ func makeRequest(url string) (*http.Response, error) {
 //
 //	This function first fetches the PUUID using the summoner's name and tag line, then fetches the summoner data using the PUUID.
 func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
-	waitForRateLimiters()
-
 	err := LoadEnv()
 	if err != nil {
 		return nil, fmt.Errorf("error loading .env file")
@@ -187,8 +185,6 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 //
 //	This function fetches the summoner data using the PUUID and also retrieves the summoner's rank.
 func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
-	waitForRateLimiters()
-
 	err := LoadEnv()
 	if err != nil {
 		return nil, fmt.Errorf("error loading .env file")
@@ -273,8 +269,6 @@ func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
 //
 //	This function fetches the rank data for both solo and flex queues.
 func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
-	waitForRateLimiters()
-
 	err := LoadEnv()
 	if err != nil {
 		return 0, 0, fmt.Errorf("error loading .env file")
@@ -348,8 +342,6 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 //
 //	This function fetches the ID of the last ranked match played by the summoner.
 func GetLastRankedMatch(puuid string) (string, error) {
-	waitForRateLimiters()
-
 	err := LoadEnv()
 	if err != nil {
 		return "", fmt.Errorf("error loading .env file")
@@ -407,8 +399,6 @@ func GetLastRankedMatch(puuid string) (string, error) {
 //
 //	This function checks if there is an ongoing match for the summoner and returns the match data if found.
 func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
-	waitForRateLimiters()
-
 	url := fmt.Sprintf("%s/by-summoner/%s?api_key=%s", riotSpectatorBaseURL, puuid, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
@@ -507,8 +497,6 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 //
 //	This function fetches the summoner's name and tag line using the PUUID.
 func GetNameTagByPUUID(puuid string) (string, string, error) {
-	waitForRateLimiters()
-
 	err := LoadEnv()
 	if err != nil {
 		return "", "", fmt.Errorf("error loading .env file")
