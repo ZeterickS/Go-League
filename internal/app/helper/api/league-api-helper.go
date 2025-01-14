@@ -31,11 +31,16 @@ func LoadEnv() error {
 	return godotenv.Load()
 }
 
-// GetSummonerByTag fetches summoner data by tag from the League of Legends API
-func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
-	for !rateLimiter.Allow() {
+// waitForRateLimiters waits until both rate limiters allow a request
+func waitForRateLimiters() {
+	for !rateLimiterPerSecond.Allow() || !rateLimiterPer2Minutes.Allow() {
 		time.Sleep(time.Second)
 	}
+}
+
+// GetSummonerByTag fetches summoner data by tag from the League of Legends API
+func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
+	waitForRateLimiters()
 
 	err := LoadEnv()
 	if err != nil {
@@ -79,9 +84,7 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 
 // GetSummonerByPUUID fetches summoner data by PUUID from the League of Legends API
 func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
-	for !rateLimiter.Allow() {
-		time.Sleep(time.Second)
-	}
+	waitForRateLimiters()
 
 	err := LoadEnv()
 	if err != nil {
@@ -151,9 +154,7 @@ func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
 
 // GetSummonerRank fetches the rank and division of a summoner by their ID from the League of Legends API
 func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
-	for !rateLimiter.Allow() {
-		time.Sleep(time.Second)
-	}
+	waitForRateLimiters()
 
 	err := LoadEnv()
 	if err != nil {
@@ -213,9 +214,7 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 
 // GetLastRankedMatch fetches the last ranked match of a summoner by their PUUID from the League of Legends API
 func GetLastRankedMatch(puuid string) (string, error) {
-	for !rateLimiter.Allow() {
-		time.Sleep(time.Second)
-	}
+	waitForRateLimiters()
 
 	err := LoadEnv()
 	if err != nil {
@@ -258,9 +257,7 @@ func GetLastRankedMatch(puuid string) (string, error) {
 
 // GetOngoingMatchByPUUID checks if there is an ongoing match for the given summoner's PUUID
 func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
-	for !rateLimiter.Allow() {
-		time.Sleep(time.Second)
-	}
+	waitForRateLimiters()
 
 	url := fmt.Sprintf("%s/by-summoner/%s?api_key=%s", riotSpectatorBaseURL, puuid, apiKey)
 	resp, err := http.Get(url)
@@ -341,9 +338,7 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.OngoingMatch, error) {
 
 // GetNameTagByPUUID fetches the name and tag from a PUUID and returns them as two separate strings
 func GetNameTagByPUUID(puuid string) (string, string, error) {
-	for !rateLimiter.Allow() {
-		time.Sleep(time.Second)
-	}
+	waitForRateLimiters()
 
 	err := LoadEnv()
 	if err != nil {

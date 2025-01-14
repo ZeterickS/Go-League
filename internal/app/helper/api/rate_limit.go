@@ -44,4 +44,5 @@ func (rl *RateLimiter) Allow() bool {
 	return false
 }
 
-var rateLimiter = NewRateLimiter(50, time.Minute) // 50 requests per minute
+var rateLimiterPerSecond = NewRateLimiter(10, time.Second)      // 20 requests per second
+var rateLimiterPer2Minutes = NewRateLimiter(100, 2*time.Minute) // 100 requests per 2 minutes
