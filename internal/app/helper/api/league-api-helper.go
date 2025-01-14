@@ -97,6 +97,9 @@ func makeRequest(url string) (*http.Response, error) {
 		log.Printf("Request URL: %s", url)
 		log.Printf("Response: %s", resp.Status)
 		log.Printf("Request failed with status code: %d", resp.StatusCode)
+		if resp.StatusCode == 404 {
+			return resp, fmt.Errorf("not found")
+		}
 		if resp.StatusCode == 429 && retries == 0 {
 			resp.Body.Close()
 			time.Sleep(10 * time.Second)
