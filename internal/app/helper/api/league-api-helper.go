@@ -95,13 +95,13 @@ func makeRequest(url string) (*http.Response, error) {
 	for retries := 0; retries < 2; retries++ {
 		resp, err := http.Get(url)
 		log.Printf("Request failed with status code: %d", resp.StatusCode)
+		if resp != nil && resp.StatusCode == 429 && retries == 0 {
+			resp.Body.Close()
+			time.Sleep(10 * time.Second)
+			log.Println("Rate limit exceeded, waiting 10 seconds...")
+			continue
+		}
 		if err != nil {
-			if resp != nil && resp.StatusCode == 429 {
-				resp.Body.Close()
-				time.Sleep(10 * time.Second)
-				log.Println("Rate limit exceeded, waiting 10 seconds...")
-				continue
-			}
 			if retries == 1 {
 				return nil, fmt.Errorf("failed to make request after retries: %w", err)
 			}
