@@ -111,7 +111,7 @@ func hasSummonerChanged(oldSummoner, newSummoner *summoner.Summoner) bool {
 // CheckForOngoingGames checks for ongoing games for all registered summoners and sends a message to the Discord channel if a new ongoing game is detected.
 func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, summoners map[string]*summoner.Summoner) {
 	// Load ongoing matches from file
-	ongoingMatches, err := databaseHelper.LoadMatchFromFile()
+	ongoingMatches, err := databaseHelper.LoadOngoingMatchFromFile()
 	if err != nil {
 		log.Printf("Failed to load ongoing matches: %v", err)
 		return
@@ -139,7 +139,7 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 			} else {
 				// Save the new ongoing match
 				ongoingMatches[currentOngoingMatch.GameID] = currentOngoingMatch
-				err = databaseHelper.SaveMatchToFile(currentOngoingMatch)
+				err = databaseHelper.SaveOngoingMatchToFile(currentOngoingMatch)
 				if err != nil {
 					log.Printf("Failed to save ongoing match: %v", err)
 					continue
@@ -159,13 +159,18 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 
 		// If the match is not known, send a message to the Discord channel
 		if !matchKnown {
+			log.Printf("Match known: %v", matchKnown)
 			// Iterate over each team in the ongoing match
 			for teamid, team := range currentOngoingMatch.Teams {
+				log.Printf("Team ID: %v", teamid)
 				// Iterate over each participant in the team
 				for _, participant := range team.Participants {
+					log.Printf("Participant: %v", participant.Summoner.Name)
 					// Iterate over each summoner to see if the participant is known as summoner
 					for _, s := range summoners {
+						log.Printf("Participant PUUID: %s, Summoner PUUID: %s", participant.Summoner.PUUID, s.PUUID)
 						if participant.Summoner.PUUID == s.PUUID {
+							log.Printf("Participant found: %s", s.Name)
 							var rank rank.Rank
 							if currentOngoingMatch.GameType == "Solo/Duo" {
 								rank = s.SoloRank
