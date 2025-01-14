@@ -117,6 +117,8 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 		return
 	}
 
+	log.Printf("Checking for ongoing games")
+
 	// Iterate over each summoner to check for ongoing matches
 	for _, summoner := range summoners {
 		log.Printf("Checking for ongoing games for summoner: %s", summoner.Name)
@@ -139,7 +141,6 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 				continue
 			} else {
 				// Save the new ongoing match
-				ongoingMatches[currentOngoingMatch.GameID] = currentOngoingMatch
 				err = databaseHelper.SaveOngoingMatchToFile(currentOngoingMatch)
 				if err != nil {
 					log.Printf("Failed to save ongoing match: %v", err)
