@@ -91,8 +91,8 @@ func waitForRateLimiters() {
 //
 //	This function makes an HTTP GET request and waits for 10 seconds if the rate limit is exceeded.
 func makeRequest(url string) (*http.Response, error) {
-	waitForRateLimiters()
 	for retries := 0; retries < 2; retries++ {
+		waitForRateLimiters()
 		resp, err := http.Get(url)
 		log.Printf("Request URL: %s", url)
 		log.Printf("Response: %s", resp.Status)
