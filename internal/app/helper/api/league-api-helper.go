@@ -65,6 +65,7 @@ func LoadEnv() error {
 //
 //	This function is used to handle rate limiting for API requests.
 func waitForRateLimiters() {
+	log.Println("Waiting for rate limiters...")
 	starttime := time.Now()
 	for !rateLimiterPerSecond.Allow() || !rateLimiterPer2Minutes.Allow() {
 		time.Sleep(time.Second)
