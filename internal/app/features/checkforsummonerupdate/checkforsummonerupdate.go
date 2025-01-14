@@ -187,7 +187,7 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 
 							// Send a message to the Discord channel
 							embedmessage := embed.NewEmbed().
-								SetAuthor(rank.ToString(), rankTierURL).
+								SetAuthor(rank.ToString(), rankTierURL, fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", s.Name, s.TagLine)).
 								SetTitle(fmt.Sprintf("A %v-Match has started!", currentOngoingMatch.GameType)).
 								AddField("Your Team Average Rank", currentOngoingMatch.Teams[teamid].AverageRank().ToString()).
 								AddField("Enemy Team Average Rank", currentOngoingMatch.Teams[enemyteamid].AverageRank().ToString()).
