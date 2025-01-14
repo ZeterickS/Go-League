@@ -103,7 +103,7 @@ func makeRequest(url string) (*http.Response, error) {
 			log.Println("Rate limit exceeded, waiting 10 seconds...")
 			continue
 		}
-		if err != nil {
+		if err != nil || resp.StatusCode != http.StatusOK {
 			if retries == 1 {
 				return nil, fmt.Errorf("failed to make request after retries: %w", err)
 			}
