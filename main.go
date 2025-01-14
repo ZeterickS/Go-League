@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"discord-bot/internal/app/features/checkforsummonerupdate"
 	"discord-bot/internal/app/features/offboarding"
@@ -192,6 +193,7 @@ func addCommands(s *discordgo.Session, GuildID string, commands []*discordgo.App
 }
 
 func main() {
+	time.Sleep(120 * time.Second)
 
 	// Get the guild ID from the environment variables
 	GuildID := os.Getenv("GUILD_ID")
@@ -221,10 +223,7 @@ func main() {
 	}
 
 	if GuildID != "" {
-		err = addCommands(s, GuildID, commands)
-		if err != nil {
-			log.Fatalf("Failed to add commands: %v", err)
-		}
+		addCommands(s, GuildID, commands)
 	} else {
 		log.Println("Guild ID is not set. Skipping command registration.")
 	}
