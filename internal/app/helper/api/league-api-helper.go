@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -64,9 +65,11 @@ func LoadEnv() error {
 //
 //	This function is used to handle rate limiting for API requests.
 func waitForRateLimiters() {
+	starttime := time.Now()
 	for !rateLimiterPerSecond.Allow() || !rateLimiterPer2Minutes.Allow() {
 		time.Sleep(time.Second)
 	}
+	log.Printf("Rate limiters allowed request after %v", time.Since(starttime))
 }
 
 // makeRequest makes an HTTP GET request and handles rate limit errors.
@@ -93,6 +96,7 @@ func makeRequest(url string) (*http.Response, error) {
 			if resp != nil && resp.StatusCode == http.StatusTooManyRequests {
 				resp.Body.Close()
 				time.Sleep(10 * time.Second)
+				log.Println("Rate limit exceeded, waiting 10 seconds...")
 				continue
 			}
 			if retries == 1 {

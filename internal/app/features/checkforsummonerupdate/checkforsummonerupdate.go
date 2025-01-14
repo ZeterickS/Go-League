@@ -242,6 +242,8 @@ func CheckForUpdates() {
 				continue
 			}
 
+			log.Printf("Checking for rank updates for summoner: %v", name)
+
 			// Compare summoners and process only if something changed
 			if hasSummonerChanged(summoner, currentSummoner) {
 				updated = true
