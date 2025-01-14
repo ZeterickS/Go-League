@@ -61,9 +61,9 @@ func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*s
 	return summoner, nil
 }
 
-// SaveOngoingToFile saves an OngoingMatch instance to a JSON file
-func SaveOngoingToFile(ongoingMatch *match.OngoingMatch) error {
-	var ongoingMatches map[int64]*match.OngoingMatch
+// SaveMatchToFile saves an OngoingMatch instance to a JSON file
+func SaveMatchToFile(ongoingMatch *match.Match) error {
+	var ongoingMatches map[int64]*match.Match
 
 	// Load existing matches if the file exists
 	data, err := os.ReadFile(ongoingFilename)
@@ -78,7 +78,7 @@ func SaveOngoingToFile(ongoingMatch *match.OngoingMatch) error {
 
 	// Initialize the map if it is nil
 	if ongoingMatches == nil {
-		ongoingMatches = make(map[int64]*match.OngoingMatch)
+		ongoingMatches = make(map[int64]*match.Match)
 	}
 
 	// Add or update the match in the map
@@ -99,9 +99,9 @@ func SaveOngoingToFile(ongoingMatch *match.OngoingMatch) error {
 	return nil
 }
 
-// LoadOngoingFromFile loads an array of OngoingMatch instances from a JSON file
-func LoadOngoingFromFile() (map[int64]*match.OngoingMatch, error) {
-	var ongoingMatches map[int64]*match.OngoingMatch
+// LoadMatchFromFile loads an array of Matches instances from a JSON file
+func LoadMatchFromFile() (map[int64]*match.Match, error) {
+	var ongoingMatches map[int64]*match.Match
 
 	data, err := os.ReadFile(ongoingFilename)
 	if err != nil {
