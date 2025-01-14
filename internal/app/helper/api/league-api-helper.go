@@ -94,9 +94,6 @@ func makeRequest(url string) (*http.Response, error) {
 	for retries := 0; retries < 2; retries++ {
 		waitForRateLimiters()
 		resp, err := http.Get(url)
-		log.Printf("Request URL: %s", url)
-		log.Printf("Response: %s", resp.Status)
-		log.Printf("Request failed with status code: %d", resp.StatusCode)
 		if resp.StatusCode == 404 {
 			return resp, fmt.Errorf("not found")
 		}
