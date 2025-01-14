@@ -23,7 +23,22 @@ const (
 	riotSpectatorBaseURL = "https://euw1.api.riotgames.com/lol/spectator/v5/active-games"
 )
 
-// LoadEnv loads environment variables from a .env file if they are not already set
+// LoadEnv loads environment variables from a .env file if they are not already set.
+//
+// Synopsis:
+//
+//	err := LoadEnv()
+//
+// Parameters:
+//
+//	None.
+//
+// Returns:
+//   - error: An error if the .env file could not be loaded, otherwise nil.
+//
+// Notes:
+//
+//	This function is used to ensure that environment variables are loaded before making API requests.
 func LoadEnv() error {
 	if os.Getenv("ROPT_API_TOKEN") != "" {
 		return nil
@@ -31,14 +46,80 @@ func LoadEnv() error {
 	return godotenv.Load()
 }
 
-// waitForRateLimiters waits until both rate limiters allow a request
+// waitForRateLimiters waits until both rate limiters allow a request.
+//
+// Synopsis:
+//
+//	waitForRateLimiters()
+//
+// Parameters:
+//
+//	None.
+//
+// Returns:
+//
+//	None.
+//
+// Notes:
+//
+//	This function is used to handle rate limiting for API requests.
 func waitForRateLimiters() {
 	for !rateLimiterPerSecond.Allow() || !rateLimiterPer2Minutes.Allow() {
 		time.Sleep(time.Second)
 	}
 }
 
-// GetSummonerByTag fetches summoner data by tag from the League of Legends API
+// makeRequest makes an HTTP GET request and handles rate limit errors.
+//
+// Synopsis:
+//
+//	resp, err := makeRequest(url)
+//
+// Parameters:
+//   - url: string - The URL to make the request to.
+//
+// Returns:
+//   - *http.Response: The HTTP response.
+//   - error: An error if the request failed.
+//
+// Notes:
+//
+//	This function makes an HTTP GET request and waits for 10 seconds if the rate limit is exceeded.
+func makeRequest(url string) (*http.Response, error) {
+	waitForRateLimiters()
+	for {
+		resp, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode == http.StatusTooManyRequests {
+			resp.Body.Close()
+			time.Sleep(10 * time.Second)
+			continue
+		}
+
+		return resp, nil
+	}
+}
+
+// GetSummonerByTag fetches summoner data by tag from the League of Legends API.
+//
+// Synopsis:
+//
+//	summoner, err := GetSummonerByTag("summonerName", "tagLine")
+//
+// Parameters:
+//   - name: string - The summoner's name.
+//   - tagLine: string - The summoner's tag line.
+//
+// Returns:
+//   - *summoner.Summoner: The summoner data.
+//   - error: An error if the summoner data could not be fetched.
+//
+// Notes:
+//
+//	This function first fetches the PUUID using the summoner's name and tag line, then fetches the summoner data using the PUUID.
 func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 	waitForRateLimiters()
 
@@ -53,7 +134,7 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 	}
 
 	url := fmt.Sprintf("%s/by-riot-id/%s/%s?api_key=%s", riotAccountBaseURL, name, tagLine, apiKey)
-	resp, err := http.Get(url)
+	resp, err := makeRequest(url)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +163,22 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 	return GetSummonerByPUUID(accountData.PUUID)
 }
 
-// GetSummonerByPUUID fetches summoner data by PUUID from the League of Legends API
+// GetSummonerByPUUID fetches summoner data by PUUID from the League of Legends API.
+//
+// Synopsis:
+//
+//	summoner, err := GetSummonerByPUUID("puuid")
+//
+// Parameters:
+//   - puuid: string - The summoner's PUUID.
+//
+// Returns:
+//   - *summoner.Summoner: The summoner data.
+//   - error: An error if the summoner data could not be fetched.
+//
+// Notes:
+//
+//	This function fetches the summoner data using the PUUID and also retrieves the summoner's rank.
 func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
 	waitForRateLimiters()
 
@@ -102,7 +198,7 @@ func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
 	}
 
 	url := fmt.Sprintf("%s/by-puuid/%s?api_key=%s", riotSummonerBaseURL, puuid, apiKey)
-	resp, err := http.Get(url)
+	resp, err := makeRequest(url)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +248,23 @@ func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
 	return summoner, nil
 }
 
-// GetSummonerRank fetches the rank and division of a summoner by their ID from the League of Legends API
+// GetSummonerRank fetches the rank and division of a summoner by their ID from the League of Legends API.
+//
+// Synopsis:
+//
+//	soloRank, flexRank, err := GetSummonerRank("summonerID")
+//
+// Parameters:
+//   - summonerID: string - The summoner's ID.
+//
+// Returns:
+//   - rank.Rank: The solo rank of the summoner.
+//   - rank.Rank: The flex rank of the summoner.
+//   - error: An error if the rank data could not be fetched.
+//
+// Notes:
+//
+//	This function fetches the rank data for both solo and flex queues.
 func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	waitForRateLimiters()
 
@@ -167,7 +279,7 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	}
 
 	url := fmt.Sprintf("%s/by-summoner/%s?api_key=%s", riotLeagueBaseURL, summonerID, apiKey)
-	resp, err := http.Get(url)
+	resp, err := makeRequest(url)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -212,7 +324,22 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	return soloRank, flexRank, nil
 }
 
-// GetLastRankedMatch fetches the last ranked match of a summoner by their PUUID from the League of Legends API
+// GetLastRankedMatch fetches the last ranked match of a summoner by their PUUID from the League of Legends API.
+//
+// Synopsis:
+//
+//	matchID, err := GetLastRankedMatch("puuid")
+//
+// Parameters:
+//   - puuid: string - The summoner's PUUID.
+//
+// Returns:
+//   - string: The ID of the last ranked match.
+//   - error: An error if the match data could not be fetched.
+//
+// Notes:
+//
+//	This function fetches the ID of the last ranked match played by the summoner.
 func GetLastRankedMatch(puuid string) (string, error) {
 	waitForRateLimiters()
 
@@ -227,7 +354,7 @@ func GetLastRankedMatch(puuid string) (string, error) {
 	}
 
 	url := fmt.Sprintf("%s/by-puuid/%s/ids?type=ranked&start=0&count=1&api_key=%s", riotMatchBaseURL, puuid, apiKey)
-	resp, err := http.Get(url)
+	resp, err := makeRequest(url)
 	if err != nil {
 		return "", err
 	}
@@ -255,12 +382,28 @@ func GetLastRankedMatch(puuid string) (string, error) {
 	return matchIDs[0], nil
 }
 
-// GetOngoingMatchByPUUID checks if there is an ongoing match for the given summoner's PUUID
+// GetOngoingMatchByPUUID checks if there is an ongoing match for the given summoner's PUUID.
+//
+// Synopsis:
+//
+//	ongoingMatch, err := GetOngoingMatchByPUUID("puuid", "apiKey")
+//
+// Parameters:
+//   - puuid: string - The summoner's PUUID.
+//   - apiKey: string - The API key for authentication.
+//
+// Returns:
+//   - *match.Match: The ongoing match data, or nil if no match is found.
+//   - error: An error if the match data could not be fetched.
+//
+// Notes:
+//
+//	This function checks if there is an ongoing match for the summoner and returns the match data if found.
 func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 	waitForRateLimiters()
 
 	url := fmt.Sprintf("%s/by-summoner/%s?api_key=%s", riotSpectatorBaseURL, puuid, apiKey)
-	resp, err := http.Get(url)
+	resp, err := makeRequest(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request to Riot Games API: %v", err)
 	}
@@ -344,7 +487,23 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 	return ongoingMatch, nil
 }
 
-// GetNameTagByPUUID fetches the name and tag from a PUUID and returns them as two separate strings
+// GetNameTagByPUUID fetches the name and tag from a PUUID and returns them as two separate strings.
+//
+// Synopsis:
+//
+//	name, tagLine, err := GetNameTagByPUUID("puuid")
+//
+// Parameters:
+//   - puuid: string - The summoner's PUUID.
+//
+// Returns:
+//   - string: The summoner's name.
+//   - string: The summoner's tag line.
+//   - error: An error if the name and tag line could not be fetched.
+//
+// Notes:
+//
+//	This function fetches the summoner's name and tag line using the PUUID.
 func GetNameTagByPUUID(puuid string) (string, string, error) {
 	waitForRateLimiters()
 
@@ -359,7 +518,7 @@ func GetNameTagByPUUID(puuid string) (string, string, error) {
 	}
 
 	url := fmt.Sprintf("%s/by-puuid/%s?api_key=%s", riotAccountBaseURL, puuid, apiKey)
-	resp, err := http.Get(url)
+	resp, err := makeRequest(url)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to make request to Riot Games API: %v", err)
 	}
