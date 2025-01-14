@@ -11,7 +11,7 @@ type RateLimiter struct {
 	tokens    int
 	maxTokens int
 	interval  time.Duration
-	lastCheck time.Time
+	requests  []time.Time
 }
 
 func NewRateLimiter(maxTokens int, interval time.Duration) *RateLimiter {
@@ -19,7 +19,7 @@ func NewRateLimiter(maxTokens int, interval time.Duration) *RateLimiter {
 		tokens:    maxTokens,
 		maxTokens: maxTokens,
 		interval:  interval,
-		lastCheck: time.Now(),
+		requests:  make([]time.Time, 0, maxTokens),
 	}
 }
 
@@ -29,22 +29,11 @@ func (rl *RateLimiter) Check() bool {
 	defer rl.mu.Unlock()
 
 	now := time.Now()
-	elapsed := now.Sub(rl.lastCheck)
+	rl.cleanup(now)
 
-	// Calculate how many tokens to add based on the elapsed time
-	tokensToAdd := int(elapsed / rl.interval)
-	if tokensToAdd > 0 {
-		rl.tokens += tokensToAdd
-		rl.lastCheck = rl.lastCheck.Add(time.Duration(tokensToAdd) * rl.interval)
-	}
+	log.Printf("RateLimiter Check: tokens=%d, maxTokens=%d, requests=%d", rl.tokens, rl.maxTokens, len(rl.requests))
 
-	if rl.tokens > rl.maxTokens {
-		rl.tokens = rl.maxTokens
-	}
-
-	log.Printf("RateLimiter Check: tokens=%d, maxTokens=%d, elapsed=%v, tokensToAdd=%d", rl.tokens, rl.maxTokens, elapsed, tokensToAdd)
-
-	return rl.tokens > 0
+	return len(rl.requests) < rl.maxTokens
 }
 
 // Consume a token if available
@@ -52,13 +41,26 @@ func (rl *RateLimiter) Allow() bool {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
-	if rl.tokens > 0 {
-		rl.tokens--
-		log.Printf("RateLimiter Allow: tokens=%d", rl.tokens)
+	now := time.Now()
+	rl.cleanup(now)
+
+	if len(rl.requests) < rl.maxTokens {
+		rl.requests = append(rl.requests, now)
+		log.Printf("RateLimiter Allow: tokens=%d, maxTokens=%d, requests=%d", rl.tokens, rl.maxTokens, len(rl.requests))
 		return true
 	}
 
 	return false
+}
+
+// Cleanup removes tokens that are older than the interval
+func (rl *RateLimiter) cleanup(now time.Time) {
+	cutoff := now.Add(-rl.interval)
+	i := 0
+	for i < len(rl.requests) && rl.requests[i].Before(cutoff) {
+		i++
+	}
+	rl.requests = rl.requests[i:]
 }
 
 var rateLimiterPerSecond = NewRateLimiter(10, time.Second)      // 10 requests per second
