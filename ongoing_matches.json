@@ -1,0 +1,308 @@
+{
+  "7267262122": {
+    "GameID": 7267262122,
+    "Teams": [
+      {
+        "TeamID": 100,
+        "Participants": [
+          {
+            "Summoner": {
+              "Name": "KAILAO",
+              "TagLine": "EUW",
+              "AccountID": "ZipwDtkEbcXjhlpvXaHvxTnVfoAQ-RUOV2vrguv3z1O0mw",
+              "ID": "PL1s4DcUUn5ujvRU2-8FrKenxfIJ8YJUvnRpPO_fkEywf58",
+              "PUUID": "SLju8njU-AUEg0K9wiPvtAA5IG4DfjBmZw_g_QSj82T08yD-K-CHUeuVYCif1Vkuc38G-podP0dOiw",
+              "ProfileIconID": 6759,
+              "SoloRank": 0,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:56:41.594286318+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8005,
+                8009,
+                9104,
+                8017,
+                8226,
+                8236,
+                5005,
+                5008,
+                5011
+              ],
+              "PerkStyle": 8000,
+              "PerkSubStyle": 8200
+            },
+            "ChampionID": 236
+          },
+          {
+            "Summoner": {
+              "Name": "DIG Sosso",
+              "TagLine": "EUW",
+              "AccountID": "-cVVPRrV4dM7nqM5RH76UJYC2LASlodI3_3ETOmyPNlpHZk",
+              "ID": "vbtnEamm3JXlIjZFuZGDJje3rhbV4qabZ4tAlmT61fsh0V8",
+              "PUUID": "ojRsB1iWZ4u4oW5Mk0GBfHcTxKkbZ1PBemLbIZiCSEe8DizYnTHKLa2R5eKtFjtIOh7Cgqyc2cUfxg",
+              "ProfileIconID": 755,
+              "SoloRank": 0,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:56:44.793438588+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8437,
+                8446,
+                8429,
+                8451,
+                8304,
+                8345,
+                5008,
+                5008,
+                5001
+              ],
+              "PerkStyle": 8400,
+              "PerkSubStyle": 8300
+            },
+            "ChampionID": 126
+          },
+          {
+            "Summoner": {
+              "Name": "At00me",
+              "TagLine": "EUW",
+              "AccountID": "9vhEoXTi6BV_uE4NcJmx3KlgM91p5k4fhhxOI_QCa4k0vJE",
+              "ID": "ITzMn24qu8VRNxX_hIgiTj1MleXJoh6wW_S8rqvcw1Q_Lvg",
+              "PUUID": "DqAdeI1W93i8kNRZxTikrA-KhnquqmVg6dQSxXRWquhvGoj26MvM4lboSQZLlFp-AhaCXqX8zIj1Gw",
+              "ProfileIconID": 6642,
+              "SoloRank": 0,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:56:48.184853241+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8008,
+                9101,
+                9104,
+                8299,
+                8444,
+                8451,
+                5005,
+                5008,
+                5001
+              ],
+              "PerkStyle": 8000,
+              "PerkSubStyle": 8400
+            },
+            "ChampionID": 157
+          },
+          {
+            "Summoner": {
+              "Name": "TheChrno",
+              "TagLine": "9999",
+              "AccountID": "ELYAbtI0BsXUY4JW1_H9s26nhX3Logzfoyzkqiu6ECjf5g",
+              "ID": "37yNnqDI8XIjZmV96WrTLi7FmxWbmpja5Ep1ZPz8dQseLe4",
+              "PUUID": "a3eu-O1nw0EFcMGL8j5G-nkETiTiEnnVO3Rifpq4cspBpaYuUCk4aHFg7ikyIuMNXlp89zc0utsPyQ",
+              "ProfileIconID": 3614,
+              "SoloRank": 0,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:56:51.385061519+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8112,
+                8143,
+                8140,
+                8105,
+                8017,
+                9104,
+                5005,
+                5008,
+                5011
+              ],
+              "PerkStyle": 8100,
+              "PerkSubStyle": 8000
+            },
+            "ChampionID": 950
+          },
+          {
+            "Summoner": {
+              "Name": "PrincessOcelotte",
+              "TagLine": "EUW",
+              "AccountID": "zf9TqTAOKy2sxF0a580zZzYxa2cM5ZaPGVO7JgbMq3oZZw",
+              "ID": "UDWAnyKOpmoJS12QpI0h0WW4BCu91NBi68et0UOL4ItIuUM",
+              "PUUID": "_t0WTt0moYqrQY6bChRXP5bPyLQLoiHi3GQ5YEJw9K1EWICxqCey3A3QuGKbkF2IyXKdrQDZf3wYpw",
+              "ProfileIconID": 6715,
+              "SoloRank": 0,
+              "FlexRank": 1423,
+              "Updated": "2025-01-14T11:56:54.560529673+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8229,
+                8226,
+                8210,
+                8237,
+                8345,
+                8347,
+                5008,
+                5008,
+                5011
+              ],
+              "PerkStyle": 8200,
+              "PerkSubStyle": 8300
+            },
+            "ChampionID": 518
+          }
+        ]
+      },
+      {
+        "TeamID": 200,
+        "Participants": [
+          {
+            "Summoner": {
+              "Name": "GIGABIN",
+              "TagLine": "1998",
+              "AccountID": "fqm3mP3-mBetwAC8xj3flkSjC2C3HKg8_sNlTeDo2-y1Wg",
+              "ID": "QXMRT303Gx5_kYSL3Zsd3ypypWsvrOzSvIod_UfrD8LQFP0",
+              "PUUID": "eUwY1ORrb2-TXBPwwJANhvyHjYCl-j8UnKBjKi-L4qNt7AlDnZu0WNpgNnrgLnVxFjTCD8Quzmf5UA",
+              "ProfileIconID": 6769,
+              "SoloRank": 2015,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:56:57.737529815+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8010,
+                9111,
+                9104,
+                8017,
+                8347,
+                8304,
+                5005,
+                5008,
+                5001
+              ],
+              "PerkStyle": 8000,
+              "PerkSubStyle": 8300
+            },
+            "ChampionID": 62
+          },
+          {
+            "Summoner": {
+              "Name": "Zarno",
+              "TagLine": "EUW",
+              "AccountID": "HNA4kYw9vqyT17MJFVAQJ1ESbTc9bFjMkRkV0xyUUgPzbw",
+              "ID": "iKHaVD7xQOXP6qNc7XUI2O-zEElvVZNZz4CmjjQTtblZKYQ",
+              "PUUID": "C9X3le_cGCqyI00iv-n3IV2Wua9JOyZ97f1jdI6srtXWnyXUgrgsQ9YjU9V25cKh8wvxZPMIm0B72A",
+              "ProfileIconID": 6642,
+              "SoloRank": 0,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:57:00.914916359+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8229,
+                8226,
+                8210,
+                8237,
+                8345,
+                8347,
+                5008,
+                5008,
+                5001
+              ],
+              "PerkStyle": 8200,
+              "PerkSubStyle": 8300
+            },
+            "ChampionID": 99
+          },
+          {
+            "Summoner": {
+              "Name": "StevHKD35",
+              "TagLine": "BZH",
+              "AccountID": "va2refyA61jvvz2czWo9UrzTmJwxSkuVQfL0tKmGHcvQscQ",
+              "ID": "74WM4AccSeB6kDKqxnnXgOmsP79CLeACO39J7JyTbamtNM8",
+              "PUUID": "ZXukVKf8IHLi9t2n2dYkAnloaJcNuilZhCBuSbcQzryolbFY_C18uRtC3XljWtgQVMYPS8yTFKy82A",
+              "ProfileIconID": 6026,
+              "SoloRank": 0,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:57:04.191105381+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8021,
+                8009,
+                9103,
+                8014,
+                8234,
+                8236,
+                5008,
+                5008,
+                5001
+              ],
+              "PerkStyle": 8000,
+              "PerkSubStyle": 8200
+            },
+            "ChampionID": 202
+          },
+          {
+            "Summoner": {
+              "Name": "Ka0zofShark6",
+              "TagLine": "EUW",
+              "AccountID": "jxspFBPzuMzNf4Gf-_MtjjwVg7TDMShv3zWN5g8X0evkVbA",
+              "ID": "4_HHJsOvLoFwsSS9JEfdJdGX5p_r632hug3TKc1t-WxwRcM",
+              "PUUID": "VYZk3hZAW0dIOtHbo0jkzwmWXH9njdtv8vfmQIORIVCNM1owKTNhPCCySbvZIqx2OeJNhPOyF7weyw",
+              "ProfileIconID": 2073,
+              "SoloRank": 1297,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:57:07.365172753+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8230,
+                8275,
+                8234,
+                8236,
+                8429,
+                8451,
+                5008,
+                5008,
+                5001
+              ],
+              "PerkStyle": 8200,
+              "PerkSubStyle": 8400
+            },
+            "ChampionID": 86
+          },
+          {
+            "Summoner": {
+              "Name": "DerSchlingel",
+              "TagLine": "CNINE",
+              "AccountID": "z-6qvfkr4M-dNKDY_qqIej-9DfQCP7P0gijEtlf2rBug6n4",
+              "ID": "9gS-ad74EkfpaB8bI57hejuAC_ya4N3UDl-SGYeBoZ9xHYQ",
+              "PUUID": "h9efLc92bcWO5EFNl8Xk_NGQHjmMVWNHdEj5rCw_bLv9g1WMSQAIvj7pwTc4KzG4CJ3PIW72ypU67g",
+              "ProfileIconID": 622,
+              "SoloRank": 0,
+              "FlexRank": 0,
+              "Updated": "2025-01-14T11:57:10.539669517+01:00"
+            },
+            "Perks": {
+              "PerkIDs": [
+                8112,
+                8143,
+                8140,
+                8106,
+                8226,
+                8237,
+                5005,
+                5008,
+                5011
+              ],
+              "PerkStyle": 8100,
+              "PerkSubStyle": 8200
+            },
+            "ChampionID": 893
+          }
+        ]
+      }
+    ],
+    "GameType": "Flex"
+  }
+}

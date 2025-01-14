@@ -1,13 +1,16 @@
 package databaseHelper
 
 import (
+	"discord-bot/types/match"
 	"discord-bot/types/summoner"
 	"encoding/json"
 	"fmt"
 	"os"
 )
 
+// TODO - To ENV VARS
 const filename = "summoners.json"
+const ongoingFilename = "ongoing_matches.json"
 
 // SaveSummonersToFile saves a map of Summoner instances to a JSON file
 func SaveSummonersToFile(summoners map[string]*summoner.Summoner) error {
@@ -56,4 +59,62 @@ func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*s
 		return nil, fmt.Errorf("summoner with name %s not found", name)
 	}
 	return summoner, nil
+}
+
+// SaveOngoingMatchToFile saves an OngoingMatch instance to a JSON file
+func SaveOngoingMatchToFile(ongoingMatch *match.Match) error {
+	var ongoingMatches map[int64]*match.Match
+
+	// Load existing matches if the file exists
+	data, err := os.ReadFile(ongoingFilename)
+	if err == nil {
+		err = json.Unmarshal(data, &ongoingMatches)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal existing matches: %v", err)
+		}
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read file: %v", err)
+	}
+
+	// Initialize the map if it is nil
+	if ongoingMatches == nil {
+		ongoingMatches = make(map[int64]*match.Match)
+	}
+
+	// Add or update the match in the map
+	ongoingMatches[ongoingMatch.GameID] = ongoingMatch
+
+	// Marshal the ongoing matches to JSON
+	data, err = json.MarshalIndent(ongoingMatches, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal ongoing matches: %v", err)
+	}
+
+	// Write the ongoing matches to the file
+	err = os.WriteFile(ongoingFilename, data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write file: %v", err)
+	}
+
+	return nil
+}
+
+// LoadOngoingMatchFromFile loads an array of Matches instances from a JSON file
+func LoadOngoingMatchFromFile() (map[int64]*match.Match, error) {
+	var ongoingMatches map[int64]*match.Match
+
+	data, err := os.ReadFile(ongoingFilename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil // No ongoing match file found
+		}
+		return nil, fmt.Errorf("failed to read file: %v", err)
+	}
+
+	err = json.Unmarshal(data, &ongoingMatches)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal ongoing matches: %v", err)
+	}
+
+	return ongoingMatches, nil
 }
