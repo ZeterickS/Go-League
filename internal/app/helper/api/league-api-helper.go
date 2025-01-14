@@ -87,20 +87,22 @@ func waitForRateLimiters() {
 //	This function makes an HTTP GET request and waits for 10 seconds if the rate limit is exceeded.
 func makeRequest(url string) (*http.Response, error) {
 	waitForRateLimiters()
-	for {
+	for retries := 0; retries < 2; retries++ {
 		resp, err := http.Get(url)
 		if err != nil {
-			return nil, err
+			if resp != nil && resp.StatusCode == http.StatusTooManyRequests {
+				resp.Body.Close()
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			if retries == 1 {
+				return nil, fmt.Errorf("failed to make request after retries: %w", err)
+			}
+		} else {
+			return resp, nil
 		}
-
-		if resp.StatusCode == http.StatusTooManyRequests {
-			resp.Body.Close()
-			time.Sleep(10 * time.Second)
-			continue
-		}
-
-		return resp, nil
 	}
+	return nil, fmt.Errorf("failed to make request after retries")
 }
 
 // GetSummonerByTag fetches summoner data by tag from the League of Legends API.
