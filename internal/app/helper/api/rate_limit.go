@@ -23,24 +23,38 @@ func NewRateLimiter(maxTokens int, interval time.Duration) *RateLimiter {
 	}
 }
 
-func (rl *RateLimiter) Allow() bool {
+// Check if a token is available without consuming it
+func (rl *RateLimiter) Check() bool {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
 	now := time.Now()
 	elapsed := now.Sub(rl.lastCheck)
-	rl.lastCheck = now
 
-	// Add tokens based on the elapsed time
-	rl.tokens += int(elapsed / rl.interval)
+	// Calculate how many tokens to add based on the elapsed time
+	tokensToAdd := int(elapsed / rl.interval)
+	if tokensToAdd > 0 {
+		rl.tokens += tokensToAdd
+		rl.lastCheck = rl.lastCheck.Add(time.Duration(tokensToAdd) * rl.interval)
+	}
+
 	if rl.tokens > rl.maxTokens {
 		rl.tokens = rl.maxTokens
 	}
 
-	log.Printf("RateLimiter status: tokens=%d, maxTokens=%d, elapsed=%v", rl.tokens, rl.maxTokens, elapsed)
+	log.Printf("RateLimiter Check: tokens=%d, maxTokens=%d, elapsed=%v, tokensToAdd=%d", rl.tokens, rl.maxTokens, elapsed, tokensToAdd)
+
+	return rl.tokens > 0
+}
+
+// Consume a token if available
+func (rl *RateLimiter) Allow() bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
 
 	if rl.tokens > 0 {
 		rl.tokens--
+		log.Printf("RateLimiter Allow: tokens=%d", rl.tokens)
 		return true
 	}
 
