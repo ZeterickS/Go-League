@@ -437,8 +437,6 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	fmt.Println("Response Body:", string(body))
-
 	err = json.Unmarshal(body, &apiResponse)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %v", err)
@@ -468,7 +466,6 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 
 		summoner, err := GetSummonerByPUUID(participant.PUUID)
 
-		fmt.Printf("Summoner: %+v\n", summoner)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get summoner by PUUID: %v", err)
 		}
@@ -483,8 +480,6 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 			},
 		})
 	}
-
-	fmt.Printf("Ongoing Match: %+v\n", ongoingMatch)
 
 	return ongoingMatch, nil
 }
