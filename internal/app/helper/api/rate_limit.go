@@ -65,5 +65,5 @@ func (rl *RateLimiter) cleanup(now time.Time) {
 	rl.requests = rl.requests[i:]
 }
 
-var rateLimiterPerSecond = NewRateLimiter(10, time.Second)      // 10 requests per second
-var rateLimiterPer2Minutes = NewRateLimiter(100, 2*time.Minute) // 100 requests per 2 minutes
+var rateLimiterPerSecond = NewRateLimiter(8, time.Second)      // 8 requests per second
+var rateLimiterPer2Minutes = NewRateLimiter(80, 2*time.Minute) // 80 requests per 2 minutes
