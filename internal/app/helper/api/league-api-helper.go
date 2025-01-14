@@ -94,9 +94,7 @@ func makeRequest(url string) (*http.Response, error) {
 	waitForRateLimiters()
 	for retries := 0; retries < 2; retries++ {
 		resp, err := http.Get(url)
-		if err != nil {
-			log.Printf("Request failed with status code: %d", resp.StatusCode)
-		}
+		log.Printf("Request failed with status code: %d", resp.StatusCode)
 		if err != nil {
 			if resp != nil && resp.StatusCode == http.StatusTooManyRequests {
 				resp.Body.Close()
