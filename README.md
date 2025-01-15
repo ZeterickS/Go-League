@@ -28,24 +28,7 @@ This project is a Discord bot written in Go that interacts with the Riot Games A
     GUILD_ID="your-discord-guild-id"
     API_RATE_LIMIT_2_MINUTE=100
     API_RATE_LIMIT_SECOND=20
-    GITHUB_TOKEN="your-github-token"
-    GITHUB_USERNAME="your-github-username"
     DEVELOPMENT=False
-    ```
-
-2. Make the [pull_and_run.sh](http://_vscodecontentref_/3) script executable:
-    ```sh
-    chmod +x pull_and_run.sh
-    ```
-
-3. Set up a cron job to run the [pull_and_run.sh](http://_vscodecontentref_/4) script periodically:
-    ```sh
-    crontab -e
-    ```
-
-    Add the following line to run the script every 5 minutes:
-    ```sh
-    */5 * * * * /path/to/your/repository/pull_and_run.sh
     ```
 
 ### Running the Bot
