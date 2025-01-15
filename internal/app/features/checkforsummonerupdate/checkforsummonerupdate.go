@@ -110,17 +110,16 @@ func hasSummonerChanged(oldSummoner, newSummoner *summoner.Summoner) bool {
 
 // CheckForOngoingGames checks for ongoing games for all registered summoners and sends a message to the Discord channel if a new ongoing game is detected.
 func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, summoners map[string]*summoner.Summoner) {
-	// Load ongoing matches from file
-	ongoingMatches, err := databaseHelper.LoadOngoingMatchFromFile()
-	if err != nil {
-		log.Printf("Failed to load ongoing matches: %v", err)
-		return
-	}
-
 	log.Printf("Checking for ongoing games")
 
 	// Iterate over each summoner to check for ongoing matches
 	for _, summoner := range summoners {
+		// Load ongoing matches from file
+		ongoingMatches, err := databaseHelper.LoadOngoingMatchFromFile()
+		if err != nil {
+			log.Printf("Failed to load ongoing matches: %v", err)
+			return
+		}
 		// Fetch ongoing match data for the summoner
 		currentOngoingMatch, err := apiHelper.GetOngoingMatchByPUUID(summoner.PUUID, os.Getenv("ROPT_API_TOKEN"))
 		if err != nil {
