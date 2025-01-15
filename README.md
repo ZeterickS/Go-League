@@ -1,5 +1,7 @@
 # Discord Bot for League of Legends
+## Motivation
 
+Our motivation for this project was to learn Go, and it is our first time using it.
 This project is a Discord bot written in Go that interacts with the Riot Games API to provide information about active games and summoner updates. It uses the `discordgo` library to interact with Discord and `github.com/bwmarrin/discordgo` for Discord API interactions.
 
 ## Project Structure
