@@ -57,7 +57,9 @@ func init() {
 	}
 
 	// Parse spells.json
-	file, err = os.Open("../../../assets/15.1.1/jsonmaps/spells.json")
+	// Use an absolute path to the runes.json file
+	filePath = filepath.Join(wd, "assets/15.1.1/jsonmaps/spells.json")
+	file, err = os.Open(filePath)
 	if err != nil {
 		fmt.Printf("Error opening spells.json: %v\n", err)
 		return

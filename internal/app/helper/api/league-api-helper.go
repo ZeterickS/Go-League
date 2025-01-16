@@ -65,13 +65,13 @@ func LoadEnv() error {
 //
 //	This function is used to handle rate limiting for API requests.
 func waitForRateLimiters() {
-	starttime := time.Now()
+	//starttime := time.Now()
 	for !rateLimiterPerSecond.Check() || !rateLimiterPer2Minutes.Check() {
 		time.Sleep(5 * time.Second)
 	}
 	rateLimiterPer2Minutes.Allow()
 	rateLimiterPerSecond.Allow()
-	log.Printf("Rate limiters allowed request after %v", time.Since(starttime))
+	//log.Printf("Rate limiters allowed request after %v", time.Since(starttime))
 }
 
 // makeRequest makes an HTTP GET request and handles rate limit errors.
@@ -356,7 +356,7 @@ func GetLastRankedMatchIDbyPUUID(puuid string) (string, error) {
 		return "", fmt.Errorf("API token not found in environment variables")
 	}
 
-	url := fmt.Sprintf("%s/by-puuid/%s/ids?type=ranked&start=0&count=1&api_key=%s", riotMatchBaseURL, puuid, apiKey)
+	url := fmt.Sprintf("%s/by-puuid/%s/ids?&start=0&count=1&api_key=%s", riotMatchBaseURL, puuid, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return "", err
@@ -420,24 +420,26 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 	}
 
 	var apiResponse struct {
-		GameID       int64 `json:"gameId"`
-		QueueID      int   `json:"gameQueueConfigId"`
-		Participants []struct {
-			PUUID      string      `json:"puuid"`
-			TeamID     int         `json:"teamId"`
-			ChampionID int         `json:"championId"`
-			Perks      match.Perks `json:"perks"`
-			SummonerID string      `json:"summonerId"`
-			Spell1ID   int         `json:"summoner1Id"`
-			Spell2ID   int         `json:"summoner2Id"`
-			Item0      int         `json:"item0"`
-			Item1      int         `json:"item1"`
-			Item2      int         `json:"item2"`
-			Item3      int         `json:"item3"`
-			Item4      int         `json:"item4"`
-			Item5      int         `json:"item5"`
-			Item6      int         `json:"item6"`
-		} `json:"participants"`
+		Info struct {
+			GameID       int64 `json:"gameId"`
+			QueueID      int   `json:"gameQueueConfigId"`
+			Participants []struct {
+				PUUID      string      `json:"puuid"`
+				TeamID     int         `json:"teamId"`
+				ChampionID int         `json:"championId"`
+				Perks      match.Perks `json:"perks"`
+				SummonerID string      `json:"summonerId"`
+				Spell1ID   int         `json:"summoner1Id"`
+				Spell2ID   int         `json:"summoner2Id"`
+				Item0      int         `json:"item0"`
+				Item1      int         `json:"item1"`
+				Item2      int         `json:"item2"`
+				Item3      int         `json:"item3"`
+				Item4      int         `json:"item4"`
+				Item5      int         `json:"item5"`
+				Item6      int         `json:"item6"`
+			} `json:"participants"`
+		} `json:"info"`
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -445,27 +447,28 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	err = json.Unmarshal(body, &apiResponse)
-	if err != nil {
+	if err := json.Unmarshal(body, &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %v", err)
 	}
 
+	log.Printf("Response body: %s", body)
+
 	gameType := "Flex"
-	if apiResponse.QueueID == 440 {
+	if apiResponse.Info.QueueID == 440 {
 		gameType = "Flex"
-	} else if apiResponse.QueueID == 420 {
+	} else if apiResponse.Info.QueueID == 420 {
 		gameType = "Solo/Duo"
 	} else {
 		gameType = "UNRANKED"
 	}
 
 	matchData := &match.Match{
-		GameID:   apiResponse.GameID,
+		GameID:   apiResponse.Info.GameID,
 		Teams:    [2]match.Team{{TeamID: 100}, {TeamID: 200}},
 		GameType: gameType,
 	}
 
-	for _, participant := range apiResponse.Participants {
+	for _, participant := range apiResponse.Info.Participants {
 		teamIndex := 0
 		if participant.TeamID == 200 {
 			teamIndex = 1

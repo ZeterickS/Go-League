@@ -65,12 +65,14 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 		rankTierURL := cdragon.GetRankedPictureURL(rankTier)
 
 		lastmatchid, err := apiHelper.GetLastRankedMatchIDbyPUUID(currentSummoner.PUUID)
+		log.Printf("Last ranked match ID: %v", lastmatchid)
 
 		if err != nil {
 			log.Printf("Failed to fetch last ranked match ID: %v", err)
 		}
 
 		lastMatch, err := apiHelper.GetMatchByID(lastmatchid)
+		log.Printf("Last match: %v", lastMatch)
 
 		if err != nil {
 			log.Printf("Failed to fetch last match: %v", err)
@@ -78,6 +80,8 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 
 		for _, participant := range lastMatch.Teams[0].Participants {
 			if participant.Summoner.PUUID == currentSummoner.PUUID {
+
+				log.Printf("Generating game image for participant: %v", participant)
 
 				lastgameimage, err := gametoimage.GameToImage(participant)
 				if err != nil {
