@@ -99,12 +99,15 @@ func makeRequest(url string) (*http.Response, error) {
 		}
 		if resp.StatusCode == 429 && retries == 0 {
 			resp.Body.Close()
-			time.Sleep(10 * time.Second)
-			log.Println("Rate limit exceeded, waiting 10 seconds...")
+			log.Println("Rate limit exceeded, waiting 20 seconds...")
+			time.Sleep(20 * time.Second)
+			waitForRateLimiters()
+
 			continue
 		}
 		if err != nil || resp.StatusCode != http.StatusOK {
 			if retries == 1 {
+				log.Printf("Response: %v", resp)
 				return nil, fmt.Errorf("failed to make request after retries: %w", err)
 			}
 		} else {

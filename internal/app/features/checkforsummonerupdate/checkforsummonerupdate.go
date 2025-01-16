@@ -78,41 +78,46 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 			log.Printf("Failed to fetch last match: %v", err)
 		}
 
-		for _, participant := range lastMatch.Teams[0].Participants {
-			if participant.Summoner.PUUID == currentSummoner.PUUID {
+		for i := 0; i < len(lastMatch.Teams); i++ {
 
-				log.Printf("Generating game image for participant: %v", participant)
+			for _, participant := range lastMatch.Teams[i].Participants {
+				log.Printf("Checking participant: %v", participant)
+				log.Printf("Participant PUUID: %v, Current Summoner PUUID: %v\n", participant.Summoner.PUUID, currentSummoner.PUUID)
+				if participant.Summoner.PUUID == currentSummoner.PUUID {
 
-				lastgameimage, err := gametoimage.GameToImage(participant)
-				if err != nil {
-					log.Printf("Failed to generate game image: %v", err)
-					continue
-				}
+					log.Printf("Generating game image for participant: %v", participant)
 
-				// Use the URL directly
-				embedmessage := embed.NewEmbed().
-					SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
-					SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-					AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
-					AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
-					SetThumbnail(rankTierURL).
-					SetImage("attachment://lastgameimage.png").
-					SetColor(color).InlineAllFields().MessageEmbed
+					lastgameimage, err := gametoimage.GameToImage(participant)
+					if err != nil {
+						log.Printf("Failed to generate game image: %v", err)
+						continue
+					}
 
-				messageSend := &discordgo.MessageSend{
-					Embeds: []*discordgo.MessageEmbed{embedmessage},
-					Files: []*discordgo.File{
-						{
-							Name:   "lastgameimage.png",
-							Reader: lastgameimage,
+					// Use the URL directly
+					embedmessage := embed.NewEmbed().
+						SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
+						SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
+						AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
+						AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
+						SetThumbnail(rankTierURL).
+						SetImage("attachment://lastgameimage.png").
+						SetColor(color).InlineAllFields().MessageEmbed
+
+					messageSend := &discordgo.MessageSend{
+						Embeds: []*discordgo.MessageEmbed{embedmessage},
+						Files: []*discordgo.File{
+							{
+								Name:   "lastgameimage.png",
+								Reader: lastgameimage,
+							},
 						},
-					},
-				}
+					}
 
-				_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
-				if err != nil {
-					log.Printf("Failed to send embed message to Discord channel: %v", err)
-					return err
+					_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
+					if err != nil {
+						log.Printf("Failed to send embed message to Discord channel: %v", err)
+						return err
+					}
 				}
 			}
 		}

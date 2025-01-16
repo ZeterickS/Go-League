@@ -72,7 +72,7 @@ func init() {
 			Image struct {
 				Full string `json:"full"`
 			} `json:"image"`
-		} `json:"data"`
+		} `json:"image"`
 	}
 
 	if err := json.NewDecoder(file).Decode(&spells); err != nil {
@@ -94,8 +94,13 @@ func init() {
 // GetItemFiles takes a list of item IDs and returns a slice of os.File pointers corresponding to the assets.
 func GetItemFiles(itemIDs []int) ([]*os.File, error) {
 	var files []*os.File
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("error getting current working directory: %w", err)
+	}
+
 	for _, itemID := range itemIDs {
-		filePath := fmt.Sprintf("../../../assets/items/%d.png", itemID)
+		filePath := filepath.Join(wd, "assets/15.1.1/items", fmt.Sprintf("%d.png", itemID))
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for item ID %d: %w", itemID, err)
@@ -115,11 +120,16 @@ func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 		if !ok {
 			return nil, fmt.Errorf("icon not found for perk ID %d", perkID)
 		}
-		filePath := filepath.Join(baseURL, iconPath)
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("error getting current working directory: %w", err)
+		}
+		filePath := filepath.Join(wd, iconPath)
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for perk ID %d: %w", perkID, err)
 		}
+		defer file.Close() // Ensure the file is closed
 		files = append(files, file)
 	}
 	return files, nil
@@ -133,11 +143,16 @@ func GetSpellFiles(spellIDs []int) ([]*os.File, error) {
 		if !ok {
 			return nil, fmt.Errorf("image not found for spell ID %d", spellID)
 		}
-		filePath := filepath.Join(baseURL, "spells", imagePath)
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("error getting current working directory: %w", err)
+		}
+		filePath := filepath.Join(wd, "spells", imagePath)
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for spell ID %d: %w", spellID, err)
 		}
+		defer file.Close() // Ensure the file is closed
 		files = append(files, file)
 	}
 	return files, nil
