@@ -408,7 +408,7 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 		return nil, fmt.Errorf("API token not found in environment variables")
 	}
 
-	url := fmt.Sprintf("%s/matches/%s?api_key=%s", riotMatchBaseURL, matchId, apiKey)
+	url := fmt.Sprintf("%s/%s?api_key=%s", riotMatchBaseURL, matchId, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return nil, err
