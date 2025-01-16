@@ -1,13 +1,13 @@
 package gametoimage
 
 import (
+	assethelper "discord-bot/internal/app/helper/assets"
+	"discord-bot/types/match"
 	"image"
-	"log"
 	"os"
 
-	"github.com/nfnt/resize"
-
 	"github.com/fogleman/gg"
+	"github.com/nfnt/resize"
 )
 
 // ImageBuilder is the main structure for handling the template image and assets.
@@ -16,69 +16,80 @@ type ImageBuilder struct {
 	Context  *gg.Context
 }
 
-// perks match.Perks, Items match.Items, SummonerSpell match.Spells
-func gametoimage() {
+// GameToImage generates an image based on the game data provided.
+func GameToImage(participant match.Participant) (*os.File, error) {
 	builder, err := NewImageBuilder()
 	if err != nil {
-		log.Fatalf("Error loading template: %v", err)
+		return nil, err
 	}
 
-	items := []string{
-		"../../assets/15.1.1/items/1004.png",
-		"../../assets/15.1.1/items/1006.png",
-		"../../assets/15.1.1/items/1001.png",
-		// Add more item paths as needed
+	defaultImage, err := os.Open("../../assets/template/template_empty.png")
+	if err != nil {
+		return nil, err
+	}
+	defer defaultImage.Close()
+
+	// assemble from right to left
+
+	itemImages, err := assethelper.GetItemFiles(participant.Items.ItemIDs)
+	if err != nil {
+		return nil, err
 	}
 
-	defaultImage := "../../assets/template/template_empty.png"
-
+	// Adding Items
 	for i := 0; i < 6; i++ {
-		item := defaultImage
-		if i < len(items) && items[i] != "" {
-			item = items[i]
-		}
-		err = builder.AddImage(item, float64(i*64+64), 0, 64, 64)
-		if err != nil {
-			log.Fatalf("Error adding image: %v", err)
+		if i < len(itemImages) {
+			err = builder.AddImage(itemImages[i], float64(i*64+64), 0, 64, 64)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			err = builder.AddImage(defaultImage, float64(i*64+64), 0, 64, 64)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	summonerSpells := []string{
-		"../../assets/15.1.1/spells/SummonerFlash.png",
-		"../../assets/15.1.1/spells/SummonerDot.png",
+	spellImages, err := assethelper.GetSpellFiles(participant.Spells.SpellIDs)
+	if err != nil {
+		return nil, err
 	}
 
-	for i := 0; i < 2; i++ {
-		spell := defaultImage
-		if i < len(summonerSpells) && summonerSpells[i] != "" {
-			spell = summonerSpells[i]
-		}
+	// Adding Spells
+	for i, spell := range spellImages {
 		err = builder.AddImage(spell, float64(i*32), 0, 32, 32)
 		if err != nil {
-			log.Fatalf("Error adding summoner spell: %v", err)
+			return nil, err
 		}
 	}
 
-	Perks := []string{
-		"../../assets/15.1.1/spells/SummonerFlash.png",
-		"../../assets/15.1.1/spells/SummonerDot.png",
+	perkImages, err := assethelper.GetPerkFiles(participant.Perks)
+	if err != nil {
+		return nil, err
 	}
 
-	for i := 0; i < 2; i++ {
-		perk := defaultImage
-		if i < len(Perks) && Perks[i] != "" {
-			perk = Perks[i]
-		}
-		err = builder.AddImage(perk, float64(i*32), 32, 32, 32)
-		if err != nil {
-			log.Fatalf("Error adding summoner spell: %v", err)
+	// Adding Perks
+	for i, item := range perkImages {
+		if i >= 2 {
+			err = builder.AddImage(item, float64(i*32), 0, 32, 32)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	err = builder.Save("output.png")
 	if err != nil {
-		log.Fatalf("Error saving image: %v", err)
+		return nil, err
 	}
+
+	output, err := os.Open("output.png")
+	if err != nil {
+		return nil, err
+	}
+
+	return output, nil
 }
 
 func NewImageBuilder() (*ImageBuilder, error) {
@@ -101,14 +112,11 @@ func NewImageBuilder() (*ImageBuilder, error) {
 		Context:  dc,
 	}, nil
 }
-func (ib *ImageBuilder) AddImage(assetPath string, x, y, width, height float64) error {
-	file, err := os.Open(assetPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
 
-	asset, _, err := image.Decode(file)
+func (ib *ImageBuilder) AddImage(newfile *os.File, x, y, width, height float64) error {
+	defer newfile.Close()
+
+	asset, _, err := image.Decode(newfile)
 	if err != nil {
 		return err
 	}

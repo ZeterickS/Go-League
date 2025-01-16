@@ -1,0 +1,610 @@
+[
+    {
+      "id": 8100,
+      "key": "Domination",
+      "icon": "perk-images/Styles/7200_Domination.png",
+      "name": "Domination",
+      "slots": [
+        {
+          "runes": [
+            {
+              "id": 8112,
+              "key": "Electrocute",
+              "icon": "perk-images/Styles/Domination/Electrocute/Electrocute.png",
+              "name": "Electrocute",
+              "shortDesc": "Hitting a champion with 3 \u003Cb\u003Eseparate\u003C/b\u003E attacks or abilities in 3s deals bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003Eadaptive damage\u003C/lol-uikit-tooltipped-keyword\u003E.",
+              "longDesc": "Hitting a champion with 3 \u003Cb\u003Eseparate\u003C/b\u003E attacks or abilities within 3s deals bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003E\u003Cfont color='#48C4B7'\u003Eadaptive damage\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E.\u003Cbr\u003E\u003Cbr\u003EDamage: 50 - 190 (+0.1 bonus AD, +0.05 AP) damage.\u003Cbr\u003ECooldown: 20s\u003Cbr\u003E\u003Cbr\u003E\u003Ci\u003E'We called them the Thunderlords, for to speak of their lightning was to invite disaster.'\u003C/i\u003E"
+            },
+            {
+              "id": 8128,
+              "key": "DarkHarvest",
+              "icon": "perk-images/Styles/Domination/DarkHarvest/DarkHarvest.png",
+              "name": "Dark Harvest",
+              "shortDesc": "Damaging a low health champion inflicts \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003Eadaptive damage\u003C/lol-uikit-tooltipped-keyword\u003E and harvests a soul from the victim.",
+              "longDesc": "Damaging a Champion below 50% health deals \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003Eadaptive damage\u003C/lol-uikit-tooltipped-keyword\u003E and harvests their soul, permanently increasing Dark Harvest's damage by 9.\u003Cbr\u003E\u003Cbr\u003EDark Harvest damage: 20 (+9 damage per soul) (+0.1 bonus AD) (+0.05 AP)\u003Cbr\u003ECooldown: 35s (resets to 1.0s on takedown)"
+            },
+            {
+              "id": 9923,
+              "key": "HailOfBlades",
+              "icon": "perk-images/Styles/Domination/HailOfBlades/HailOfBlades.png",
+              "name": "Hail of Blades",
+              "shortDesc": "Gain a large amount of Attack Speed for the first 3 attacks made against enemy champions.",
+              "longDesc": "Gain 110% (80% for ranged champions) Attack Speed when you attack an enemy champion for up to 3 attacks.\u003Cbr\u003E\u003Cbr\u003ENo more than 3s can elapse between attacks or this effect will end.\u003Cbr\u003E\u003Cbr\u003ECooldown: 12s.\u003Cbr\u003E\u003Cbr\u003E\u003Crules\u003EAttack resets increase the attack limit by 1.\u003Cbr\u003EAllows you to temporarily exceed the attack speed limit.\u003C/rules\u003E"
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8126,
+              "key": "CheapShot",
+              "icon": "perk-images/Styles/Domination/CheapShot/CheapShot.png",
+              "name": "Cheap Shot",
+              "shortDesc": "Deal bonus true damage to enemy champions with \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_ImpairAct'\u003Eimpaired movement or actions\u003C/lol-uikit-tooltipped-keyword\u003E. ",
+              "longDesc": "Damaging champions with \u003Cb\u003Eimpaired movement or actions\u003C/b\u003E deals 10 - 45 bonus true damage (based on level).\u003Cbr\u003E\u003Cbr\u003ECooldown: 4s\u003Cbr\u003E\u003Crules\u003EActivates on damage occurring after the impairment.\u003C/rules\u003E"
+            },
+            {
+              "id": 8139,
+              "key": "TasteOfBlood",
+              "icon": "perk-images/Styles/Domination/TasteOfBlood/GreenTerror_TasteOfBlood.png",
+              "name": "Taste of Blood",
+              "shortDesc": "Heal when you damage an enemy champion.",
+              "longDesc": "Heal when you damage an enemy champion.\u003Cbr\u003E\u003Cbr\u003EHealing: 16-40 (+0.1 bonus AD, +0.05 AP) health (based on level)\u003Cbr\u003E\u003Cbr\u003ECooldown: 20s"
+            },
+            {
+              "id": 8143,
+              "key": "SuddenImpact",
+              "icon": "perk-images/Styles/Domination/SuddenImpact/SuddenImpact.png",
+              "name": "Sudden Impact",
+              "shortDesc": "Damaging basic attacks and abilities deal bonus true damage to enemy champions after using a dash, leap, blink, teleport, or when leaving stealth.",
+              "longDesc": "Damaging basic attacks and abilities deal a bonus \u003CtrueDamage\u003E20 - 80 True Damage\u003C/trueDamage\u003E based on level to enemy champions after using a dash, leap, blink, teleport, or when leaving stealth for 4s.\u003Cbr\u003E\u003Cbr\u003ECooldown: 10s"
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8137,
+              "key": "SixthSense",
+              "icon": "perk-images/Styles/Domination/SixthSense/SixthSense.png",
+              "name": "Sixth Sense",
+              "shortDesc": "On a long Cooldown, automatically sense a nearby untracked and unseen ward, tracking it for the team. \u003Cbr\u003E\u003Cbr\u003ELevel 11: Also reveal the ward for 10s.",
+              "longDesc": "Automatically sense a nearby untracked and unseen ward, tracking it for the team. \u003Cbr\u003E\u003Cbr\u003ELevel 11: Also reveal the ward for 10s.\u003Cbr\u003E\u003Cbr\u003EThis effect has a [300 Melee || 360 Ranged] second Cooldown."
+            },
+            {
+              "id": 8140,
+              "key": "GrislyMementos",
+              "icon": "perk-images/Styles/Domination/GrislyMementos/GrislyMementos.png",
+              "name": "Grisly Mementos",
+              "shortDesc": "Collect 1 memento on champion \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003Etakedowns\u003C/lol-uikit-tooltipped-keyword\u003E, up to 25 total.\u003Cbr\u003E\u003Cbr\u003EGain 4 Trinket Haste for each collected.",
+              "longDesc": "Collect 1 memento on champion \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003Etakedowns\u003C/lol-uikit-tooltipped-keyword\u003E, up to 25 total.\u003Cbr\u003E\u003Cbr\u003EGain 4 Trinket Ability Haste for each collected. In game modes where vision Trinkets do not exist, instead gain 2 Summoner Spell Haste."
+            },
+            {
+              "id": 8141,
+              "key": "DeepWard",
+              "icon": "perk-images/Styles/Domination/DeepWard/DeepWard.png",
+              "name": "Deep Ward",
+              "shortDesc": "Your wards in the enemy jungle are \u003CkeywordMajor\u003EDeep\u003C/keywordMajor\u003E, gaining Health and Duration.\u003Cbr\u003E\u003Cbr\u003ELevel 9: Wards in the river are also \u003CkeywordMajor\u003EDeep\u003C/keywordMajor\u003E.",
+              "longDesc": "Your wards in the enemy jungle are \u003CkeywordMajor\u003EDeep\u003C/keywordMajor\u003E. \u003CkeywordMajor\u003EDeep\u003C/keywordMajor\u003E wards gain +1 extra Health and +[30 - 45]s increased duration (+[30 - 120]s for Trinket stealth wards).\u003Cbr\u003E\u003Cbr\u003ELevel 9: Wards in the river are also \u003CkeywordMajor\u003EDeep\u003C/keywordMajor\u003E."
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8135,
+              "key": "TreasureHunter",
+              "icon": "perk-images/Styles/Domination/TreasureHunter/TreasureHunter.png",
+              "name": "Treasure Hunter",
+              "shortDesc": "\u003Cb\u003EUnique\u003C/b\u003E \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003Etakedowns\u003C/lol-uikit-tooltipped-keyword\u003E grant additional gold the first time they are collected. ",
+              "longDesc": "Gain an additional \u003Cgold\u003E50 gold\u003C/gold\u003E the next time you collect a \u003Ci\u003EBounty Hunter\u003C/i\u003E stack. Increase the gold gained by \u003Cgold\u003E20 gold\u003C/gold\u003E for each \u003Ci\u003EBounty Hunter\u003C/i\u003E stack, up to \u003Cgold\u003E130 gold\u003C/gold\u003E.\u003Cbr\u003E\u003Cbr\u003E\u003Ci\u003EBounty Hunter\u003C/i\u003E stacks are earned the first time you get a takedown on each enemy champion."
+            },
+            {
+              "id": 8105,
+              "key": "RelentlessHunter",
+              "icon": "perk-images/Styles/Domination/RelentlessHunter/RelentlessHunter.png",
+              "name": "Relentless Hunter",
+              "shortDesc": "\u003Cb\u003EUnique\u003C/b\u003E \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003Etakedowns\u003C/lol-uikit-tooltipped-keyword\u003E grant permanent \u003Cb\u003Eout of combat \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_MS'\u003EMS\u003C/lol-uikit-tooltipped-keyword\u003E\u003C/b\u003E. ",
+              "longDesc": "Gain \u003Cspeed\u003E8 Move Speed\u003C/speed\u003E out of combat per \u003Ci\u003EBounty Hunter\u003C/i\u003E stack. \u003Ci\u003EBounty Hunter\u003C/i\u003E stacks are earned the first time you get a takedown on each enemy champion."
+            },
+            {
+              "id": 8106,
+              "key": "UltimateHunter",
+              "icon": "perk-images/Styles/Domination/UltimateHunter/UltimateHunter.png",
+              "name": "Ultimate Hunter",
+              "shortDesc": "\u003Cb\u003EUnique\u003C/b\u003E \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003Etakedowns\u003C/lol-uikit-tooltipped-keyword\u003E grant permanent cooldown reduction on your Ultimate. ",
+              "longDesc": "Your ultimate gains \u003Cattention\u003E6\u003C/attention\u003E Ability Haste, plus an additional \u003Cattention\u003E5\u003C/attention\u003E Ability Haste per \u003Ci\u003EBounty Hunter\u003C/i\u003E stack. \u003Ci\u003EBounty Hunter\u003C/i\u003E stacks are earned the first time you get a takedown on each enemy champion."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8300,
+      "key": "Inspiration",
+      "icon": "perk-images/Styles/7203_Whimsy.png",
+      "name": "Inspiration",
+      "slots": [
+        {
+          "runes": [
+            {
+              "id": 8351,
+              "key": "GlacialAugment",
+              "icon": "perk-images/Styles/Inspiration/GlacialAugment/GlacialAugment.png",
+              "name": "Glacial Augment",
+              "shortDesc": "Immobilizing an enemy champion will cause 3 glacial rays that slow nearby enemies and reduce their damage to your allies.",
+              "longDesc": "Immobilizing an enemy champion will cause 3 glacial rays to emanate from them towards you and other nearby champions, creating frozen zones for 3 (+ the immobilizing effect's duration) seconds that slow enemies for 20% (+90% per 100% Heal and Shield Power) (+6% per 100 Ability Power) (+7% per 100 bonus Attack Damage) and reduce their damage by 15% against your allies (not including yourself). \u003Cbr\u003E\u003Cbr\u003ECooldown: 25s"
+            },
+            {
+              "id": 8360,
+              "key": "UnsealedSpellbook",
+              "icon": "perk-images/Styles/Inspiration/UnsealedSpellbook/UnsealedSpellbook.png",
+              "name": "Unsealed Spellbook",
+              "shortDesc": "Swap Summoner Spells while out of combat. Swapping to unique Summoner Spells will increase the rate at which you can make future swaps.",
+              "longDesc": "Swap one of your equipped Summoner Spells to a new, single use Summoner Spell. Each unique Summoner Spell you swap to permanently decreases your swap cooldown by 25s (initial swap cooldown is at 5 mins). \u003Cbr\u003E\u003Cbr\u003EYour first swap becomes available at 6 mins. \u003Cbr\u003E\u003Crules\u003E\u003Cbr\u003ESummoner Spells can only be swapped while out of combat. \u003Cbr\u003EAfter using a swapped Summoner Spell you must swap 3 more times before the first can be selected again.\u003Cbr\u003ESmite damage increases after two Summoner Spell swaps. \u003C/rules\u003E"
+            },
+            {
+              "id": 8369,
+              "key": "FirstStrike",
+              "icon": "perk-images/Styles/Inspiration/FirstStrike/FirstStrike.png",
+              "name": "First Strike",
+              "shortDesc": "When you initiate champion combat, deal 7% extra damage for 3 seconds and gain gold based on damage dealt.",
+              "longDesc": "Attacks or abilities against an enemy champion within 0.25s of entering champion combat grant 10 gold and \u003Cb\u003EFirst Strike\u003C/b\u003E for 3 seconds, causing you to deal \u003Ctruedamage\u003E7%\u003C/truedamage\u003E extra \u003Ctruedamage\u003E damage\u003C/truedamage\u003E against champions, and granting \u003Cgold\u003E50% (35% for ranged champions)\u003C/gold\u003E of bonus damage dealt as \u003Cgold\u003Egold\u003C/gold\u003E.\u003Cbr\u003E\u003Cbr\u003ECooldown: \u003CscaleLevel\u003E25 - 15\u003C/scaleLevel\u003Es"
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8306,
+              "key": "HextechFlashtraption",
+              "icon": "perk-images/Styles/Inspiration/HextechFlashtraption/HextechFlashtraption.png",
+              "name": "Hextech Flashtraption",
+              "shortDesc": "While Flash is on cooldown it is replaced by \u003Ci\u003EHexflash\u003C/i\u003E.\u003Cbr\u003E\u003Cbr\u003E\u003Ci\u003EHexflash\u003C/i\u003E: Channel, then blink to a new location.",
+              "longDesc": "While Flash is on cooldown it is replaced by \u003Ci\u003EHexflash\u003C/i\u003E.\u003Cbr\u003E\u003Cbr\u003E\u003Ci\u003EHexflash\u003C/i\u003E: Channel for 2s to blink to a new location.\u003Cbr\u003E\u003Cbr\u003ECooldown: 20s. Goes on a 10s cooldown when you enter champion combat."
+            },
+            {
+              "id": 8304,
+              "key": "MagicalFootwear",
+              "icon": "perk-images/Styles/Inspiration/MagicalFootwear/MagicalFootwear.png",
+              "name": "Magical Footwear",
+              "shortDesc": "You get free boots at 12 min but you cannot buy boots before then. Each \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003Etakedown\u003C/lol-uikit-tooltipped-keyword\u003E you get makes your boots come 45s sooner.",
+              "longDesc": "You get free Slightly Magical Footwear at 12 min, but you cannot buy boots before then. For each takedown you acquire the boots 45s sooner.\u003Cbr\u003E\u003Cbr\u003ESlightly Magical Footwear grants you an additional \u003Cspeed\u003E10 Move Speed\u003C/speed\u003E."
+            },
+            {
+              "id": 8321,
+              "key": "CashBack",
+              "icon": "perk-images/Styles/Inspiration/CashBack/CashBack2.png",
+              "name": "Cash Back",
+              "shortDesc": "Get some gold back when you purchase Legendary Items.",
+              "longDesc": "Get 6% Gold back when you purchase Legendary Items."
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8313,
+              "key": "PerfectTiming",
+              "icon": "perk-images/Styles/Inspiration/PerfectTiming/AlchemistCabinet.png",
+              "name": "Triple Tonic",
+              "shortDesc": "Upon reaching level 3, gain an Elixir of Avarice.\u003Cbr\u003EUpon reaching level 6, gain an Elixir of Force.\u003Cbr\u003EUpon reaching level 9, gain an Elixir of Skill. ",
+              "longDesc": "Upon reaching level 3, gain an Elixir of Avarice.\u003Cbr\u003EUpon reaching level 6, gain an Elixir of Force.\u003Cbr\u003EUpon reaching level 9, gain an Elixir of Skill. "
+            },
+            {
+              "id": 8352,
+              "key": "TimeWarpTonic",
+              "icon": "perk-images/Styles/Inspiration/TimeWarpTonic/TimeWarpTonic.png",
+              "name": "Time Warp Tonic",
+              "shortDesc": "Potions grant some restoration immediately.",
+              "longDesc": "Consuming a potion grants 40% of its health restoration immediately."
+            },
+            {
+              "id": 8345,
+              "key": "BiscuitDelivery",
+              "icon": "perk-images/Styles/Inspiration/BiscuitDelivery/BiscuitDelivery.png",
+              "name": "Biscuit Delivery",
+              "shortDesc": "Gain a free Biscuit every 2 min, until 6 min. Consuming or selling a Biscuit permanently increases your max health and restores health.",
+              "longDesc": "Biscuit Delivery: Gain a Total Biscuit of Everlasting Will every 2 mins, until 6 min.\u003Cbr\u003E\u003Cbr\u003EBiscuits restore 12% of your missing health. Consuming or selling a Biscuit permanently increases your max health by 30. "
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8347,
+              "key": "CosmicInsight",
+              "icon": "perk-images/Styles/Inspiration/CosmicInsight/CosmicInsight.png",
+              "name": "Cosmic Insight",
+              "shortDesc": "+\u003Cattention\u003E18\u003C/attention\u003E Summoner Spell Haste\u003Cbr\u003E+\u003Cattention\u003E10\u003C/attention\u003E Item Haste",
+              "longDesc": "+\u003Cattention\u003E18\u003C/attention\u003E Summoner Spell Haste\u003Cbr\u003E+\u003Cattention\u003E10\u003C/attention\u003E Item Haste"
+            },
+            {
+              "id": 8410,
+              "key": "ApproachVelocity",
+              "icon": "perk-images/Styles/Resolve/ApproachVelocity/ApproachVelocity.png",
+              "name": "Approach Velocity",
+              "shortDesc": "Bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_MS'\u003EMS\u003C/lol-uikit-tooltipped-keyword\u003E towards nearby enemy champions that are \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_ImpairMov'\u003Emovement impaired\u003C/lol-uikit-tooltipped-keyword\u003E, increased for enemy champions that you impair.",
+              "longDesc": "Gain \u003Cspeed\u003E7.5% Move Speed\u003C/speed\u003E towards nearby enemy champions that are movement impaired. This bonus is increased to \u003Cspeed\u003E15% Move Speed\u003C/speed\u003E for any enemy champion that you impair. \u003Cbr\u003E\u003Cbr\u003EActivation Range for CC from allies: 1000"
+            },
+            {
+              "id": 8316,
+              "key": "JackOfAllTrades",
+              "icon": "perk-images/Styles/Inspiration/JackOfAllTrades/JackofAllTrades2.png",
+              "name": "Jack Of All Trades",
+              "shortDesc": "For each different stat gained from items, gain one Jack stack. Each stack grants you \u003Cspeed\u003E1 Ability Haste\u003C/speed\u003E.\u003Cbr\u003E\u003Cbr\u003EGain bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003EAdaptive Force\u003C/lol-uikit-tooltipped-keyword\u003E at 5 and 10 stacks.",
+              "longDesc": "For each different stat gained from items, gain one Jack stack. Each stack grants you \u003Cspeed\u003E1 Ability Haste\u003C/speed\u003E.\u003Cbr\u003E\u003Cbr\u003EGain 10 or 25 bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003EAdaptive Force\u003C/lol-uikit-tooltipped-keyword\u003E at 5 and 10 stacks, respectively."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8000,
+      "key": "Precision",
+      "icon": "perk-images/Styles/7201_Precision.png",
+      "name": "Precision",
+      "slots": [
+        {
+          "runes": [
+            {
+              "id": 8005,
+              "key": "PressTheAttack",
+              "icon": "perk-images/Styles/Precision/PressTheAttack/PressTheAttack.png",
+              "name": "Press the Attack",
+              "shortDesc": "Hitting an enemy champion 3 consecutive times deals bonus damage and amplifies your damage until you leave combat with champions.",
+              "longDesc": "Hitting an enemy champion with 3 consecutive basic attacks deals 40 - 160 bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003E\u003Cfont color='#48C4B7'\u003Eadaptive damage\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E (based on level) and amplifies your damage dealt by 8% until you leave combat with champions."
+            },
+            {
+              "id": 8008,
+              "key": "LethalTempo",
+              "icon": "perk-images/Styles/Precision/LethalTempo/LethalTempoTemp.png",
+              "name": "Lethal Tempo",
+              "shortDesc": "Attacking an enemy champion grants you Attack Speed, up to 6 stacks. At max stacks, deal \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003E\u003Cfont color='#48C4B7'\u003Ebonus adaptive damage\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E On-Attack.",
+              "longDesc": "Attacking an enemy champion grants you [6% Melee || 4% Ranged] Attack Speed for 6 seconds, up to 6. At max stacks, deal [9 - 30 Melee || 6 - 24 Ranged] \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003Ebonus adaptive damage On-Attack, increased by 1% per 1% Bonus Attack Speed\u003C/lol-uikit-tooltipped-keyword\u003E."
+            },
+            {
+              "id": 8021,
+              "key": "FleetFootwork",
+              "icon": "perk-images/Styles/Precision/FleetFootwork/FleetFootwork.png",
+              "name": "Fleet Footwork",
+              "shortDesc": "Attacking and moving builds Energy stacks. At 100 stacks, your next attack heals you and grants increased \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_MS'\u003EMS\u003C/lol-uikit-tooltipped-keyword\u003E.",
+              "longDesc": "Attacking and moving builds Energy stacks. At 100 stacks, your next attack is Energized\u003Cbr\u003E\u003Cbr\u003EEnergized attacks heal you for 10 - 130 (+0.1 Bonus AD, +0.05 AP) and grant \u003Cspeed\u003E20% Move Speed\u003C/speed\u003E for 1s.\u003Cbr\u003E\u003Cbr\u003EFor Ranged Champions, Healing is 60% effective and Move Speed is 75% effective. All healing is 15% effective against Minions."
+            },
+            {
+              "id": 8010,
+              "key": "Conqueror",
+              "icon": "perk-images/Styles/Precision/Conqueror/Conqueror.png",
+              "name": "Conqueror",
+              "shortDesc": "Gain stacks of adaptive force when attacking enemy champions. After reaching 12 stacks, heal for a portion of damage you deal to champions.",
+              "longDesc": "Basic attacks or spells that deal damage to an enemy champion grant 2 stacks of Conqueror for 5s, gaining 1.8-4 \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003E\u003Cfont color='#48C4B7'\u003EAdaptive Force\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E per stack. Stacks up to 12 times. Ranged champions gain only 1 stack per basic attack.\u003Cbr\u003E\u003Cbr\u003EWhen fully stacked, heal for 8% of the damage you deal to champions (5% for ranged champions)."
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 9101,
+              "key": "AbsorbLife",
+              "icon": "perk-images/Styles/Precision/AbsorbLife/AbsorbLife.png",
+              "name": "Absorb Life",
+              "shortDesc": "Killing a target heals you.",
+              "longDesc": "Killing a target heals you for @HealAmount@."
+            },
+            {
+              "id": 9111,
+              "key": "Triumph",
+              "icon": "perk-images/Styles/Precision/Triumph.png",
+              "name": "Triumph",
+              "shortDesc": "\u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003ETakedowns\u003C/lol-uikit-tooltipped-keyword\u003E restore 5% of your missing health and grant an additional 20 gold. ",
+              "longDesc": "Takedowns restore 5% of your missing health, 2.5% of your max health, and grant an additional 20 gold. \u003Cbr\u003E\u003Cbr\u003E\u003Chr\u003E\u003Cbr\u003E\u003Ci\u003E'The most dangerous game brings the greatest glory.' \u003Cbr\u003E—Noxian Reckoner\u003C/i\u003E"
+            },
+            {
+              "id": 8009,
+              "key": "PresenceOfMind",
+              "icon": "perk-images/Styles/Precision/PresenceOfMind/PresenceOfMind.png",
+              "name": "Presence of Mind",
+              "shortDesc": "Restore a small amount of mana or energy when damaging an enemy champion. Takedowns restore mana or energy.",
+              "longDesc": "Damaging an enemy champion restores 6-50 (80% for ranged) mana or 6 energy.\u003Cbr\u003E\u003Cbr\u003ETakedowns restore 15% of your maximum mana or energy. \u003Cbr\u003E\u003Cbr\u003ECooldown for damage restoration: 8s"
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 9104,
+              "key": "LegendAlacrity",
+              "icon": "perk-images/Styles/Precision/LegendAlacrity/LegendAlacrity.png",
+              "name": "Legend: Alacrity",
+              "shortDesc": "\u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003ETakedowns\u003C/lol-uikit-tooltipped-keyword\u003E on enemies grant permanent \u003Cb\u003EAttack Speed\u003C/b\u003E. ",
+              "longDesc": "Gain 3% attack speed plus an additional 1.5% for every \u003Ci\u003ELegend\u003C/i\u003E stack (\u003CstatGood\u003Emax 10 stacks\u003C/statGood\u003E).\u003Cbr\u003E\u003Cbr\u003EEarn progress toward \u003Ci\u003ELegend\u003C/i\u003E stacks for every champion takedown, epic monster takedown, large monster kill, and minion kill."
+            },
+            {
+              "id": 9105,
+              "key": "LegendHaste",
+              "icon": "perk-images/Styles/Precision/LegendHaste/LegendHaste.png",
+              "name": "Legend: Haste",
+              "shortDesc": "\u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003ETakedowns\u003C/lol-uikit-tooltipped-keyword\u003E on enemies grant permanent Basic Ability \u003Cb\u003EHaste\u003C/b\u003E. ",
+              "longDesc": "Gain 1.5 basic ability haste for every \u003Ci\u003ELegend\u003C/i\u003E stack (\u003CstatGood\u003Emax 10 stacks\u003C/statGood\u003E).\u003Cbr\u003E\u003Cbr\u003EEarn progress toward \u003Ci\u003ELegend\u003C/i\u003E stacks for every champion takedown, epic monster takedown, large monster kill, and minion kill."
+            },
+            {
+              "id": 9103,
+              "key": "LegendBloodline",
+              "icon": "perk-images/Styles/Precision/LegendBloodline/LegendBloodline.png",
+              "name": "Legend: Bloodline",
+              "shortDesc": "\u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Takedown'\u003ETakedowns\u003C/lol-uikit-tooltipped-keyword\u003E on enemies grant permanent\u003Cb\u003E Life Steal\u003C/b\u003E, up to a cap. Once the cap is reached, increase your max health. Weaker earlier but stronger later game than other Legend Runes.",
+              "longDesc": "Gain \u003CscaleAD\u003E0.35% Life Steal\u003C/scaleAD\u003E for every \u003Ci\u003ELegend\u003C/i\u003E stack (\u003CstatGood\u003Emax 15 stacks\u003C/statGood\u003E). At maximum \u003Ci\u003ELegend\u003C/i\u003E stacks, gain \u003CscaleHealth\u003E85 max health\u003C/scaleHealth\u003E.\u003Cbr\u003E\u003Cbr\u003EEarn progress toward \u003Ci\u003ELegend\u003C/i\u003E stacks for every champion takedown, epic monster takedown, large monster kill, and minion kill."
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8014,
+              "key": "CoupDeGrace",
+              "icon": "perk-images/Styles/Precision/CoupDeGrace/CoupDeGrace.png",
+              "name": "Coup de Grace",
+              "shortDesc": "Deal more damage to low health enemy champions.",
+              "longDesc": "Deal 8% more damage to champions who have less than 40% health."
+            },
+            {
+              "id": 8017,
+              "key": "CutDown",
+              "icon": "perk-images/Styles/Precision/CutDown/CutDown.png",
+              "name": "Cut Down",
+              "shortDesc": "Deal more damage to high health enemy champions.",
+              "longDesc": "Deal 8% more damage to champions who have more than 60% health."
+            },
+            {
+              "id": 8299,
+              "key": "LastStand",
+              "icon": "perk-images/Styles/Sorcery/LastStand/LastStand.png",
+              "name": "Last Stand",
+              "shortDesc": "Deal more damage to champions while you are low on health.",
+              "longDesc": "Deal 5% - 11% increased damage to champions while you are below 60% health. Max damage gained at 30% health."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8400,
+      "key": "Resolve",
+      "icon": "perk-images/Styles/7204_Resolve.png",
+      "name": "Resolve",
+      "slots": [
+        {
+          "runes": [
+            {
+              "id": 8437,
+              "key": "GraspOfTheUndying",
+              "icon": "perk-images/Styles/Resolve/GraspOfTheUndying/GraspOfTheUndying.png",
+              "name": "Grasp of the Undying",
+              "shortDesc": "Every 4s your next attack on a champion deals bonus magic damage, heals you, and permanently increases your health.",
+              "longDesc": "Every 4s in combat, your next basic attack on a champion will:\u003Cli\u003EDeal bonus magic damage equal to 3.5% of your max health\u003Cli\u003EHeal you for 1.3% of your max health\u003Cli\u003EPermanently increase your health by 5\u003Cbr\u003E\u003Crules\u003E\u003Ci\u003ERanged Champions:\u003C/i\u003E Damage, healing, and permanent health gained are 60% effective.\u003C/rules\u003E"
+            },
+            {
+              "id": 8439,
+              "key": "Aftershock",
+              "icon": "perk-images/Styles/Resolve/VeteranAftershock/VeteranAftershock.png",
+              "name": "Aftershock",
+              "shortDesc": "After \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Immobilize'\u003Eimmobilizing\u003C/lol-uikit-tooltipped-keyword\u003E an enemy champion gain defenses and later deal a burst of magic damage around you.",
+              "longDesc": "After immobilizing an enemy champion, increase your Armor and Magic Resist by 35 + 80% of your Bonus Resists for 2.5s. Then explode, dealing magic damage to nearby enemies.\u003Cbr\u003E\u003Cbr\u003EDamage: 25 - 120 (+8% of your bonus health)\u003Cbr\u003ECooldown: 20s\u003Cbr\u003E\u003Cbr\u003EResistance bonus from Aftershock capped at: 80-150 (based on level)\u003Cbr\u003E"
+            },
+            {
+              "id": 8465,
+              "key": "Guardian",
+              "icon": "perk-images/Styles/Resolve/Guardian/Guardian.png",
+              "name": "Guardian",
+              "shortDesc": "Guard allies you cast spells on and those that are very nearby. If you or a guarded ally would take damage based on level, you're both granted a shield.",
+              "longDesc": "\u003Ci\u003EGuard\u003C/i\u003E allies within 350 units of you, and allies you target with spells for 2.5s. While \u003Ci\u003EGuarding\u003C/i\u003E, if you or the ally take more than a small amount of damage over the duration of the \u003Ci\u003EGuard\u003C/i\u003E, both of you gain a shield for 1.5s.\u003Cbr\u003E\u003Cbr\u003ECooldown: \u003CscaleLevel\u003E90 - 40\u003C/scaleLevel\u003E seconds\u003Cbr\u003EShield: \u003CscaleLevel\u003E45 - 120\u003C/scaleLevel\u003E + \u003CscaleAP\u003E12.5%\u003C/scaleAP\u003E of your ability power + \u003Cscalehealth\u003E8%\u003C/scalehealth\u003E of your bonus health\u003Cbr\u003EProc Threshold: \u003CscaleLevel\u003E90 - 250\u003C/scaleLevel\u003E postmitigation damage"
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8446,
+              "key": "Demolish",
+              "icon": "perk-images/Styles/Resolve/Demolish/Demolish.png",
+              "name": "Demolish",
+              "shortDesc": "Charge up a powerful attack against a tower while near it.",
+              "longDesc": "Charge up a powerful attack against a tower over 3s, while within 600 range of it. The charged attack deals 100 (+35% of your max health) bonus physical damage. \u003Cbr\u003E\u003Cbr\u003ECooldown: 45s"
+            },
+            {
+              "id": 8463,
+              "key": "FontOfLife",
+              "icon": "perk-images/Styles/Resolve/FontOfLife/FontOfLife.png",
+              "name": "Font of Life",
+              "shortDesc": "\u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_ImpairMov'\u003EImpairing\u003C/lol-uikit-tooltipped-keyword\u003E the movement of an enemy champion heals nearby allied champions. ",
+              "longDesc": "Impairing the movement of an enemy champion restores \u003Chealing\u003E@BaseHeal@ Health\u003C/healing\u003E to you and the lowest health nearby allied champion.\u003Cbr\u003E\u003Cbr\u003E70% effect for Ranged Users.\u003Cbr\u003E\u003Cbr\u003ECooldown: 20s"
+            },
+            {
+              "id": 8401,
+              "key": "ShieldBash",
+              "icon": "perk-images/Styles/Resolve/MirrorShell/MirrorShell.png",
+              "name": "Shield Bash",
+              "shortDesc": "Whenever you gain a shield, your next basic attack against a champion deals bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003E\u003Cfont color='#48C4B7'\u003Eadaptive\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E damage.",
+              "longDesc": "Whenever you gain a new shield,  your next basic attack against a champion deals \u003CscaleLevel\u003E5 - 30\u003C/scaleLevel\u003E \u003CscaleHealth\u003E(+2.5% Bonus Health)\u003C/scaleHealth\u003E \u003CscaleMana\u003E(+15.0% New Shield Amount)\u003C/scaleMana\u003E bonus \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003E\u003Cfont color='#48C4B7'\u003Eadaptive\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E damage.\u003Cbr\u003E\u003Cbr\u003EYou have up to 2s after the shield expires to use this effect."
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8429,
+              "key": "Conditioning",
+              "icon": "perk-images/Styles/Resolve/Conditioning/Conditioning.png",
+              "name": "Conditioning",
+              "shortDesc": "After 12 min gain +8 Armor and +8 Magic Resist and increase your Armor and Magic Resist by 3%.",
+              "longDesc": "After 12 min gain +8 Armor and +8 Magic Resist and increase your Armor and Magic Resist by 3%."
+            },
+            {
+              "id": 8444,
+              "key": "SecondWind",
+              "icon": "perk-images/Styles/Resolve/SecondWind/SecondWind.png",
+              "name": "Second Wind",
+              "shortDesc": "After taking damage from an enemy champion heal back some missing health over time. ",
+              "longDesc": "After taking damage from an enemy champion, heal for 4% of your missing health +3 over 10s."
+            },
+            {
+              "id": 8473,
+              "key": "BonePlating",
+              "icon": "perk-images/Styles/Resolve/BonePlating/BonePlating.png",
+              "name": "Bone Plating",
+              "shortDesc": "After taking damage from an enemy champion, the next 3 spells or attacks you receive from them deal 30-60 (based on level) less damage.\u003Cbr\u003E\u003Cbr\u003EDuration: 1.5s\u003Cbr\u003ECooldown: 55s",
+              "longDesc": "After taking damage from an enemy champion, the next 3 spells or attacks you receive from them deal 30-60 (based on level) less damage.\u003Cbr\u003E\u003Cbr\u003EDuration: 1.5s\u003Cbr\u003ECooldown: 55s"
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8451,
+              "key": "Overgrowth",
+              "icon": "perk-images/Styles/Resolve/Overgrowth/Overgrowth.png",
+              "name": "Overgrowth",
+              "shortDesc": "Gain permanent max health when minions or monsters die near you.",
+              "longDesc": "Absorb life essence from monsters or enemy minions that die near you, permanently gaining 3 maximum health for every 8.\u003Cbr\u003E\u003Cbr\u003EWhen you've absorbed 120 monsters or enemy minions, gain an additional 3.5% maximum health."
+            },
+            {
+              "id": 8453,
+              "key": "Revitalize",
+              "icon": "perk-images/Styles/Resolve/Revitalize/Revitalize.png",
+              "name": "Revitalize",
+              "shortDesc": "Gain 5% Heal and Shield Power.\u003Cbr\u003E\u003Cbr\u003EHeals and shields you cast or receive are 10% stronger on targets below 40% health.",
+              "longDesc": "Gain 5% Heal and Shield Power.\u003Cbr\u003E\u003Cbr\u003EHeals and shields you cast or receive are 10% stronger on targets below 40% health."
+            },
+            {
+              "id": 8242,
+              "key": "Unflinching",
+              "icon": "perk-images/Styles/Sorcery/Unflinching/Unflinching.png",
+              "name": "Unflinching",
+              "shortDesc": "Gain Armor and Magic Resist when receiving crowd control.",
+              "longDesc": "Gain 2 - 10 (level scaling) Armor and Magic Resist when crowd controlled and for 2 seconds after."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8200,
+      "key": "Sorcery",
+      "icon": "perk-images/Styles/7202_Sorcery.png",
+      "name": "Sorcery",
+      "slots": [
+        {
+          "runes": [
+            {
+              "id": 8214,
+              "key": "SummonAery",
+              "icon": "perk-images/Styles/Sorcery/SummonAery/SummonAery.png",
+              "name": "Summon Aery",
+              "shortDesc": "Your attacks and abilities send Aery to a target, damaging enemies or shielding allies.",
+              "longDesc": "Damaging enemy champions with basic attacks or abilities sends Aery to them, dealing 10 - 50 based on level (+\u003CscaleAP\u003E0.05 AP\u003C/scaleAP\u003E) (+\u003CscaleAD\u003E0.1 bonus AD\u003C/scaleAD\u003E).\u003Cbr\u003E\u003Cbr\u003EEmpowering or protecting allies with abilities sends Aery to them, shielding them for 30 - 100 based on level (+\u003CscaleAP\u003E0.05 AP\u003C/scaleAP\u003E) (+\u003CscaleAD\u003E0.1 bonus AD\u003C/scaleAD\u003E).\u003Cbr\u003E\u003Cbr\u003EAery cannot be sent out again until she returns to you."
+            },
+            {
+              "id": 8229,
+              "key": "ArcaneComet",
+              "icon": "perk-images/Styles/Sorcery/ArcaneComet/ArcaneComet.png",
+              "name": "Arcane Comet",
+              "shortDesc": "Damaging a champion with an ability hurls a damaging comet at their location.",
+              "longDesc": "Damaging a champion with an ability hurls a comet at their location, or, if Arcane Comet is on cooldown, reduces its remaining cooldown.\u003Cbr\u003E\u003Cbr\u003E\u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003E\u003Cfont color='#48C4B7'\u003EAdaptive Damage\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E: 30 - 130 based on level (\u003CscaleAP\u003E+0.05 AP\u003C/scaleAP\u003E and \u003CscaleAD\u003E+0.1 bonus AD\u003C/scaleAD\u003E)\u003Cbr\u003ECooldown: 20 - 8s\u003Cbr\u003E\u003Crules\u003E\u003Cbr\u003ECooldown Reduction:\u003Cbr\u003ESingle Target: 20%.\u003Cbr\u003EArea of Effect: 10%.\u003Cbr\u003EDamage over Time: 5%.\u003Cbr\u003E\u003C/rules\u003E"
+            },
+            {
+              "id": 8230,
+              "key": "PhaseRush",
+              "icon": "perk-images/Styles/Sorcery/PhaseRush/PhaseRush.png",
+              "name": "Phase Rush",
+              "shortDesc": "Hitting an enemy champion with 3 \u003Cb\u003Eseparate\u003C/b\u003E attacks or abilities grants a burst of \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_MS'\u003EMS\u003C/lol-uikit-tooltipped-keyword\u003E and Slow Resist. ",
+              "longDesc": "Hitting an enemy champion with 3 attacks or \u003Cb\u003Eseparate\u003C/b\u003E abilities within 4s grants \u003Cspeed\u003E25 - 50% Move Speed\u003C/speed\u003E based on level and \u003Cstatus\u003E75% Slow Resistance\u003C/status\u003E for 3s. Move Speed is 75% effective for ranged champions.\u003Cbr\u003ECooldown: 30s - 10s"
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8224,
+              "key": "NullifyingOrb",
+              "icon": "perk-images/Styles/Sorcery/NullifyingOrb/Axiom_Arcanist.png",
+              "name": "Axiom Arcanist",
+              "shortDesc": "Your Ultimate has increased damage, healing, and shielding. Scoring a takedown on an enemy champion reduces your Ultimate's current cooldown.",
+              "longDesc": "Your Ultimate has increased damage, healing, and shielding. Scoring a takedown on an enemy champion reduces your Ultimate's current cooldown by 7%."
+            },
+            {
+              "id": 8226,
+              "key": "ManaflowBand",
+              "icon": "perk-images/Styles/Sorcery/ManaflowBand/ManaflowBand.png",
+              "name": "Manaflow Band",
+              "shortDesc": "Hitting an enemy champion with an ability permanently increases your maximum mana by 25, up to 250 mana.\u003Cbr\u003E\u003Cbr\u003EAfter reaching 250 bonus mana, restore 1% of your missing mana every 5 seconds.",
+              "longDesc": "Hitting an enemy champion with an ability permanently increases your maximum mana by 25, up to 250 mana.\u003Cbr\u003E\u003Cbr\u003EAfter reaching 250 bonus mana, restore 1% of your missing mana every 5 seconds.\u003Cbr\u003E\u003Cbr\u003ECooldown: 15 seconds"
+            },
+            {
+              "id": 8275,
+              "key": "NimbusCloak",
+              "icon": "perk-images/Styles/Sorcery/NimbusCloak/6361.png",
+              "name": "Nimbus Cloak",
+              "shortDesc": "After casting a Summoner Spell, gain a short \u003Cspeed\u003EMove Speed\u003C/speed\u003E increase that allows you to pass through units.",
+              "longDesc": "After casting a Summoner Spell, gain a \u003Cspeed\u003EMove Speed\u003C/speed\u003E increase that lasts for 2s and allows you to pass through units.\u003Cbr\u003E\u003Cbr\u003EIncrease: \u003Cspeed\u003E14% - 40% Move Speed\u003C/speed\u003E based on the Summoner Spell's cooldown. (Higher cooldown Summoner Spells grant more \u003Cspeed\u003EMove Speed\u003C/speed\u003E). "
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8210,
+              "key": "Transcendence",
+              "icon": "perk-images/Styles/Sorcery/Transcendence/Transcendence.png",
+              "name": "Transcendence",
+              "shortDesc": "Gain bonuses upon reaching the following levels:\u003Cbr\u003ELevel 5: +5 \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_CDR'\u003EAbility Haste\u003C/lol-uikit-tooltipped-keyword\u003E \u003Cbr\u003ELevel 8: +5 \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_CDR'\u003EAbility Haste\u003C/lol-uikit-tooltipped-keyword\u003E \u003Cbr\u003ELevel 11: On Champion takedown, reduce the remaining cooldown of basic abilities by 20%.",
+              "longDesc": "Gain bonuses upon reaching the following levels:\u003Cbr\u003ELevel 5: +5 \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_CDR'\u003EAbility Haste\u003C/lol-uikit-tooltipped-keyword\u003E \u003Cbr\u003ELevel 8: +5 \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_CDR'\u003EAbility Haste\u003C/lol-uikit-tooltipped-keyword\u003E \u003Cbr\u003ELevel 11: On Champion takedown, reduce the remaining cooldown of basic abilities by 20%."
+            },
+            {
+              "id": 8234,
+              "key": "Celerity",
+              "icon": "perk-images/Styles/Sorcery/Celerity/CelerityTemp.png",
+              "name": "Celerity",
+              "shortDesc": "All \u003Cspeed\u003EMove Speed\u003C/speed\u003E bonuses are 7% more effective on you and gain \u003Cspeed\u003E1% Move Speed\u003C/speed\u003E.",
+              "longDesc": "All movement bonuses are 7% more effective on you and gain \u003Cspeed\u003E1% Move Speed\u003C/speed\u003E."
+            },
+            {
+              "id": 8233,
+              "key": "AbsoluteFocus",
+              "icon": "perk-images/Styles/Sorcery/AbsoluteFocus/AbsoluteFocus.png",
+              "name": "Absolute Focus",
+              "shortDesc": "While above 70% health, gain extra \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_AdaptiveDmg'\u003Eadaptive damage\u003C/lol-uikit-tooltipped-keyword\u003E.",
+              "longDesc": "While above 70% health, gain an \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003E\u003Cfont color='#48C4B7'\u003Eadaptive\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E bonus of up to 18 Attack Damage or 30 Ability Power (based on level). \u003Cbr\u003E\u003Cbr\u003EGrants 1.8 Attack Damage or 3 Ability Power at level 1. "
+            }
+          ]
+        },
+        {
+          "runes": [
+            {
+              "id": 8237,
+              "key": "Scorch",
+              "icon": "perk-images/Styles/Sorcery/Scorch/Scorch.png",
+              "name": "Scorch",
+              "shortDesc": "Your first damaging ability hit every 10s burns champions.",
+              "longDesc": "Your next damaging ability hit sets champions on fire dealing 20 - 40 bonus magic damage based on level after 1s.\u003Cbr\u003E\u003Cbr\u003ECooldown: 10s"
+            },
+            {
+              "id": 8232,
+              "key": "Waterwalking",
+              "icon": "perk-images/Styles/Sorcery/Waterwalking/Waterwalking.png",
+              "name": "Waterwalking",
+              "shortDesc": "Gain \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_MS'\u003EMS\u003C/lol-uikit-tooltipped-keyword\u003E and AP or AD, \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003Eadaptive\u003C/lol-uikit-tooltipped-keyword\u003E in the river.",
+              "longDesc": "Gain \u003Cspeed\u003E10 Move Speed\u003C/speed\u003E and \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003E\u003Cfont color='#48C4B7'\u003E13 - 30 Adaptive Force\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E (based on level) when in the river.\u003Cbr\u003E\u003Cbr\u003E\u003Ci\u003EMay you be as swift as the rushing river and agile as a startled Rift Scuttler.\u003C/i\u003E"
+            },
+            {
+              "id": 8236,
+              "key": "GatheringStorm",
+              "icon": "perk-images/Styles/Sorcery/GatheringStorm/GatheringStorm.png",
+              "name": "Gathering Storm",
+              "shortDesc": "Gain increasing amounts of AD or AP, \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003Eadaptive\u003C/lol-uikit-tooltipped-keyword\u003E over the course of the game.",
+              "longDesc": "Every 10 min gain AP or AD, \u003Clol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'\u003E\u003Cfont color='#48C4B7'\u003Eadaptive\u003C/font\u003E\u003C/lol-uikit-tooltipped-keyword\u003E.\u003Cbr\u003E\u003Cbr\u003E\u003Ci\u003E10 min\u003C/i\u003E: + 8 AP or 5 AD \u003Cbr\u003E\u003Ci\u003E20 min\u003C/i\u003E: + 24 AP or 14 AD\u003Cbr\u003E\u003Ci\u003E30 min\u003C/i\u003E: + 48 AP or 29 AD\u003Cbr\u003E\u003Ci\u003E40 min\u003C/i\u003E: + 80 AP or 48 AD\u003Cbr\u003E\u003Ci\u003E50 min\u003C/i\u003E: + 120 AP or 72 AD\u003Cbr\u003E\u003Ci\u003E60 min\u003C/i\u003E: + 168 AP or 101 AD\u003Cbr\u003Eetc..."
+            }
+          ]
+        }
+      ]
+    }
+  ]

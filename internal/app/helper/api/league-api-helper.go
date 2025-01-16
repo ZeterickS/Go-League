@@ -345,7 +345,7 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 // Notes:
 //
 //	This function fetches the ID of the last ranked match played by the summoner.
-func GetLastRankedMatch(puuid string) (string, error) {
+func GetLastRankedMatchIDbyPUUID(puuid string) (string, error) {
 	err := LoadEnv()
 	if err != nil {
 		return "", fmt.Errorf("error loading .env file")
@@ -383,6 +383,114 @@ func GetLastRankedMatch(puuid string) (string, error) {
 	}
 
 	return matchIDs[0], nil
+}
+
+// GetMatchByID fetches match data by match ID from the League of Legends API.
+//
+// Synopsis:
+//
+//	match, err := GetMatchByID("matchId")
+//
+// Parameters:
+//   - matchId: string - The match ID.
+//
+// Returns:
+//   - *match.Match: The match data.
+//   - error: An error if the match data could not be fetched.
+func GetMatchByID(matchId string) (*match.Match, error) {
+	err := LoadEnv()
+	if err != nil {
+		return nil, fmt.Errorf("error loading .env file")
+	}
+
+	apiKey := os.Getenv("ROPT_API_TOKEN")
+	if apiKey == "" {
+		return nil, fmt.Errorf("API token not found in environment variables")
+	}
+
+	url := fmt.Sprintf("%s/matches/%s?api_key=%s", riotMatchBaseURL, matchId, apiKey)
+	resp, err := makeRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch match data: %s", resp.Status)
+	}
+
+	var apiResponse struct {
+		GameID       int64 `json:"gameId"`
+		QueueID      int   `json:"gameQueueConfigId"`
+		Participants []struct {
+			PUUID      string      `json:"puuid"`
+			TeamID     int         `json:"teamId"`
+			ChampionID int         `json:"championId"`
+			Perks      match.Perks `json:"perks"`
+			SummonerID string      `json:"summonerId"`
+			Spell1ID   int         `json:"summoner1Id"`
+			Spell2ID   int         `json:"summoner2Id"`
+			Item0      int         `json:"item0"`
+			Item1      int         `json:"item1"`
+			Item2      int         `json:"item2"`
+			Item3      int         `json:"item3"`
+			Item4      int         `json:"item4"`
+			Item5      int         `json:"item5"`
+			Item6      int         `json:"item6"`
+		} `json:"participants"`
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	err = json.Unmarshal(body, &apiResponse)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response body: %v", err)
+	}
+
+	gameType := "Flex"
+	if apiResponse.QueueID == 440 {
+		gameType = "Flex"
+	} else if apiResponse.QueueID == 420 {
+		gameType = "Solo/Duo"
+	} else {
+		gameType = "UNRANKED"
+	}
+
+	matchData := &match.Match{
+		GameID:   apiResponse.GameID,
+		Teams:    [2]match.Team{{TeamID: 100}, {TeamID: 200}},
+		GameType: gameType,
+	}
+
+	for _, participant := range apiResponse.Participants {
+		teamIndex := 0
+		if participant.TeamID == 200 {
+			teamIndex = 1
+		}
+
+		summoner, err := GetSummonerByPUUID(participant.PUUID)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to get summoner by PUUID: %v", err)
+		}
+
+		matchData.Teams[teamIndex].Participants = append(matchData.Teams[teamIndex].Participants, match.Participant{
+			Summoner:   *summoner,
+			Perks:      participant.Perks,
+			ChampionID: participant.ChampionID,
+			Items: match.Items{
+				ItemIDs: []int{participant.Item0, participant.Item1, participant.Item2, participant.Item3, participant.Item4, participant.Item5, participant.Item6},
+			},
+			Spells: match.Spells{
+				SpellIDs: []int{participant.Spell1ID, participant.Spell2ID},
+			},
+		})
+	}
+
+	return matchData, nil
 }
 
 // GetOngoingMatchByPUUID checks if there is an ongoing match for the given summoner's PUUID.
