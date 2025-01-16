@@ -62,36 +62,13 @@ func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*s
 }
 
 // SaveOngoingMatchToFile saves an OngoingMatch instance to a JSON file
-func SaveOngoingMatchToFile(ongoingMatch *match.Match) error {
-	var ongoingMatches map[int64]*match.Match
-
-	// Load existing matches if the file exists
-	data, err := os.ReadFile(ongoingFilename)
-	if err == nil {
-		err = json.Unmarshal(data, &ongoingMatches)
-		if err != nil {
-			return fmt.Errorf("failed to unmarshal existing matches: %v", err)
-		}
-	} else if !os.IsNotExist(err) {
-		return fmt.Errorf("failed to read file: %v", err)
-	}
-
-	// Initialize the map if it is nil
-	if ongoingMatches == nil {
-		ongoingMatches = make(map[int64]*match.Match)
-	}
-
-	// Add or update the match in the map
-	ongoingMatches[ongoingMatch.GameID] = ongoingMatch
-
-	// Marshal the ongoing matches to JSON
-	data, err = json.MarshalIndent(ongoingMatches, "", "  ")
+func SaveOngoingMatchToFile(ongoingMatch *match.Match, filename string) error {
+	data, err := json.MarshalIndent(ongoingMatch, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal ongoing matches: %v", err)
+		return fmt.Errorf("failed to marshal ongoing match: %v", err)
 	}
 
-	// Write the ongoing matches to the file
-	err = os.WriteFile(ongoingFilename, data, 0644)
+	err = os.WriteFile(filename, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %v", err)
 	}
