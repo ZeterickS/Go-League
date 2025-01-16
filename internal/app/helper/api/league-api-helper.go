@@ -20,7 +20,7 @@ const (
 	riotAccountBaseURL   = "https://europe.api.riotgames.com/riot/account/v1/accounts"
 	riotSummonerBaseURL  = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners"
 	riotLeagueBaseURL    = "https://euw1.api.riotgames.com/lol/league/v4/entries"
-	riotMatchBaseURL     = "https://euw1.api.riotgames.com/lol/match/v5/matches"
+	riotMatchBaseURL     = "https://europe.api.riotgames.com/lol/match/v5/matches"
 	riotSpectatorBaseURL = "https://euw1.api.riotgames.com/lol/spectator/v5/active-games"
 )
 

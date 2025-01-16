@@ -15,8 +15,17 @@ var spellData map[int]string
 const baseURL = "../../../assets"
 
 func init() {
-	// Parse runes.json
-	file, err := os.Open("../../../assets/15.1.1/jsonmaps/runes.json")
+	// Print the current working directory
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting current working directory: %v\n", err)
+		return
+	}
+	fmt.Printf("Current working directory: %s\n", wd)
+
+	// Use an absolute path to the runes.json file
+	filePath := filepath.Join(wd, "assets/15.1.1/jsonmaps/runes.json")
+	file, err := os.Open(filePath)
 	if err != nil {
 		fmt.Printf("Error opening runes.json: %v\n", err)
 		return

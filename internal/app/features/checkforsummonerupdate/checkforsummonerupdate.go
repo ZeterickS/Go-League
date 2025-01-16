@@ -84,7 +84,6 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 					log.Printf("Failed to generate game image: %v", err)
 					continue
 				}
-				defer lastgameimage.Close()
 
 				// Use the URL directly
 				embedmessage := embed.NewEmbed().
