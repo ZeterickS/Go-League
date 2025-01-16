@@ -132,6 +132,10 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 			continue
 		}
 
+		if currentOngoingMatch.GameType == "UNRANKED" {
+			continue
+		}
+
 		// Check if the match is already stored
 		if len(ongoingMatches) != 0 {
 			if ongoingMatches[currentOngoingMatch.GameID] != nil {
@@ -170,7 +174,7 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 							} else if currentOngoingMatch.GameType == "Flex" {
 								rank = s.FlexRank
 							} else if currentOngoingMatch.GameType == "UNRANKED" {
-								rank = s.SoloRank
+								continue
 							}
 
 							enemyteamid := 1
