@@ -12,9 +12,11 @@ import (
 var runeData map[int]string
 var spellData map[int]string
 
+const baseURL = "../../../assets"
+
 func init() {
 	// Parse runes.json
-	file, err := os.Open("../../assets/15.1.1/jsonmaps/runes.json")
+	file, err := os.Open("../../../assets/15.1.1/jsonmaps/runes.json")
 	if err != nil {
 		fmt.Printf("Error opening runes.json: %v\n", err)
 		return
@@ -46,7 +48,7 @@ func init() {
 	}
 
 	// Parse spells.json
-	file, err = os.Open("../../assets/15.1.1/jsonmaps/spells.json")
+	file, err = os.Open("../../../assets/15.1.1/jsonmaps/spells.json")
 	if err != nil {
 		fmt.Printf("Error opening spells.json: %v\n", err)
 		return
@@ -82,7 +84,7 @@ func init() {
 func GetItemFiles(itemIDs []int) ([]*os.File, error) {
 	var files []*os.File
 	for _, itemID := range itemIDs {
-		filePath := fmt.Sprintf("../../assets/items/%d.png", itemID)
+		filePath := fmt.Sprintf("../../../assets/items/%d.png", itemID)
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for item ID %d: %w", itemID, err)
@@ -102,7 +104,7 @@ func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 		if !ok {
 			return nil, fmt.Errorf("icon not found for perk ID %d", perkID)
 		}
-		filePath := filepath.Join("../../assets", iconPath)
+		filePath := filepath.Join(baseURL, iconPath)
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for perk ID %d: %w", perkID, err)
@@ -120,7 +122,7 @@ func GetSpellFiles(spellIDs []int) ([]*os.File, error) {
 		if !ok {
 			return nil, fmt.Errorf("image not found for spell ID %d", spellID)
 		}
-		filePath := filepath.Join("../../assets/spells", imagePath)
+		filePath := filepath.Join(baseURL, "spells", imagePath)
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for spell ID %d: %w", spellID, err)

@@ -23,7 +23,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		return nil, err
 	}
 
-	defaultImage, err := os.Open("../../assets/template/template_empty.png")
+	defaultImage, err := os.Open("../../../assets/template/template_empty.png")
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 }
 
 func NewImageBuilder() (*ImageBuilder, error) {
-	file, err := os.Open("../../assets/template/template.png")
+	file, err := os.Open("../../../assets/template/template.png")
 	if err != nil {
 		return nil, err
 	}
