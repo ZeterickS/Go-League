@@ -10,7 +10,7 @@ import (
 
 // TODO - To ENV VARS
 const filename = "summoners.json"
-const ongoingFilename = "ongoing_matches.json"
+const ongoingFilename = "ongoing.json"
 
 // SaveSummonersToFile saves a map of Summoner instances to a JSON file
 func SaveSummonersToFile(summoners map[string]*summoner.Summoner) error {
@@ -62,13 +62,13 @@ func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*s
 }
 
 // SaveOngoingMatchToFile saves an OngoingMatch instance to a JSON file
-func SaveOngoingMatchToFile(ongoingMatch *match.Match, filename string) error {
+func SaveOngoingMatchToFile(ongoingMatch *match.Match) error {
 	data, err := json.MarshalIndent(ongoingMatch, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal ongoing match: %v", err)
 	}
 
-	err = os.WriteFile(filename, data, 0644)
+	err = os.WriteFile(ongoingFilename, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %v", err)
 	}
