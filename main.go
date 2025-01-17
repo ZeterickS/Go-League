@@ -122,7 +122,8 @@ var (
 				return
 			}
 			s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-				Embeds: &[]*discordgo.MessageEmbed{message},
+				Content: nil,
+				Embeds:  &[]*discordgo.MessageEmbed{message},
 			})
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
