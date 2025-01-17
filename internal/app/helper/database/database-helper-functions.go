@@ -63,6 +63,12 @@ func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*s
 
 // SaveOngoingMatchToFile saves an OngoingMatch instance to a JSON file
 func SaveOngoingMatchToFile(ongoingMatch *match.Match) error {
+	// Check if a directory with the same name exists
+	info, err := os.Stat(ongoingFilename)
+	if err == nil && info.IsDir() {
+		return fmt.Errorf("a directory with the name %s already exists", ongoingFilename)
+	}
+
 	// Load existing ongoing matches from file
 	existingMatches, err := LoadOngoingMatchFromFile()
 	if err != nil {
@@ -78,7 +84,13 @@ func SaveOngoingMatchToFile(ongoingMatch *match.Match) error {
 		return fmt.Errorf("failed to marshal updated ongoing matches: %v", err)
 	}
 
-	err = os.WriteFile(ongoingFilename, data, 0644)
+	// Get the absolute path for the ongoingFilename
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current working directory: %v", err)
+	}
+	ongoingFilePath := fmt.Sprintf("%s/%s", cwd, ongoingFilename)
+	err = os.WriteFile(ongoingFilePath, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %v", err)
 	}
