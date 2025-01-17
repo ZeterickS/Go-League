@@ -1,7 +1,6 @@
 package apiHelper
 
 import (
-	"log"
 	"os"
 	"strconv"
 	"sync"
@@ -34,8 +33,8 @@ func (rl *RateLimiter) Check() bool {
 	rl.cleanup(now)
 
 	if len(rl.requests) > 0 {
-		oldestTokenAge := now.Sub(rl.requests[0])
-		log.Printf("Oldest token age: %v", oldestTokenAge)
+		//oldestTokenAge := now.Sub(rl.requests[0])
+		//log.Printf("Oldest token age: %v", oldestTokenAge)
 	}
 
 	return len(rl.requests) < rl.maxTokens
