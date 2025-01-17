@@ -167,15 +167,15 @@ func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 		iconPath, err := GetRuneIconByID(perkID)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
+			continue
 		} else {
 			fmt.Printf("Icon path: %s\n", iconPath)
 		}
-		//filePath := filepath.Join(wd, "assets/15.1.1/", iconPath)
+
 		file, err := os.Open(iconPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for perk ID %d: %w", perkID, err)
 		}
-		defer file.Close() // Ensure the file is closed
 		files = append(files, file)
 	}
 	return files, nil
