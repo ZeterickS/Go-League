@@ -63,9 +63,19 @@ func GetSummonerByName(summoners map[string]*summoner.Summoner, name string) (*s
 
 // SaveOngoingMatchToFile saves an OngoingMatch instance to a JSON file
 func SaveOngoingMatchToFile(ongoingMatch *match.Match) error {
-	data, err := json.MarshalIndent(ongoingMatch, "", "  ")
+	// Load existing ongoing matches from file
+	existingMatches, err := LoadOngoingMatchFromFile()
 	if err != nil {
-		return fmt.Errorf("failed to marshal ongoing match: %v", err)
+		return fmt.Errorf("failed to load existing ongoing matches: %v", err)
+	}
+
+	// Add or update the ongoing match in the existing matches
+	existingMatches[ongoingMatch.GameID] = ongoingMatch
+
+	// Marshal the updated matches to JSON
+	data, err := json.MarshalIndent(existingMatches, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal updated ongoing matches: %v", err)
 	}
 
 	err = os.WriteFile(ongoingFilename, data, 0644)
