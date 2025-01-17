@@ -76,7 +76,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 	// Adding Perks
 	for i, item := range perkImages {
 		if i >= 2 {
-			err = builder.AddImage(item, float64(i*32), 0, 32, 32)
+			err = builder.AddImage(item, float64(i*32), 32, 32, 32)
 			if err != nil {
 				return nil, err
 			}
