@@ -90,6 +90,47 @@ func init() {
 	}
 }
 
+// GetRuneIconByID searches for the rune ID in runes.json and returns the corresponding icon path.
+func GetRuneIconByID(runeID int) (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("error getting current working directory: %w", err)
+	}
+
+	filePath := filepath.Join(wd, "assets/15.1.1/jsonmaps/runes.json")
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("error opening runes.json: %w", err)
+	}
+	defer file.Close()
+
+	var runes []struct {
+		ID    int `json:"id"`
+		Slots []struct {
+			Runes []struct {
+				ID   int    `json:"id"`
+				Icon string `json:"icon"`
+			} `json:"runes"`
+		} `json:"slots"`
+	}
+
+	if err := json.NewDecoder(file).Decode(&runes); err != nil {
+		return "", fmt.Errorf("error decoding runes.json: %w", err)
+	}
+
+	for _, runeCategory := range runes {
+		for _, slot := range runeCategory.Slots {
+			for _, rune := range slot.Runes {
+				if rune.ID == runeID {
+					return filepath.Join(wd, rune.Icon), nil
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("rune ID %d not found", runeID)
+}
+
 // GetItemFiles takes a list of item IDs and returns a slice of os.File pointers corresponding to the assets.
 func GetItemFiles(itemIDs []int) ([]*os.File, error) {
 	var files []*os.File
@@ -114,16 +155,19 @@ func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 	var files []*os.File
 	var styleIDs []int
 	styleIDs = append(styleIDs, perks.PerkStyle, perks.PerkSubStyle)
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("error getting current working directory: %w", err)
+	}
+
 	for _, perkID := range styleIDs {
-		iconPath, ok := runeData[perkID]
-		if !ok {
-			return nil, fmt.Errorf("icon not found for perk ID %d", perkID)
-		}
-		wd, err := os.Getwd()
+		iconPath, err := GetRuneIconByID(perkID)
 		if err != nil {
-			return nil, fmt.Errorf("error getting current working directory: %w", err)
+			fmt.Printf("Error: %v\n", err)
+		} else {
+			fmt.Printf("Icon path: %s\n", iconPath)
 		}
-		filePath := filepath.Join(wd, iconPath)
+		filePath := filepath.Join(wd, "assets/15.1.1/", iconPath)
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for perk ID %d: %w", perkID, err)
