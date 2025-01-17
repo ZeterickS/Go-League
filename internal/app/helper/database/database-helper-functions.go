@@ -10,7 +10,7 @@ import (
 
 // TODO - To ENV VARS
 const filename = "summoners.json"
-const ongoingFilename = "ongoing.json"
+const ongoingFilename = "ongoing_matches.json"
 
 // SaveSummonersToFile saves a map of Summoner instances to a JSON file
 func SaveSummonersToFile(summoners map[string]*summoner.Summoner) error {
