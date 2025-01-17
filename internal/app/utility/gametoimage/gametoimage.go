@@ -34,7 +34,6 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open default image: %w", err)
 	}
-	defer defaultImage.Close()
 
 	// Log the default image path
 	fmt.Printf("Default image path: %s\n", defaultImagePath)

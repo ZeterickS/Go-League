@@ -145,12 +145,22 @@ func GetItemFiles(itemIDs []int) ([]*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error getting current working directory: %w", err)
 	}
+	var file *os.File
 
 	for _, itemID := range itemIDs {
-		filePath := filepath.Join(wd, "assets/15.1.1/items", fmt.Sprintf("%d.png", itemID))
-		file, err := os.Open(filePath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to open file for item ID %d: %w", itemID, err)
+		if itemID == 0 {
+			defaultImagePath := wd + "/assets/15.1.1/template/template_empty.png"
+			file, err = os.Open(defaultImagePath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to open default image: %w", err)
+			}
+		} else {
+
+			filePath := filepath.Join(wd, "assets/15.1.1/items", fmt.Sprintf("%d.png", itemID))
+			file, err = os.Open(filePath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to open file for item ID %d: %w", itemID, err)
+			}
 		}
 		files = append(files, file)
 	}
