@@ -14,6 +14,11 @@ import (
 // OnboardSummoner fetches summoner data by tag and saves it to the database
 func OnboardSummoner(name, tagLine string) (*discordgo.MessageEmbed, error) {
 
+	// Sanity check for name and tagLine to ensure they are URL-safe
+	if strings.ContainsAny(name, " !@#$%^&*()+=[]{}|\\;:'\",<>/?") || strings.ContainsAny(tagLine, " !@#$%^&*()+=[]{}|\\;:'\",<>/?") {
+		return nil, fmt.Errorf("name or tagLine contains invalid characters")
+	}
+
 	summoners, err := databaseHelper.LoadSummonersFromFile()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load summoner data: %v", err)

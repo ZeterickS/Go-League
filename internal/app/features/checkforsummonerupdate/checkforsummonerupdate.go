@@ -105,13 +105,13 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 
 					// Use the URL directly
 					embedmessage := embed.NewEmbed().
-						SetAuthor(rank.ToString(), rankTierURL, fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
+						SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
 						SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
 						AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
 						AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
 						SetThumbnail(cdragon.GetChampionSquareURL(participant.ChampionID)).
 						SetImage("attachment://lastgameimage.png").
-						SetFooter(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
+						SetFooter(rank.ToString(), rankTierURL, fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
 						SetColor(color).InlineAllFields().MessageEmbed
 
 					messageSend := &discordgo.MessageSend{
@@ -247,12 +247,12 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 
 							// Send a message to the Discord channel
 							embedmessage := embed.NewEmbed().
-								SetAuthor(rank.ToString(), rankTierURL, fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", s.Name, s.TagLine)).
+								SetAuthor(s.GetNameTag(), cdragon.GetProfileIconURL(s.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", s.Name, s.TagLine), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", s.Name, s.TagLine)).
 								SetTitle(fmt.Sprintf("A %v-Match has started!", currentOngoingMatch.GameType)).
 								AddField("Your Team Average Rank", currentOngoingMatch.Teams[teamid].AverageRank().ToString()).
 								AddField("Enemy Team Average Rank", currentOngoingMatch.Teams[enemyteamid].AverageRank().ToString()).
 								SetThumbnail(cdragon.GetChampionSquareURL(participant.ChampionID)).
-								SetFooter(s.GetNameTag(), cdragon.GetProfileIconURL(s.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", s.Name, s.TagLine), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", s.Name, s.TagLine)).
+								SetFooter(rank.ToString(), rankTierURL, fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", s.Name, s.TagLine)).
 								InlineAllFields().MessageEmbed
 
 							messageSend := &discordgo.MessageSend{
