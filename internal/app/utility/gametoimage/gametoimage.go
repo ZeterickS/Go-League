@@ -130,7 +130,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode perk image: %w", err)
 		}
-		// Resize the perk image to 30x30
+		// Resize the perk image to 28x28
 		resizedPerk := resize.Resize(28, 28, perkimage, resize.Lanczos3)
 		perkFile, err := os.CreateTemp("", "resized_perk_*.png")
 		if err != nil {
@@ -147,7 +147,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to seek to beginning of perk file: %w", err)
 		}
 
-		err = builder.AddImage(perkFile, float64((i*28)+2+i*2), 34, 28, 28)
+		err = builder.AddImage(perkFile, float64((i*28)+2+i*4), 34, 28, 28)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add perk image: %w", err)
 		}
