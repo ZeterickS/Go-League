@@ -427,20 +427,33 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 			GameID       int64 `json:"gameId"`
 			QueueID      int   `json:"gameQueueConfigId"`
 			Participants []struct {
-				PUUID      string      `json:"puuid"`
-				TeamID     int         `json:"teamId"`
-				ChampionID int         `json:"championId"`
-				Perks      match.Perks `json:"perks"`
-				SummonerID string      `json:"summonerId"`
-				Spell1ID   int         `json:"summoner1Id"`
-				Spell2ID   int         `json:"summoner2Id"`
-				Item0      int         `json:"item0"`
-				Item1      int         `json:"item1"`
-				Item2      int         `json:"item2"`
-				Item3      int         `json:"item3"`
-				Item4      int         `json:"item4"`
-				Item5      int         `json:"item5"`
-				Item6      int         `json:"item6"`
+				PUUID      string `json:"puuid"`
+				TeamID     int    `json:"teamId"`
+				ChampionID int    `json:"championId"`
+				Perks      struct {
+					StatPerks struct {
+						Defense int `json:"defense"`
+						Flex    int `json:"flex"`
+						Offense int `json:"offense"`
+					} `json:"statPerks"`
+					Styles []struct {
+						Description string `json:"description"`
+						Selections  []struct {
+							Perk int `json:"perk"`
+						} `json:"selections"`
+						Style int `json:"style"`
+					} `json:"styles"`
+				} `json:"perks"`
+				SummonerID string `json:"summonerId"`
+				Spell1ID   int    `json:"summoner1Id"`
+				Spell2ID   int    `json:"summoner2Id"`
+				Item0      int    `json:"item0"`
+				Item1      int    `json:"item1"`
+				Item2      int    `json:"item2"`
+				Item3      int    `json:"item3"`
+				Item4      int    `json:"item4"`
+				Item5      int    `json:"item5"`
+				Item6      int    `json:"item6"`
 			} `json:"participants"`
 		} `json:"info"`
 	}
@@ -483,9 +496,20 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 			return nil, fmt.Errorf("failed to get summoner by PUUID: %v", err)
 		}
 
+		var perkIDs []int
+		for _, style := range participant.Perks.Styles {
+			for _, selection := range style.Selections {
+				perkIDs = append(perkIDs, selection.Perk)
+			}
+		}
+
 		matchData.Teams[teamIndex].Participants = append(matchData.Teams[teamIndex].Participants, match.Participant{
-			Summoner:   *summoner,
-			Perks:      participant.Perks,
+			Summoner: *summoner,
+			Perks: match.Perks{
+				PerkIDs:      perkIDs,
+				PerkStyle:    participant.Perks.Styles[0].Style,
+				PerkSubStyle: participant.Perks.Styles[1].Style,
+			},
 			ChampionID: participant.ChampionID,
 			Items: match.Items{
 				ItemIDs: []int{participant.Item0, participant.Item1, participant.Item2, participant.Item3, participant.Item4, participant.Item5, participant.Item6},
