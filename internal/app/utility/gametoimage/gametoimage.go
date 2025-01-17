@@ -92,6 +92,11 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		// Check the image format
 		_, format, err := image.Decode(perk)
 		if err != nil {
+			// Log the error and the first few bytes of the image file for debugging
+			buf := make([]byte, 512)
+			perk.Seek(0, 0) // Reset the reader to the beginning
+			n, _ := perk.Read(buf)
+			fmt.Printf("First %d bytes of the image: %x\n", n, buf[:n])
 			return nil, fmt.Errorf("failed to decode perk image: %w", err)
 		}
 		fmt.Printf("Perk image format: %s\n", format)
@@ -153,12 +158,6 @@ func (ib *ImageBuilder) AddImage(newfile *os.File, x, y, width, height float64) 
 	// Draw the resized asset onto the context.
 	ib.Context.DrawImage(resizedAsset, int(x), int(y))
 	return nil
-}
-
-func resizeImage(img image.Image, width, height int) image.Image {
-	dc := gg.NewContext(width, height)
-	dc.DrawImageAnchored(img, width/2, height/2, 0.5, 0.5)
-	return dc.Image()
 }
 
 func (ib *ImageBuilder) Save(outputPath string) error {
