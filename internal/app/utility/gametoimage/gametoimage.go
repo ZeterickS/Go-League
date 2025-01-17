@@ -79,7 +79,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to decode spell image: %w", err)
 		}
 		// Resize the spell image to 31x31
-		resizedSpell := resize.Resize(31, 31, spellimage, resize.Lanczos3)
+		resizedSpell := resize.Resize(30, 30, spellimage, resize.Lanczos3)
 		spellFile, err := os.CreateTemp("", "resized_spell_*.png")
 		if err != nil {
 			return nil, fmt.Errorf("failed to create temp file for resized spell: %w", err)
@@ -96,7 +96,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to seek to beginning of spell file: %w", err)
 		}
 
-		err = builder.AddImage(spellFile, float64(i*31), 1, 31, 31)
+		err = builder.AddImage(spellFile, float64((i*31)+1+i), 1, 31, 31)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add spell image: %w", err)
 		}
