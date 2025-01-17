@@ -91,6 +91,10 @@ func waitForRateLimiters() {
 //
 //	This function makes an HTTP GET request and waits for 10 seconds if the rate limit is exceeded.
 func makeRequest(url string) (*http.Response, error) {
+	if url == "" {
+		return nil, fmt.Errorf("url cannot be empty")
+	}
+
 	for retries := 0; retries < 2; retries++ {
 		waitForRateLimiters()
 		resp, err := http.Get(url)
