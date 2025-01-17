@@ -57,7 +57,6 @@ func init() {
 	}
 
 	// Parse spells.json
-	// Use an absolute path to the runes.json file
 	filePath = filepath.Join(wd, "assets/15.1.1/jsonmaps/spells.json")
 	file, err = os.Open(filePath)
 	if err != nil {
@@ -72,7 +71,7 @@ func init() {
 			Image struct {
 				Full string `json:"full"`
 			} `json:"image"`
-		} `json:"image"`
+		} `json:"data"`
 	}
 
 	if err := json.NewDecoder(file).Decode(&spells); err != nil {
@@ -147,12 +146,11 @@ func GetSpellFiles(spellIDs []int) ([]*os.File, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error getting current working directory: %w", err)
 		}
-		filePath := filepath.Join(wd, "spells", imagePath)
+		filePath := filepath.Join(wd, "assets/15.1.1/spells", imagePath)
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for spell ID %d: %w", spellID, err)
 		}
-		defer file.Close() // Ensure the file is closed
 		files = append(files, file)
 	}
 	return files, nil
