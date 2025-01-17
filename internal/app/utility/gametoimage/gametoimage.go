@@ -79,7 +79,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to decode spell image: %w", err)
 		}
 		// Resize the spell image to 31x31
-		resizedSpell := resize.Resize(30, 30, spellimage, resize.Lanczos3)
+		resizedSpell := resize.Resize(32, 32, spellimage, resize.Lanczos3)
 		spellFile, err := os.CreateTemp("", "resized_spell_*.png")
 		if err != nil {
 			return nil, fmt.Errorf("failed to create temp file for resized spell: %w", err)
@@ -95,7 +95,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to seek to beginning of spell file: %w", err)
 		}
 
-		err = builder.AddImage(spellFile, float64((i*31)+1+i), 1, 31, 31)
+		err = builder.AddImage(spellFile, float64(i*32), 0, 32, 32)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add spell image: %w", err)
 		}
@@ -132,7 +132,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to decode perk image: %w", err)
 		}
 		// Resize the perk image to 32x32
-		resizedPerk := resize.Resize(32, 32, perkimage, resize.Lanczos3)
+		resizedPerk := resize.Resize(30, 30, perkimage, resize.Lanczos3)
 		perkFile, err := os.CreateTemp("", "resized_perk_*.png")
 		if err != nil {
 			return nil, fmt.Errorf("failed to create temp file for resized perk: %w", err)
@@ -148,7 +148,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to seek to beginning of perk file: %w", err)
 		}
 
-		err = builder.AddImage(perkFile, float64(i*32), 32, 32, 32)
+		err = builder.AddImage(perkFile, float64((i*30)+1+i), 33, 31, 31)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add perk image: %w", err)
 		}
