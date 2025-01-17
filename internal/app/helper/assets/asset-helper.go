@@ -161,7 +161,7 @@ func GetItemFiles(itemIDs []int) ([]*os.File, error) {
 func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 	var files []*os.File
 	var styleIDs []int
-	styleIDs = append(styleIDs, perks.PerkStyle, perks.PerkSubStyle)
+	styleIDs = append(styleIDs, perks.PerkIDs[0], perks.PerkSubStyle)
 
 	for _, perkID := range styleIDs {
 		iconPath, err := GetRuneIconByID(perkID)

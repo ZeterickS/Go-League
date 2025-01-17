@@ -5,6 +5,7 @@ import (
 	"discord-bot/types/match"
 	"fmt"
 	"image"
+	"image/png"
 	"os"
 
 	"github.com/fogleman/gg"
@@ -73,7 +74,29 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		// Log the spell image path
 		fmt.Printf("Spell image path: %s\n", spell.Name())
 
-		err = builder.AddImage(spell, float64(i*32), 0, 32, 32)
+		spellimage, _, err := image.Decode(spell)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode spell image: %w", err)
+		}
+		// Resize the spell image to 31x31
+		resizedSpell := resize.Resize(31, 31, spellimage, resize.Lanczos3)
+		spellFile, err := os.CreateTemp("", "resized_spell_*.png")
+		if err != nil {
+			return nil, fmt.Errorf("failed to create temp file for resized spell: %w", err)
+		}
+		defer spellFile.Close()
+
+		err = png.Encode(spellFile, resizedSpell)
+		if err != nil {
+			return nil, fmt.Errorf("failed to encode resized spell to file: %w", err)
+		}
+
+		_, err = spellFile.Seek(0, 0)
+		if err != nil {
+			return nil, fmt.Errorf("failed to seek to beginning of spell file: %w", err)
+		}
+
+		err = builder.AddImage(spellFile, float64(i*31), 1, 31, 31)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add spell image: %w", err)
 		}
