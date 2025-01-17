@@ -89,6 +89,13 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		// Log the perk image path
 		fmt.Printf("Perk image path: %s\n", perk.Name())
 
+		// Check the image format
+		_, format, err := image.Decode(perk)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode perk image: %w", err)
+		}
+		fmt.Printf("Perk image format: %s\n", format)
+
 		err = builder.AddImage(perk, float64(i*32), 32, 32, 32)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add perk image: %w", err)
