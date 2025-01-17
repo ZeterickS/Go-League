@@ -92,14 +92,18 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		// Check the image format
 		_, format, err := image.Decode(perk)
 		if err != nil {
-			// Log the error and the first few bytes of the image file for debugging
-			buf := make([]byte, 512)
-			perk.Seek(0, 0) // Reset the reader to the beginning
-			n, _ := perk.Read(buf)
-			fmt.Printf("First %d bytes of the image: %x\n", n, buf[:n])
+
 			return nil, fmt.Errorf("failed to decode perk image: %w", err)
 		}
+		// Log the error and the first few bytes of the image file for debugging
+		buf := make([]byte, 512)
+		perk.Seek(0, 0) // Reset the reader to the beginning
+		n, _ := perk.Read(buf)
+		fmt.Printf("First %d bytes of the image: %x\n", n, buf[:n])
 		fmt.Printf("Perk image format: %s\n", format)
+
+		// Reset the reader to the beginning before adding the image
+		perk.Seek(0, 0)
 
 		err = builder.AddImage(perk, float64(i*32), 32, 32, 32)
 		if err != nil {
