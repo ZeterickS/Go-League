@@ -199,6 +199,12 @@ func CheckForOngoingGames(discordSession *discordgo.Session, channelID string, s
 					continue
 				}
 			}
+		} else {
+			err = databaseHelper.SaveOngoingMatchToFile(currentOngoingMatch)
+			if err != nil {
+				log.Printf("Failed to save ongoing match: %v", err)
+				continue
+			}
 		}
 
 		// Check if the current ongoing match is already known

@@ -88,6 +88,10 @@ func LoadOngoingMatchFromFile() (map[int64]*match.Match, error) {
 		return nil, fmt.Errorf("failed to read file: %v", err)
 	}
 
+	if len(data) == 0 {
+		return make(map[int64]*match.Match), nil
+	}
+
 	err = json.Unmarshal(data, &ongoingMatches)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal ongoing matches: %v", err)
