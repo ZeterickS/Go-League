@@ -97,14 +97,21 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 						continue
 					}
 
+					rank := currentSummoner.SoloRank
+
+					if lastMatch.GameType == "Flex" {
+						rank = currentSummoner.FlexRank
+					}
+
 					// Use the URL directly
 					embedmessage := embed.NewEmbed().
-						SetAuthor(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
+						SetAuthor(rank.ToString(), rankTierURL, fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
 						SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
 						AddField("Solo/Duo-Rank", currentSummoner.SoloRank.ToString()).
 						AddField("Flex-Rank", currentSummoner.FlexRank.ToString()).
-						SetThumbnail(rankTierURL).
+						SetThumbnail(cdragon.GetChampionSquareURL(participant.ChampionID)).
 						SetImage("attachment://lastgameimage.png").
+						SetFooter(currentSummoner.GetNameTag(), cdragon.GetProfileIconURL(currentSummoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", currentSummoner.Name, currentSummoner.TagLine)).
 						SetColor(color).InlineAllFields().MessageEmbed
 
 					messageSend := &discordgo.MessageSend{

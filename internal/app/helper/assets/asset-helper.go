@@ -105,7 +105,8 @@ func GetRuneIconByID(runeID int) (string, error) {
 	defer file.Close()
 
 	var runes []struct {
-		ID    int `json:"id"`
+		ID    int    `json:"id"`
+		Icon  string `json:"icon"`
 		Slots []struct {
 			Runes []struct {
 				ID   int    `json:"id"`
@@ -119,10 +120,16 @@ func GetRuneIconByID(runeID int) (string, error) {
 	}
 
 	for _, runeCategory := range runes {
+		if runeCategory.ID == runeID {
+			return filepath.Join(wd, "assets/15.1.1/", runeCategory.Icon), nil
+		}
+	}
+
+	for _, runeCategory := range runes {
 		for _, slot := range runeCategory.Slots {
 			for _, rune := range slot.Runes {
 				if rune.ID == runeID {
-					return filepath.Join(wd, rune.Icon), nil
+					return filepath.Join(wd, "assets/15.1.1/", rune.Icon), nil
 				}
 			}
 		}
@@ -167,8 +174,8 @@ func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 		} else {
 			fmt.Printf("Icon path: %s\n", iconPath)
 		}
-		filePath := filepath.Join(wd, "assets/15.1.1/", iconPath)
-		file, err := os.Open(filePath)
+		//filePath := filepath.Join(wd, "assets/15.1.1/", iconPath)
+		file, err := os.Open(iconPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open file for perk ID %d: %w", perkID, err)
 		}
