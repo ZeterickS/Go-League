@@ -148,7 +148,7 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 			return nil, fmt.Errorf("failed to seek to beginning of perk file: %w", err)
 		}
 
-		err = builder.AddImage(perkFile, float64((i*28)+2+i), 30, 30, 30)
+		err = builder.AddImage(perkFile, float64((i*28)+2+i*2), 34, 30, 30)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add perk image: %w", err)
 		}
