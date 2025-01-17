@@ -127,8 +127,11 @@ func checkAndSendRankUpdate(discordSession *discordgo.Session, channelID string,
 					_, err = discordSession.ChannelMessageSendComplex(channelID, messageSend)
 					if err != nil {
 						log.Printf("Failed to send embed message to Discord channel: %v", err)
+						lastgameimage.Close()
 						return err
 					}
+
+					lastgameimage.Close()
 				}
 			}
 		}

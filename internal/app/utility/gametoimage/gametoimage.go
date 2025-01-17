@@ -163,6 +163,24 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		return nil, fmt.Errorf("failed to open output image: %w", err)
 	}
 
+	// Close all item images
+	for _, itemImage := range itemImages {
+		itemImage.Close()
+	}
+
+	// Close all spell files
+	for _, spell := range spellImages {
+		spell.Close()
+	}
+
+	// Close all perk files
+	for _, perk := range perkImages {
+		perk.Close()
+	}
+
+	// Close the default image
+	defaultImage.Close()
+
 	return output, nil
 }
 
