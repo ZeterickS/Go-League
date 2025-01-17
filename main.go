@@ -109,7 +109,7 @@ var (
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: "Adding " + name + " " + tag + "... Waiting for RIOT API",
+						Content: "Adding " + name + " " + tag + "... Waiting for RIOT API. Depending on the server load, this may take a while.",
 					},
 				})
 			}()
@@ -122,7 +122,7 @@ var (
 				return
 			}
 			s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-				Content: nil,
+				Content: new(string),
 				Embeds:  &[]*discordgo.MessageEmbed{message},
 			})
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
