@@ -3,6 +3,7 @@ package gametoimage
 import (
 	assethelper "discord-bot/internal/app/helper/assets"
 	"discord-bot/types/match"
+	"fmt"
 	"image"
 	"os"
 
@@ -27,68 +28,81 @@ func GameToImage(participant match.Participant) (*os.File, error) {
 		return nil, err
 	}
 
-	defaultImage, err := os.Open(wd + "/assets/15.1.1/template/template_empty.png")
+	defaultImagePath := wd + "/assets/15.1.1/template/template_empty.png"
+	defaultImage, err := os.Open(defaultImagePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open default image: %w", err)
 	}
 	defer defaultImage.Close()
+
+	// Log the default image path
+	fmt.Printf("Default image path: %s\n", defaultImagePath)
 
 	// assemble from right to left
 
 	itemImages, err := assethelper.GetItemFiles(participant.Items.ItemIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get item files: %w", err)
 	}
 
 	// Adding Items
 	for i := 0; i < 6; i++ {
 		if i < len(itemImages) {
+			// Log the item image path
+			fmt.Printf("Item image path: %s\n", itemImages[i].Name())
+
 			err = builder.AddImage(itemImages[i], float64(i*64+64), 0, 64, 64)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to add item image: %w", err)
 			}
 		} else {
 			err = builder.AddImage(defaultImage, float64(i*64+64), 0, 64, 64)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to add default image: %w", err)
 			}
 		}
 	}
 
 	spellImages, err := assethelper.GetSpellFiles(participant.Spells.SpellIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get spell files: %w", err)
 	}
 
 	// Adding Spells
 	for i, spell := range spellImages {
+		// Log the spell image path
+		fmt.Printf("Spell image path: %s\n", spell.Name())
+
 		err = builder.AddImage(spell, float64(i*32), 0, 32, 32)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to add spell image: %w", err)
 		}
 	}
 
 	perkImages, err := assethelper.GetPerkFiles(participant.Perks)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get perk files: %w", err)
 	}
 
 	// Adding Perks
 	for i, perk := range perkImages {
+		// Log the perk image path
+		fmt.Printf("Perk image path: %s\n", perk.Name())
+
 		err = builder.AddImage(perk, float64(i*32), 32, 32, 32)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to add perk image: %w", err)
 		}
 	}
 
 	err = builder.Save("output.png")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to save image: %w", err)
 	}
 
 	output, err := os.Open("output.png")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open output image: %w", err)
 	}
 
 	return output, nil
