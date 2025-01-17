@@ -162,10 +162,6 @@ func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 	var files []*os.File
 	var styleIDs []int
 	styleIDs = append(styleIDs, perks.PerkStyle, perks.PerkSubStyle)
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, fmt.Errorf("error getting current working directory: %w", err)
-	}
 
 	for _, perkID := range styleIDs {
 		iconPath, err := GetRuneIconByID(perkID)
