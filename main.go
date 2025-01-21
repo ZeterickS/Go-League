@@ -6,14 +6,16 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"time"
 
+	"discord-bot/internal/app/constants"
 	"discord-bot/internal/app/features/checkforsummonerupdate"
 	"discord-bot/internal/app/features/offboarding"
 	"discord-bot/internal/app/features/onboarding"
+	databaseHelper "discord-bot/internal/app/helper/database"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -34,11 +36,6 @@ func init() {
 		log.Fatal("Bot token not found in environment variables")
 	}
 
-	GuildID := os.Getenv("GUILD_ID")
-	if GuildID == "" {
-		log.Fatal("Guild ID not found in environment variables")
-	}
-
 	s, err = discordgo.New("Bot " + BotToken)
 	if err != nil {
 		log.Fatalf("Invalid bot parameters: %v", err)
@@ -52,12 +49,26 @@ var (
 	// - ping: Responds with "Pong!".
 	// - delete: Deletes a summoner with the required options "name" (Ingame Name) and "tag" (Your Riot Tag).
 	commands = []*discordgo.ApplicationCommand{
-
-		// - add: Adds a new summoner with the required options "name" (Ingame Name) and "tag" (Your Riot Tag).
 		{
 			Name:        "add",
 			Description: "Add a new Summoner",
 			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "region",
+					Description: "Your League Region",
+					Required:    true,
+					Choices: func() []*discordgo.ApplicationCommandOptionChoice {
+						choices := []*discordgo.ApplicationCommandOptionChoice{}
+						for _, key := range constants.GetPlatformKeys() {
+							choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+								Name:  key,
+								Value: key,
+							})
+						}
+						return choices
+					}(),
+				},
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        "name",
@@ -103,8 +114,9 @@ var (
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"add": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			options := i.ApplicationCommandData().Options
-			name := options[0].StringValue()
-			tag := options[1].StringValue()
+			region := options[0].StringValue()
+			name := options[1].StringValue()
+			tag := options[2].StringValue()
 			go func() {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -113,7 +125,7 @@ var (
 					},
 				})
 			}()
-			message, err := onboarding.OnboardSummoner(name, tag)
+			message, err := onboarding.OnboardSummoner(name, tag, region, i.ChannelID)
 			if err != nil {
 				errormessage := fmt.Sprintf("Failed to onboard summoner: %v", err)
 				s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
@@ -125,6 +137,9 @@ var (
 				Content: new(string),
 				Embeds:  &[]*discordgo.MessageEmbed{message},
 			})
+		},
+		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			log.Println("Ping command received")
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -139,7 +154,7 @@ var (
 			summonerNameTag := fmt.Sprintf("%s#%s", gameName, tag)
 			log.Printf("Deleting summoner: %v", summonerNameTag)
 
-			err := offboarding.DeleteSummoner(summonerNameTag)
+			err := offboarding.DeleteSummoner(summonerNameTag, i.ChannelID)
 			if err != nil {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -160,50 +175,74 @@ var (
 	}
 )
 
-func removeCommands(s *discordgo.Session, GuildID string) {
+func removeCommands(s *discordgo.Session) {
 	log.Println("Removing commands...")
 
-	// Fetch all existing commands
-	commands, err := s.ApplicationCommands(s.State.User.ID, GuildID)
-	if err != nil {
-		log.Panicf("Cannot fetch commands: %v", err)
-	}
+	for _, Guild := range s.State.Guilds {
+		log.Printf("Removing commands for guild: %v", Guild.ID)
 
-	// Delete each command
-	for _, v := range commands {
-		err := s.ApplicationCommandDelete(s.State.User.ID, GuildID, v.ID)
-		log.Printf("Deleting command: %v", v.Name)
+		// Fetch all existing commands
+		commands, err := s.ApplicationCommands(s.State.User.ID, Guild.ID)
 		if err != nil {
-			log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
+			log.Panicf("Cannot fetch commands: %v", err)
+		}
+		for _, cmd := range commands {
+			log.Printf("Existing command: %v", cmd.Name)
+		}
+
+		// Delete each command
+		for _, v := range commands {
+			err := s.ApplicationCommandDelete(s.State.User.ID, Guild.ID, v.ID)
+			log.Printf("Deleting command: %v", v.Name)
+			if err != nil {
+				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
+			}
 		}
 	}
 }
 
-func addCommands(s *discordgo.Session, GuildID string, commands []*discordgo.ApplicationCommand) error {
-	log.Println("Adding commands...")
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
-	for i, v := range commands {
-		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, GuildID, v)
+func addCommandsIfNotRegistered(s *discordgo.Session, commands []*discordgo.ApplicationCommand) error {
+	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+			h(s, i)
+		}
+	})
+	for _, guild := range s.State.Guilds {
+		log.Printf("Registering commands for guild: %v", guild.ID)
+		existingCommands, err := s.ApplicationCommands(s.State.User.ID, guild.ID)
 		if err != nil {
-			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 			return err
 		}
-		registeredCommands[i] = cmd
-		log.Printf("Command '%v' registered successfully", v.Name)
+
+		existingCommandNames := make(map[string]bool)
+		for _, cmd := range existingCommands {
+			existingCommandNames[cmd.Name] = true
+		}
+
+		for _, cmd := range commands {
+			if !existingCommandNames[cmd.Name] {
+				_, err := s.ApplicationCommandCreate(s.State.User.ID, guild.ID, cmd)
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
+
 	return nil
 }
 
 func main() {
-	// Sleep for 2 minutes to allow the RIOT API Rate Limit to Reset
-	log.Println("Sleeping for 2 minutes to allow the RIOT API Rate Limit to Reset # LT")
-	time.Sleep(120 * time.Second)
+	log.Println("Starting application...")
 
-	// Get the guild ID from the environment variables
-	GuildID := os.Getenv("GUILD_ID")
-	if GuildID == "" {
-		log.Fatal("Guild ID not found in environment variables")
+	//time.Sleep(60 * time.Second)
+	log.Println("Woke up after initial sleep")
+
+	err := databaseHelper.InitDB()
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
 	}
+	log.Println("Database initialized successfully")
 
 	//s.Debug = true
 
@@ -217,43 +256,31 @@ func main() {
 		}
 	})
 
-	err := s.Open()
+	err = s.Open()
 	if err != nil {
 		log.Fatalf("Cannot open the session: %v", err)
 	}
 
-	if *RemoveCommands && GuildID != "" {
-		removeCommands(s, GuildID)
-	}
+	removeCommands(s)
 
-	if GuildID != "" {
-		addCommands(s, GuildID, commands)
-	} else {
-		log.Println("Guild ID is not set. Skipping command registration.")
-	}
-
-	// Get the channel ID from the environment variables
-	ChannelID := os.Getenv("CHANNEL_ID")
-	if ChannelID == "" {
-		log.Fatal("Channel ID not found in environment variables")
-	}
+	addCommandsIfNotRegistered(s, commands)
 
 	// Initialize the checkforsummonerupdate package
-	checkforsummonerupdate.Initialize(s, ChannelID)
+	log.Println("Initializing checkforsummonerupdate package")
+	checkforsummonerupdate.Initialize(s)
 
 	// Start the rank checking in a separate goroutine
+	log.Println("Starting rank checking goroutine")
 	go checkforsummonerupdate.CheckForUpdates()
 
-	defer s.Close()
+	defer func() {
+		log.Println("Closing session")
+		s.Close()
+	}()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 	log.Println("Press Ctrl+C to exit")
 	<-stop
-
-	if *RemoveCommands && GuildID != "" {
-		removeCommands(s, GuildID)
-	}
-
-	log.Println("Gracefully shutting down.")
+	log.Println("Application exiting")
 }
