@@ -5,6 +5,10 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"discord-bot/internal/logger"
+
+	"go.uber.org/zap"
 )
 
 type RateLimiter struct {
@@ -33,8 +37,8 @@ func (rl *RateLimiter) Check() bool {
 	rl.cleanup(now)
 
 	if len(rl.requests) > 0 {
-		//oldestTokenAge := now.Sub(rl.requests[0])
-		//log.Printf("Oldest token age: %v", oldestTokenAge)
+		oldestTokenAge := now.Sub(rl.requests[0])
+		logger.Logger.Debug("Oldest token age", zap.Duration("age", oldestTokenAge))
 	}
 
 	return len(rl.requests) < rl.maxTokens
@@ -50,9 +54,11 @@ func (rl *RateLimiter) Allow() bool {
 
 	if len(rl.requests) < rl.maxTokens {
 		rl.requests = append(rl.requests, now)
+		logger.Logger.Debug("Token consumed", zap.Time("time", now))
 		return true
 	}
 
+	logger.Logger.Warn("Rate limit exceeded", zap.Time("time", now))
 	return false
 }
 
@@ -64,6 +70,7 @@ func (rl *RateLimiter) cleanup(now time.Time) {
 		i++
 	}
 	rl.requests = rl.requests[i:]
+	logger.Logger.Debug("Tokens cleaned up", zap.Int("remainingTokens", len(rl.requests)))
 }
 
 func getEnvAsInt(name string, defaultValue int) int {

@@ -7,12 +7,14 @@ import (
 	"discord-bot/types/summoner"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
+	"discord-bot/internal/logger"
+
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
+	"go.uber.org/zap"
 )
 
 var db *sql.DB
@@ -30,7 +32,7 @@ func InitDB() error {
 
 	db, err = sql.Open("postgres", dataSourceName)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+		logger.Logger.Fatal("Failed to connect to the database", zap.Error(err))
 	}
 
 	// Run migrations before opening the database connection
@@ -156,7 +158,7 @@ func GetDBSummonerByName(name, tag, region string) (*summoner.Summoner, error) {
 
 // GetSummonerByPUUID retrieves a Summoner instance by their PUUID from the database
 func GetSummonerByPUUIDFromDB(puuid string) (*summoner.Summoner, error) {
-	log.Printf("Querying summoner with PUUID: %s", puuid) // Add this line for logging
+	logger.Logger.Info("Querying summoner with PUUID", zap.String("PUUID", puuid))
 	var s summoner.Summoner
 	var soloRank, flexRank int
 	err := db.QueryRow(`SELECT Name, TagLine, AccountID, ID, PUUID, ProfileIconID, SoloRank, FlexRank, Updated, Region FROM Summoner WHERE PUUID = $1`, puuid).Scan(&s.Name, &s.TagLine, &s.AccountID, &s.ID, &s.PUUID, &s.ProfileIconID, &soloRank, &flexRank, &s.Updated, &s.Region)

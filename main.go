@@ -3,19 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"time"
 
 	"discord-bot/internal/app/constants"
 	"discord-bot/internal/app/features/checkforsummonerupdate"
 	"discord-bot/internal/app/features/offboarding"
 	"discord-bot/internal/app/features/onboarding"
 	databaseHelper "discord-bot/internal/app/helper/database"
+	"discord-bot/internal/logger"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 var (
@@ -28,17 +32,25 @@ func init() {
 	flag.Parse()
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file")
+		logger.Logger.Warn("Error loading .env file")
 	}
 
 	BotToken := os.Getenv("DISCORD_BOT_TOKEN")
 	if BotToken == "" {
-		log.Fatal("Bot token not found in environment variables")
+		logger.Logger.Fatal("Bot token not found in environment variables")
 	}
 
 	s, err = discordgo.New("Bot " + BotToken)
 	if err != nil {
-		log.Fatalf("Invalid bot parameters: %v", err)
+		logger.Logger.Fatal("Invalid bot parameters", zap.Error(err))
+	}
+
+	debug := os.Getenv("DEBUG")
+	if debug == "true" {
+		go func() {
+			logger.Logger.Info("Starting pprof server on :6060")
+			logger.Logger.Error(http.ListenAndServe("0.0.0.0:6060", nil).Error())
+		}()
 	}
 }
 
@@ -139,7 +151,7 @@ var (
 			})
 		},
 		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			log.Println("Ping command received")
+			logger.Logger.Debug("Ping command received")
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -152,7 +164,7 @@ var (
 			gameName := options[0].StringValue()
 			tag := options[1].StringValue()
 			summonerNameTag := fmt.Sprintf("%s#%s", gameName, tag)
-			log.Printf("Deleting summoner: %v", summonerNameTag)
+			logger.Logger.Info("Deleting summoner", zap.String("summoner", summonerNameTag))
 
 			err := offboarding.DeleteSummoner(summonerNameTag, i.ChannelID)
 			if err != nil {
@@ -176,26 +188,27 @@ var (
 )
 
 func removeCommands(s *discordgo.Session) {
-	log.Println("Removing commands...")
+	logger.Logger.Info("Removing commands...")
 
 	for _, Guild := range s.State.Guilds {
-		log.Printf("Removing commands for guild: %v", Guild.ID)
+		logger.Logger.Info("Removing commands for guild", zap.String("guildID", Guild.ID))
 
 		// Fetch all existing commands
 		commands, err := s.ApplicationCommands(s.State.User.ID, Guild.ID)
 		if err != nil {
-			log.Panicf("Cannot fetch commands: %v", err)
+			logger.Logger.Error("Cannot fetch commands", zap.Error(err))
+			continue
 		}
 		for _, cmd := range commands {
-			log.Printf("Existing command: %v", cmd.Name)
+			logger.Logger.Debug("Existing command", zap.String("commandName", cmd.Name))
 		}
 
 		// Delete each command
 		for _, v := range commands {
 			err := s.ApplicationCommandDelete(s.State.User.ID, Guild.ID, v.ID)
-			log.Printf("Deleting command: %v", v.Name)
+			logger.Logger.Debug("Deleting command", zap.String("commandName", v.Name))
 			if err != nil {
-				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
+				logger.Logger.Error("Cannot delete command", zap.String("commandName", v.Name), zap.Error(err))
 			}
 		}
 	}
@@ -208,7 +221,7 @@ func addCommandsIfNotRegistered(s *discordgo.Session, commands []*discordgo.Appl
 		}
 	})
 	for _, guild := range s.State.Guilds {
-		log.Printf("Registering commands for guild: %v", guild.ID)
+		logger.Logger.Info("Registering commands for guild", zap.String("guildID", guild.ID))
 		existingCommands, err := s.ApplicationCommands(s.State.User.ID, guild.ID)
 		if err != nil {
 			return err
@@ -233,21 +246,20 @@ func addCommandsIfNotRegistered(s *discordgo.Session, commands []*discordgo.Appl
 }
 
 func main() {
-	log.Println("Starting application...")
+	logger.InitLogger()
+	logger.Logger.Info("Starting application... Waiting 60s to wait for Database and RateLimit to clear")
 
-	//time.Sleep(60 * time.Second)
-	log.Println("Woke up after initial sleep")
+	time.Sleep(60 * time.Second)
+	logger.Logger.Info("Woke up after initial sleep")
 
 	err := databaseHelper.InitDB()
 	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		logger.Logger.Fatal("Failed to initialize database", zap.Error(err))
 	}
-	log.Println("Database initialized successfully")
-
-	//s.Debug = true
+	logger.Logger.Info("Database initialized successfully")
 
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
+		logger.Logger.Info("Logged in as", zap.String("username", s.State.User.Username), zap.String("discriminator", s.State.User.Discriminator))
 	})
 
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -258,7 +270,7 @@ func main() {
 
 	err = s.Open()
 	if err != nil {
-		log.Fatalf("Cannot open the session: %v", err)
+		logger.Logger.Fatal("Cannot open the session", zap.Error(err))
 	}
 
 	removeCommands(s)
@@ -266,21 +278,21 @@ func main() {
 	addCommandsIfNotRegistered(s, commands)
 
 	// Initialize the checkforsummonerupdate package
-	log.Println("Initializing checkforsummonerupdate package")
+	logger.Logger.Info("Initializing checkforsummonerupdate package")
 	checkforsummonerupdate.Initialize(s)
 
 	// Start the rank checking in a separate goroutine
-	log.Println("Starting rank checking goroutine")
+	logger.Logger.Info("Starting rank checking goroutine")
 	go checkforsummonerupdate.CheckForUpdates()
 
 	defer func() {
-		log.Println("Closing session")
+		logger.Logger.Info("Closing session")
 		s.Close()
 	}()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
-	log.Println("Press Ctrl+C to exit")
+	logger.Logger.Info("Press Ctrl+C to exit")
 	<-stop
-	log.Println("Application exiting")
+	logger.Logger.Info("Application exiting")
 }

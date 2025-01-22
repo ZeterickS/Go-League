@@ -4,47 +4,48 @@ import (
 	apiHelper "discord-bot/internal/app/helper/api"
 	"discord-bot/internal/app/helper/cdragon"
 	databaseHelper "discord-bot/internal/app/helper/database"
+	"discord-bot/internal/logger"
 	"discord-bot/types/embed"
 	"discord-bot/types/summoner"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
 )
 
 // OnboardSummoner fetches summoner data by tag and saves it to the database
 func OnboardSummoner(name, tagLine, region, channelID string) (*discordgo.MessageEmbed, error) {
-	log.Printf("Onboarding summoner: name=%s, tagLine=%s, region=%s, channelID=%s", name, tagLine, region, channelID)
+	logger.Logger.Info("Onboarding summoner", zap.String("name", name), zap.String("tagLine", tagLine), zap.String("region", region), zap.String("channelID", channelID))
 	var summoner *summoner.Summoner
 
 	// Sanity check for name and tagLine to ensure they are URL-safe
 	if strings.ContainsAny(name, "!@#$%^&*()+=[]{}|\\;:'\",<>/?") || strings.ContainsAny(tagLine, " !@#$%^&*()+=[]{}|\\;:'\",<>/?") {
-		log.Printf("Invalid characters in name or tagLine: name=%s, tagLine=%s", name, tagLine)
+		logger.Logger.Warn("Invalid characters in name or tagLine", zap.String("name", name), zap.String("tagLine", tagLine))
 		return nil, fmt.Errorf("name or tagLine contains invalid characters")
 	}
 
 	// Sanity check for SQL injection
 	if strings.ContainsAny(name, "'\";--") || strings.ContainsAny(tagLine, "'\";--") {
-		log.Printf("SQL injection characters in name or tagLine: name=%s, tagLine=%s", name, tagLine)
+		logger.Logger.Warn("SQL injection characters in name or tagLine", zap.String("name", name), zap.String("tagLine", tagLine))
 		return nil, fmt.Errorf("name or tagLine contains SQL injection characters")
 	}
 
 	summonerExists, err := databaseHelper.SummonerExists(name, tagLine, region)
 	if err != nil {
-		log.Printf("Failed to check if summoner exists: %v", err)
+		logger.Logger.Error("Failed to check if summoner exists", zap.Error(err))
 		return nil, fmt.Errorf("failed to check if summoner exists: %v", err)
 	}
 
 	if summonerExists {
-		log.Printf("Summoner already exists: name=%s, tagLine=%s, region=%s", name, tagLine, region)
+		logger.Logger.Info("Summoner already exists", zap.String("name", name), zap.String("tagLine", tagLine), zap.String("region", region))
 	} else {
 		summoner, err = apiHelper.GetSummonerByTag(name, tagLine, region)
 		if err != nil {
-			log.Printf("Failed to fetch summoner data: %v", err)
+			logger.Logger.Error("Failed to fetch summoner data", zap.Error(err))
 			return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
 		}
-		log.Printf("Fetched summoner data: %+v", summoner)
+		logger.Logger.Info("Fetched summoner data", zap.Any("summoner", summoner))
 
 		err = databaseHelper.SaveSummonerToDB(*summoner)
 		if err != nil {
@@ -54,7 +55,7 @@ func OnboardSummoner(name, tagLine, region, channelID string) (*discordgo.Messag
 
 	err = databaseHelper.SaveChannelForSummoner(summoner.PUUID, channelID)
 	if err != nil {
-		return nil, fmt.Errorf("summoner already exists: name=%s, tagLine=%s, region=%s, channekID=%s", name, tagLine, region, channelID)
+		return nil, fmt.Errorf("summoner already exists: name=%s, tagLine=%s, region=%s, channelID=%s", name, tagLine, region, channelID)
 	}
 
 	embedMessage := embed.NewEmbed().

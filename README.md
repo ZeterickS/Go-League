@@ -28,7 +28,7 @@ This project is a Discord bot written in Go that interacts with the Riot Games A
 2. Create a [`.env`](.env ) file in the root directory of the project and add your Riot Games API key, Discord bot token, and other necessary environment variables, or set the Variables through the docker-compose.yml:
     ```env
     DISCORD_BOT_TOKEN="your-discord-bot-token"
-    ROPT_API_TOKEN="your-riot-api-key"
+    RIOT_API_TOKEN="your-riot-api-key"
     CHANNEL_ID="your-discord-channel-id"
     GUILD_ID="your-discord-guild-id"
     API_RATE_LIMIT_2_MINUTE=100
@@ -50,7 +50,7 @@ This will pull the Docker image, set up the necessary environment variables, and
 1. Create a [.env](http://_vscodecontentref_/2) file in the root directory of the project and add your Riot Games API key and Discord bot token:
     ```env
     DISCORD_BOT_TOKEN="your-discord-bot-token"
-    ROPT_API_TOKEN="your-riot-api-key"
+    RIOT_API_TOKEN="your-riot-api-key"
     CHANNEL_ID="your-discord-channel-id"
     GUILD_ID="your-discord-guild-id"
     API_RATE_LIMIT_2_MINUTE=100

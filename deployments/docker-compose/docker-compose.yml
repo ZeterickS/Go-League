@@ -4,9 +4,7 @@ services:
     image: ghcr.io/zetericks/go-league:${IMAGE_TAG}
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - ROPT_API_TOKEN=${ROPT_API_TOKEN}
-      - CHANNEL_ID=${CHANNEL_ID}
-      - GUILD_ID=${GUILD_ID}
+      - RIOT_API_TOKEN=${RIOT_API_TOKEN}
       - API_RATE_LIMIT_2_MINUTE=${API_RATE_LIMIT_2_MINUTE}
       - API_RATE_LIMIT_SECOND=${API_RATE_LIMIT_SECOND}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
@@ -16,6 +14,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=${POSTGRES_HOST}
+      - LOG_LEVEL=${LOG_LEVEL}
     depends_on:
       - db
 
