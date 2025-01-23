@@ -3,12 +3,27 @@ package offboarding
 import (
 	databaseHelper "discord-bot/internal/app/helper/database"
 	"discord-bot/internal/logger"
+	"fmt"
+	"strings"
 
 	"go.uber.org/zap"
 )
 
 // DeleteSummoner deletes a summoner by name.
 func DeleteSummoner(name, tag, channelID string) error {
+
+	// Sanity check for name and tagLine to ensure they are URL-safe
+	if strings.ContainsAny(name, "!@#$%^&*()+=[]{}|\\;:'\",<>/?") || strings.ContainsAny(tag, " !@#$%^&*()+=[]{}|\\;:'\",<>/?") {
+		logger.Logger.Warn("Invalid characters in name or tagLine", zap.String("name", name), zap.String("tagLine", tag))
+		return fmt.Errorf("name or tagLine contains invalid characters")
+	}
+
+	// Sanity check for SQL injection
+	if strings.ContainsAny(name, "'\";--") || strings.ContainsAny(tag, "'\";--") {
+		logger.Logger.Warn("SQL injection characters in name or tagLine", zap.String("name", name), zap.String("tagLine", tag))
+		return fmt.Errorf("name or tagLine contains SQL injection characters")
+	}
+
 	summonerNameTag := name + "#" + tag
 	err := databaseHelper.DeleteChannelForSummonerByName(name, tag, channelID)
 	if err != nil {
