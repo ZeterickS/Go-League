@@ -144,7 +144,7 @@ func LoadSummonersFromDB() (map[string]*summoner.Summoner, error) {
 func GetDBSummonerByName(name, tag string) (*summoner.Summoner, error) {
 	var s summoner.Summoner
 	var soloRank, flexRank int
-	err := db.QueryRow(`SELECT Name, TagLine, AccountID, ID, PUUID, ProfileIconID, SoloRank, FlexRank, Updated, Region FROM Summoner WHERE Name = $1 AND TagLine = $2`, name, tag).Scan(&s.Name, &s.TagLine, &s.AccountID, &s.ID, &s.PUUID, &s.ProfileIconID, &soloRank, &flexRank, &s.Updated, &s.Region)
+	err := db.QueryRow(`SELECT Name, TagLine, AccountID, ID, PUUID, ProfileIconID, SoloRank, FlexRank, Updated, Region FROM Summoner WHERE LOWER(Name) = LOWER($1) AND LOWER(TagLine) = LOWER($2)`, name, tag).Scan(&s.Name, &s.TagLine, &s.AccountID, &s.ID, &s.PUUID, &s.ProfileIconID, &soloRank, &flexRank, &s.Updated, &s.Region)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("summoner with name %s, tag %s not found", name, tag)
@@ -214,7 +214,7 @@ func GetChannelsForSummoner(puuid string) ([]string, error) {
 func DeleteChannelForSummonerByName(name, tag, channel string) error {
 	summoner, err := GetDBSummonerByName(name, tag)
 	if err != nil {
-		return fmt.Errorf("failed to get summoner by name, tag, and region: %v", err)
+		return fmt.Errorf("failed to get summoner by name, tag: %v", err)
 	}
 
 	err = DeleteChannelForSummoner(summoner.PUUID, channel)

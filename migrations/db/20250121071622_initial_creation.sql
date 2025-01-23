@@ -22,8 +22,10 @@ CREATE TABLE SummonerChannel (
 );
 
 CREATE TABLE Match (
-    GameID VARCHAR(255) PRIMARY KEY,
-    GameType VARCHAR(255) NOT NULL
+    GameID VARCHAR(255) NOT NULL,
+    GameType VARCHAR(255) NOT NULL,
+    Region VARCHAR(255) DEFAULT 'euw1',
+    PRIMARY KEY (GameID, Region)
 );
 
 CREATE TABLE Participant (
