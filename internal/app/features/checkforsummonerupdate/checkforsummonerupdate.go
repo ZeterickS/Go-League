@@ -156,16 +156,13 @@ func checkAndSendRankUpdate(summoner summoner.Summoner) error {
 				},
 			}
 			for _, knownChannel := range knownChannels {
-
 				_, err = discordSession.ChannelMessageSendComplex(knownChannel, messageSend)
 				if err != nil {
 					logger.Logger.Error("Failed to send embed message to Discord channel", zap.Error(err))
-					lastgameimage.Close()
-					return err
-				}
 
-				lastgameimage.Close()
+				}
 			}
+			lastgameimage.Close()
 			participant.Summoner.SoloRank = newparticipantSoloRank
 			participant.Summoner.FlexRank = newparticipantFlexRank
 			participant.Summoner.Updated = time.Now()
