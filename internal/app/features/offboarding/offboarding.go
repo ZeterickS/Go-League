@@ -8,8 +8,9 @@ import (
 )
 
 // DeleteSummoner deletes a summoner by name.
-func DeleteSummoner(summonerNameTag, channelID string) error {
-	err := databaseHelper.DeleteChannelForSummoner(summonerNameTag, channelID)
+func DeleteSummoner(name, tag, channelID string) error {
+	summonerNameTag := name + "#" + tag
+	err := databaseHelper.DeleteChannelForSummonerByName(name, tag, channelID)
 	if err != nil {
 		logger.Logger.Error("Failed to delete channel for summoner", zap.String("summonerNameTag", summonerNameTag), zap.String("channelID", channelID), zap.Error(err))
 		return err

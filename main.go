@@ -170,7 +170,7 @@ var (
 			summonerNameTag := fmt.Sprintf("%s#%s", gameName, tag)
 			logger.Logger.Info("Deleting summoner", zap.String("summoner", summonerNameTag))
 
-			err := offboarding.DeleteSummoner(summonerNameTag, i.ChannelID)
+			err := offboarding.DeleteSummoner(gameName, tag, i.ChannelID)
 			if err != nil {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,

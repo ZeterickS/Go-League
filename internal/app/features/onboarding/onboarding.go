@@ -39,7 +39,7 @@ func OnboardSummoner(name, tagLine, region, channelID, guildID string) (*discord
 
 	if summonerExists {
 		logger.Logger.Info("Summoner already exists", zap.String("name", name), zap.String("tagLine", tagLine), zap.String("region", region))
-		summoner, err = databaseHelper.GetDBSummonerByName(name, tagLine, region)
+		summoner, err = databaseHelper.GetDBSummonerByName(name, tagLine)
 		if err != nil {
 			logger.Logger.Error("Failed to fetch summoner data", zap.Error(err))
 			return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
