@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ if .Values.TEST }}gol-tracker-test{{ else }}gol-tracker{{ end }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: gol-tracker
+  template:
+    metadata:
+      labels:
+        app: gol-tracker
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecrets }}
+      containers:
+        - name: gol-tracker
+          image: {{ if .Values.TEST }}{{ .Values.image.repository }}:test{{ else }}{{ .Values.image.repository }}:main{{ end }}
+          env:
+            - name: DISCORD_BOT_TOKEN
+              value: "{{ .Values.env.DISCORD_BOT_TOKEN }}"
+            - name: RIOT_API_TOKEN
+              value: "{{ .Values.env.RIOT_API_TOKEN }}"
+            - name: API_RATE_LIMIT_2_MINUTE
+              value: "{{ .Values.env.API_RATE_LIMIT_2_MINUTE }}"
+            - name: API_RATE_LIMIT_SECOND
+              value: "{{ .Values.env.API_RATE_LIMIT_SECOND }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.env.POSTGRES_USER }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.env.POSTGRES_PASSWORD }}"
+            - name: POSTGRES_DB
+              value: "{{ .Values.env.POSTGRES_DB }}"
+            - name: POSTGRES_HOST
+              value: "{{ .Values.env.POSTGRES_HOST }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.env.LOG_LEVEL }}"
+            - name: DEBUG
+              value: "{{ .Values.env.DEBUG }}"
+---
+{{- if .Values.DEBUG }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: gol-tracker
+spec:
+  selector:
+    app: gol-tracker
+  ports:
+    - protocol: TCP
+      port: 6060
+      targetPort: 6060
+{{- end }}
