@@ -494,6 +494,13 @@ func UpdateOngoingToFinishedGame(oldGameID string, newMatch *match.Match) error 
 		return fmt.Errorf("failed to begin transaction: %v", err)
 	}
 
+	// Delete existing participants
+	_, err = tx.Exec(`DELETE FROM Participant WHERE GameID = $1`, oldGameID)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to delete participants for match with old GameID %s: %v", oldGameID, err)
+	}
+
 	// Update the Match table
 	query := `
         UPDATE Match
@@ -504,13 +511,6 @@ func UpdateOngoingToFinishedGame(oldGameID string, newMatch *match.Match) error 
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("failed to update match with old GameID %s: %v", oldGameID, err)
-	}
-
-	// Delete existing participants
-	_, err = tx.Exec(`DELETE FROM Participant WHERE GameID = $1`, oldGameID)
-	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to delete participants for match with old GameID %s: %v", oldGameID, err)
 	}
 
 	// Insert new participants
