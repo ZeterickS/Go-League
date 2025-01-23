@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gol-tracker
+  name: {{ if .Values.TEST }}gol-tracker-test{{ else }}gol-tracker{{ end }}
 spec:
   replicas: 1
   selector:
@@ -12,47 +12,34 @@ spec:
       labels:
         app: gol-tracker
     spec:
+      imagePullSecrets:
+        - name: github-registry
       containers:
       - name: gol-tracker
-        image: ghcr.io/zetericks/go-league:${IMAGE_TAG}
+        image: {{ if .Values.TEST }}ghcr.io/zetericks/go-league:test{{ else }}ghcr.io/zetericks/go-league:main{{ end }}
         env:
         - name: DISCORD_BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: discord-bot-secrets
-              key: DISCORD_BOT_TOKEN
+          value: "${DISCORD_BOT_TOKEN}"
         - name: RIOT_API_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: discord-bot-secrets
-              key: RIOT_API_TOKEN
+          value: "${RIOT_API_TOKEN}"
         - name: API_RATE_LIMIT_2_MINUTE
           value: "${API_RATE_LIMIT_2_MINUTE}"
         - name: API_RATE_LIMIT_SECOND
           value: "${API_RATE_LIMIT_SECOND}"
-        - name: GITHUB_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: discord-bot-secrets
-              key: GITHUB_TOKEN
-        - name: GITHUB_USERNAME
-          value: "${GITHUB_USERNAME}"
-        - name: DEVELOPMENT
-          value: "${DEVELOPMENT}"
         - name: POSTGRES_USER
           value: "${POSTGRES_USER}"
         - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: discord-bot-secrets
-              key: POSTGRES_PASSWORD
+          value: "${POSTGRES_PASSWORD}"
         - name: POSTGRES_DB
           value: "${POSTGRES_DB}"
         - name: POSTGRES_HOST
           value: "${POSTGRES_HOST}"
         - name: LOG_LEVEL
           value: "${LOG_LEVEL}"
+        - name: DEBUG
+          value: "${DEBUG}"
 ---
+{{- if .Values.DEBUG }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -62,5 +49,6 @@ spec:
     app: gol-tracker
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8080
+      port: 6060
+      targetPort: 6060
+{{- end }}
