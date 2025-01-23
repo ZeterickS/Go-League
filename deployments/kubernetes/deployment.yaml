@@ -14,7 +14,6 @@ spec:
     spec:
       imagePullSecrets:
         - name: github-registry
-          namespace: argocd
       containers:
         - name: gol-tracker
           image: {{ if .Values.TEST }}ghcr.io/zetericks/go-league:test{{ else }}ghcr.io/zetericks/go-league:main{{ end }}
