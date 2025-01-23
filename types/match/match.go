@@ -19,7 +19,7 @@ type Team struct {
 }
 
 type Match struct {
-	GameID   int64
+	GameID   string
 	Teams    [2]Team
 	GameType string // "Solo/Duo" or "Flex"
 }

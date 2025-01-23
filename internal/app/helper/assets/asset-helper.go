@@ -7,27 +7,31 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"discord-bot/internal/logger"
+
+	"go.uber.org/zap"
 )
 
 var runeData map[int]string
 var spellData map[int]string
 
-const baseURL = "../../../assets"
-
 func init() {
+	logger.InitLogger()
+
 	// Print the current working directory
 	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error getting current working directory: %v\n", err)
+		logger.Logger.Error("Error getting current working directory", zap.Error(err))
 		return
 	}
-	fmt.Printf("Current working directory: %s\n", wd)
+	logger.Logger.Info("Current working directory", zap.String("directory", wd))
 
 	// Use an absolute path to the runes.json file
 	filePath := filepath.Join(wd, "assets/15.1.1/jsonmaps/runes.json")
 	file, err := os.Open(filePath)
 	if err != nil {
-		fmt.Printf("Error opening runes.json: %v\n", err)
+		logger.Logger.Error("Error opening runes.json", zap.Error(err))
 		return
 	}
 	defer file.Close()
@@ -43,7 +47,7 @@ func init() {
 	}
 
 	if err := json.NewDecoder(file).Decode(&runes); err != nil {
-		fmt.Printf("Error decoding runes.json: %v\n", err)
+		logger.Logger.Error("Error decoding runes.json", zap.Error(err))
 		return
 	}
 
@@ -60,7 +64,7 @@ func init() {
 	filePath = filepath.Join(wd, "assets/15.1.1/jsonmaps/spells.json")
 	file, err = os.Open(filePath)
 	if err != nil {
-		fmt.Printf("Error opening spells.json: %v\n", err)
+		logger.Logger.Error("Error opening spells.json", zap.Error(err))
 		return
 	}
 	defer file.Close()
@@ -75,7 +79,7 @@ func init() {
 	}
 
 	if err := json.NewDecoder(file).Decode(&spells); err != nil {
-		fmt.Printf("Error decoding spells.json: %v\n", err)
+		logger.Logger.Error("Error decoding spells.json", zap.Error(err))
 		return
 	}
 
@@ -83,7 +87,7 @@ func init() {
 	for _, spell := range spells.Data {
 		spellID, err := strconv.Atoi(spell.Key)
 		if err != nil {
-			fmt.Printf("Error converting spell ID %s to int: %v\n", spell.Key, err)
+			logger.Logger.Error("Error converting spell ID to int", zap.String("spellID", spell.Key), zap.Error(err))
 			continue
 		}
 		spellData[spellID] = spell.Image.Full
@@ -176,10 +180,10 @@ func GetPerkFiles(perks match.Perks) ([]*os.File, error) {
 	for _, perkID := range styleIDs {
 		iconPath, err := GetRuneIconByID(perkID)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
+			logger.Logger.Error("Error getting rune icon by ID", zap.Int("perkID", perkID), zap.Error(err))
 			continue
 		} else {
-			fmt.Printf("Icon path: %s\n", iconPath)
+			logger.Logger.Info("Icon path", zap.String("path", iconPath))
 		}
 
 		file, err := os.Open(iconPath)

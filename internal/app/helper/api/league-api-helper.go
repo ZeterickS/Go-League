@@ -1,169 +1,173 @@
 package apiHelper
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	"discord-bot/internal/app/constants"
+	databaseHelper "discord-bot/internal/app/helper/database"
+	"discord-bot/internal/logger"
 	"discord-bot/types/match"
 	"discord-bot/types/rank"
 	"discord-bot/types/summoner"
 
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
 
-const (
-	riotAccountBaseURL   = "https://europe.api.riotgames.com/riot/account/v1/accounts"
-	riotSummonerBaseURL  = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners"
-	riotLeagueBaseURL    = "https://euw1.api.riotgames.com/lol/league/v4/entries"
-	riotMatchBaseURL     = "https://europe.api.riotgames.com/lol/match/v5/matches"
-	riotSpectatorBaseURL = "https://euw1.api.riotgames.com/lol/spectator/v5/active-games"
+var (
+	client       *http.Client
+	requestQueue chan request
 )
 
-// LoadEnv loads environment variables from a .env file if they are not already set.
-//
-// Synopsis:
-//
-//	err := LoadEnv()
-//
-// Parameters:
-//
-//	None.
-//
-// Returns:
-//   - error: An error if the .env file could not be loaded, otherwise nil.
-//
-// Notes:
-//
-//	This function is used to ensure that environment variables are loaded before making API requests.
+type request struct {
+	url      string
+	response chan *http.Response
+	err      chan error
+}
+
+func init() {
+	// Create a custom transport with a shared TLS connection
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true, // Adjust as needed
+		},
+		MaxIdleConns:        10,
+		IdleConnTimeout:     30 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
+	client = &http.Client{
+		Transport: tr,
+		Timeout:   30 * time.Second,
+	}
+
+	// Initialize the request queue
+	requestQueue = make(chan request, 100)
+
+	// Start the request processor
+	go processRequests()
+}
+
+func getBaseURL(platform string, region string) (string, error) {
+	if baseURL, ok := constants.Platforms[platform]; ok {
+		return "https://" + baseURL, nil
+	}
+	if baseURL, ok := constants.Regions[region]; ok {
+		return "https://" + baseURL, nil
+	}
+	return "", fmt.Errorf("invalid platform or region")
+}
+
 func LoadEnv() error {
-	if os.Getenv("ROPT_API_TOKEN") != "" {
+	if os.Getenv("RIOT_API_TOKEN") != "" {
 		return nil
 	}
 	return godotenv.Load()
 }
 
-// waitForRateLimiters waits until both rate limiters allow a request.
-//
-// Synopsis:
-//
-//	waitForRateLimiters()
-//
-// Parameters:
-//
-//	None.
-//
-// Returns:
-//
-//	None.
-//
-// Notes:
-//
-//	This function is used to handle rate limiting for API requests.
 func waitForRateLimiters() {
-	//starttime := time.Now()
 	for !rateLimiterPerSecond.Check() || !rateLimiterPer2Minutes.Check() {
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Second)
 	}
 	rateLimiterPer2Minutes.Allow()
 	rateLimiterPerSecond.Allow()
-	//log.Printf("Rate limiters allowed request after %v", time.Since(starttime))
 }
 
-// makeRequest makes an HTTP GET request and handles rate limit errors.
-//
-// Synopsis:
-//
-//	resp, err := makeRequest(url)
-//
-// Parameters:
-//   - url: string - The URL to make the request to.
-//
-// Returns:
-//   - *http.Response: The HTTP response.
-//   - error: An error if the request failed.
-//
-// Notes:
-//
-//	This function makes an HTTP GET request and waits for 10 seconds if the rate limit is exceeded.
 func makeRequest(url string) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("url cannot be empty")
 	}
 
-	for retries := 0; retries < 2; retries++ {
-		waitForRateLimiters()
-		resp, err := http.Get(url)
-		if resp.StatusCode == 404 {
-			return resp, fmt.Errorf("not found")
-		}
-		if resp.StatusCode == 429 && retries == 0 {
-			resp.Body.Close()
-			log.Println("Rate limit exceeded, waiting 20 seconds...")
-			time.Sleep(20 * time.Second)
-			waitForRateLimiters()
-
-			continue
-		}
-		if err != nil || resp.StatusCode != http.StatusOK {
-			if retries == 1 {
-				log.Printf("Response: %v", resp)
-				return nil, fmt.Errorf("failed to make request after retries: %w", err)
-			}
-		} else {
-			return resp, nil
-		}
+	req := request{
+		url:      url,
+		response: make(chan *http.Response),
+		err:      make(chan error),
 	}
-	return nil, fmt.Errorf("failed to make request after retries")
+
+	requestQueue <- req
+
+	select {
+	case resp := <-req.response:
+		return resp, nil
+	case err := <-req.err:
+		return nil, err
+	}
 }
 
-// GetSummonerByTag fetches summoner data by tag from the League of Legends API.
-//
-// Synopsis:
-//
-//	summoner, err := GetSummonerByTag("summonerName", "tagLine")
-//
-// Parameters:
-//   - name: string - The summoner's name.
-//   - tagLine: string - The summoner's tag line.
-//
-// Returns:
-//   - *summoner.Summoner: The summoner data.
-//   - error: An error if the summoner data could not be fetched.
-//
-// Notes:
-//
-//	This function first fetches the PUUID using the summoner's name and tag line, then fetches the summoner data using the PUUID.
-func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
+func processRequests() {
+	for req := range requestQueue {
+		waitForRateLimiters()
+		resp, err := client.Get(req.url)
+		if err != nil {
+			logger.Logger.Error("Failed to make request", zap.Error(err))
+			req.err <- fmt.Errorf("failed to make request: %w", err)
+			continue
+		}
+
+		if resp.StatusCode == 404 {
+			req.err <- fmt.Errorf("not found")
+			continue
+		}
+		if resp.StatusCode == 429 {
+			logger.Logger.Warn("Rate limit exceeded, waiting 20 seconds...")
+			time.Sleep(20 * time.Second)
+			waitForRateLimiters()
+			resp, err = client.Get(req.url)
+			if err != nil {
+				logger.Logger.Error("Failed to make request after retries", zap.Error(err))
+				req.err <- fmt.Errorf("failed to make request after retries: %w", err)
+				continue
+			}
+		}
+		if resp.StatusCode != http.StatusOK {
+			logger.Logger.Error("Failed to make request", zap.Int("status", resp.StatusCode))
+			req.err <- fmt.Errorf("failed to make request: status %d", resp.StatusCode)
+			continue
+		}
+
+		req.response <- resp
+	}
+}
+
+func GetSummonerByTag(name, tagLine, region string) (*summoner.Summoner, error) {
 	err := LoadEnv()
 	if err != nil {
 		return nil, fmt.Errorf("error loading .env file")
 	}
 
-	apiKey := os.Getenv("ROPT_API_TOKEN")
+	apiKey := os.Getenv("RIOT_API_TOKEN")
 	if apiKey == "" {
 		return nil, fmt.Errorf("API token not found in environment variables")
 	}
 
-	url := fmt.Sprintf("%s/by-riot-id/%s/%s?api_key=%s", riotAccountBaseURL, name, tagLine, apiKey)
+	baseURL, err := getBaseURL("", "EUROPE")
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/riot/account/v1/accounts/by-riot-id/%s/%s?api_key=%s", baseURL, name, tagLine, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch summoner data: %s", resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 
 	var accountData struct {
 		PUUID   string `json:"puuid"`
@@ -176,56 +180,106 @@ func GetSummonerByTag(name, tagLine string) (*summoner.Summoner, error) {
 		return nil, err
 	}
 
-	return GetSummonerByPUUID(accountData.PUUID)
+	return GetSummonerByPUUID(accountData.PUUID, region)
 }
 
-// GetSummonerByPUUID fetches summoner data by PUUID from the League of Legends API.
-//
-// Synopsis:
-//
-//	summoner, err := GetSummonerByPUUID("puuid")
-//
-// Parameters:
-//   - puuid: string - The summoner's PUUID.
-//
-// Returns:
-//   - *summoner.Summoner: The summoner data.
-//   - error: An error if the summoner data could not be fetched.
-//
-// Notes:
-//
-//	This function fetches the summoner data using the PUUID and also retrieves the summoner's rank.
-func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
+func GetSummonerProfileIconIDByPUUID(puuid, region string) (int, error) {
+	err := LoadEnv()
+	if err != nil {
+		return 0, fmt.Errorf("error loading .env file")
+	}
+
+	apiKey := os.Getenv("RIOT_API_TOKEN")
+	if apiKey == "" {
+		return 0, fmt.Errorf("API token not found in environment variables")
+	}
+
+	baseUrl, err := getBaseURL(region, "")
+	if err != nil {
+		return 0, err
+	}
+
+	url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-puuid/%s?api_key=%s", baseUrl, puuid, apiKey)
+	resp, err := makeRequest(url)
+	if err != nil {
+		return 0, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("failed to fetch summoner data: %s", resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	var summonerData struct {
+		ID            string `json:"id"`
+		AccountID     string `json:"accountId"`
+		PUUID         string `json:"puuid"`
+		ProfileIconID int    `json:"profileIconId"`
+		RevisionDate  int64  `json:"revisionDate"`
+		SummonerLevel int    `json:"summonerLevel"`
+	}
+
+	err = json.Unmarshal(body, &summonerData)
+	if err != nil {
+		return 0, err
+	}
+
+	return summonerData.ProfileIconID, nil
+}
+
+func GetSummonerByPUUID(puuid, region string, optionalArgs ...*string) (*summoner.Summoner, error) {
+	var name, tag string = "", ""
+
+	if len(optionalArgs) > 0 {
+		name = *optionalArgs[0]
+	}
+	if len(optionalArgs) > 1 {
+		tag = *optionalArgs[1]
+	}
+
 	err := LoadEnv()
 	if err != nil {
 		return nil, fmt.Errorf("error loading .env file")
 	}
 
-	apiKey := os.Getenv("ROPT_API_TOKEN")
+	apiKey := os.Getenv("RIOT_API_TOKEN")
 	if apiKey == "" {
 		return nil, fmt.Errorf("API token not found in environment variables")
 	}
 
-	name, tagLine, err := GetNameTagByPUUID(puuid)
+	if name == "" || tag == "" {
+		var err error
+		name, tag, err = GetNameTagByPUUID(puuid)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	baseUrl, err := getBaseURL(region, "")
 	if err != nil {
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%s/by-puuid/%s?api_key=%s", riotSummonerBaseURL, puuid, apiKey)
+	url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-puuid/%s?api_key=%s", baseUrl, puuid, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch summoner data: %s", resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	var summonerData struct {
 		ID            string `json:"id"`
@@ -241,18 +295,19 @@ func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
 		return nil, err
 	}
 
-	solorank, rankFlex, err := GetSummonerRank(summonerData.ID)
+	solorank, rankFlex, err := GetSummonerRank(summonerData.ID, region)
 
 	summoner := summoner.NewSummoner(
 		name,
-		tagLine, // TagLine
+		tag, // TagLine
 		summonerData.AccountID,
 		summonerData.ID,
 		puuid,
 		summonerData.ProfileIconID,
 		solorank,
-		rankFlex,   // FlexRank
-		time.Now(), // Updated
+		rankFlex, // FlexRank
+		time.Now(),
+		region, // Updated
 	)
 
 	if err != nil {
@@ -262,49 +317,37 @@ func GetSummonerByPUUID(puuid string) (*summoner.Summoner, error) {
 	return summoner, nil
 }
 
-// GetSummonerRank fetches the rank and division of a summoner by their ID from the League of Legends API.
-//
-// Synopsis:
-//
-//	soloRank, flexRank, err := GetSummonerRank("summonerID")
-//
-// Parameters:
-//   - summonerID: string - The summoner's ID.
-//
-// Returns:
-//   - rank.Rank: The solo rank of the summoner.
-//   - rank.Rank: The flex rank of the summoner.
-//   - error: An error if the rank data could not be fetched.
-//
-// Notes:
-//
-//	This function fetches the rank data for both solo and flex queues.
-func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
+func GetSummonerRank(summonerID, region string) (rank.Rank, rank.Rank, error) {
 	err := LoadEnv()
 	if err != nil {
 		return 0, 0, fmt.Errorf("error loading .env file")
 	}
 
-	apiKey := os.Getenv("ROPT_API_TOKEN")
+	apiKey := os.Getenv("RIOT_API_TOKEN")
 	if apiKey == "" {
 		return 0, 0, fmt.Errorf("API token not found in environment variables")
 	}
 
-	url := fmt.Sprintf("%s/by-summoner/%s?api_key=%s", riotLeagueBaseURL, summonerID, apiKey)
+	baseUrl, err := getBaseURL(region, "")
+	if err != nil {
+		return 0, 0, err
+	}
+
+	url := fmt.Sprintf("%s/lol/league/v4/entries/by-summoner/%s?api_key=%s", baseUrl, summonerID, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return 0, 0, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return 0, 0, fmt.Errorf("failed to fetch summoner rank: %s", resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return 0, 0, err
 	}
+	defer resp.Body.Close()
 
 	var rankData []struct {
 		QueueType    string `json:"queueType"`
@@ -336,48 +379,38 @@ func GetSummonerRank(summonerID string) (rank.Rank, rank.Rank, error) {
 	return soloRank, flexRank, nil
 }
 
-// GetLastRankedMatch fetches the last ranked match of a summoner by their PUUID from the League of Legends API.
-//
-// Synopsis:
-//
-//	matchID, err := GetLastRankedMatch("puuid")
-//
-// Parameters:
-//   - puuid: string - The summoner's PUUID.
-//
-// Returns:
-//   - string: The ID of the last ranked match.
-//   - error: An error if the match data could not be fetched.
-//
-// Notes:
-//
-//	This function fetches the ID of the last ranked match played by the summoner.
 func GetLastRankedMatchIDbyPUUID(puuid string) (string, error) {
 	err := LoadEnv()
 	if err != nil {
 		return "", fmt.Errorf("error loading .env file")
 	}
 
-	apiKey := os.Getenv("ROPT_API_TOKEN")
+	apiKey := os.Getenv("RIOT_API_TOKEN")
 	if apiKey == "" {
 		return "", fmt.Errorf("API token not found in environment variables")
 	}
 
-	url := fmt.Sprintf("%s/by-puuid/%s/ids?&start=0&count=1&api_key=%s", riotMatchBaseURL, puuid, apiKey)
+	baseUrl, err := getBaseURL("", "EUROPE")
+	if err != nil {
+		return "", err
+	}
+
+	url := fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?&start=0&count=1&api_key=%s", baseUrl, puuid, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("failed to fetch last ranked match: %s", resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
+
+	defer resp.Body.Close()
 
 	var matchIDs []string
 	err = json.Unmarshal(body, &matchIDs)
@@ -392,44 +425,52 @@ func GetLastRankedMatchIDbyPUUID(puuid string) (string, error) {
 	return matchIDs[0], nil
 }
 
-// GetMatchByID fetches match data by match ID from the League of Legends API.
-//
-// Synopsis:
-//
-//	match, err := GetMatchByID("matchId")
-//
-// Parameters:
-//   - matchId: string - The match ID.
-//
-// Returns:
-//   - *match.Match: The match data.
-//   - error: An error if the match data could not be fetched.
 func GetMatchByID(matchId string) (*match.Match, error) {
+	logger.Logger.Info("GetMatchByID called", zap.String("matchId", matchId)) // Updated code
 	err := LoadEnv()
 	if err != nil {
-		return nil, fmt.Errorf("error loading .env file")
+		return nil, fmt.Errorf("error loading .env file: %v", err)
 	}
 
-	apiKey := os.Getenv("ROPT_API_TOKEN")
+	parts := strings.Split(matchId, "_")
+	region := parts[0]
+	logger.Logger.Info("Region extracted from matchId", zap.String("region", region)) // Updated code
+
+	apiKey := os.Getenv("RIOT_API_TOKEN")
 	if apiKey == "" {
 		return nil, fmt.Errorf("API token not found in environment variables")
 	}
 
-	url := fmt.Sprintf("%s/%s?api_key=%s", riotMatchBaseURL, matchId, apiKey)
+	baseUrl, err := getBaseURL("", "EUROPE")
+	if err != nil {
+		return nil, fmt.Errorf("error getting base URL: %v", err)
+	}
+
+	url := fmt.Sprintf("%s/lol/match/v5/matches/%s?api_key=%s", baseUrl, matchId, apiKey)
+	logger.Logger.Info("Request URL", zap.String("url", url)) // Updated code
 	resp, err := makeRequest(url)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error making request: %v", err)
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch match data: %s", resp.Status)
 	}
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+	defer resp.Body.Close()
+
+	logger.Logger.Info("Response body", zap.ByteString("body", body)) // Updated code
+
 	var apiResponse struct {
+		Metadata struct {
+			GameID string `json:"matchId"`
+		} `json:"metadata"`
 		Info struct {
-			GameID       int64 `json:"gameId"`
-			QueueID      int   `json:"gameQueueConfigId"`
+			QueueID      int `json:"queueId"`
 			Participants []struct {
 				PUUID      string `json:"puuid"`
 				TeamID     int    `json:"teamId"`
@@ -448,30 +489,26 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 						Style int `json:"style"`
 					} `json:"styles"`
 				} `json:"perks"`
-				SummonerID string `json:"summonerId"`
-				Spell1ID   int    `json:"summoner1Id"`
-				Spell2ID   int    `json:"summoner2Id"`
-				Item0      int    `json:"item0"`
-				Item1      int    `json:"item1"`
-				Item2      int    `json:"item2"`
-				Item3      int    `json:"item3"`
-				Item4      int    `json:"item4"`
-				Item5      int    `json:"item5"`
-				Item6      int    `json:"item6"`
+				ProfileIconID  int    `json:"profileIcon"`
+				RiotIdGameName string `json:"riotIdGameName"`
+				RiotIdTagLine  string `json:"riotIdTagLine"`
+				SummonerID     string `json:"summonerId"`
+				Spell1ID       int    `json:"summoner1Id"`
+				Spell2ID       int    `json:"summoner2Id"`
+				Item0          int    `json:"item0"`
+				Item1          int    `json:"item1"`
+				Item2          int    `json:"item2"`
+				Item3          int    `json:"item3"`
+				Item4          int    `json:"item4"`
+				Item5          int    `json:"item5"`
+				Item6          int    `json:"item6"`
 			} `json:"participants"`
 		} `json:"info"`
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %v", err)
 	}
-
-	log.Printf("Response body: %s", body)
 
 	gameType := "Flex"
 	if apiResponse.Info.QueueID == 440 {
@@ -483,7 +520,7 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 	}
 
 	matchData := &match.Match{
-		GameID:   apiResponse.Info.GameID,
+		GameID:   apiResponse.Metadata.GameID,
 		Teams:    [2]match.Team{{TeamID: 100}, {TeamID: 200}},
 		GameType: gameType,
 	}
@@ -494,7 +531,40 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 			teamIndex = 1
 		}
 
-		summoner, err := GetSummonerByPUUID(participant.PUUID)
+		var summoner *summoner.Summoner
+
+		summoner, err := databaseHelper.GetSummonerByPUUIDFromDB(participant.PUUID)
+		if err != nil {
+			logger.Logger.Error("failed to get summoner by PUUID", zap.Error(err)) // Updated code
+		}
+
+		if summoner == nil {
+			summoner, err = GetSummonerByPUUID(participant.PUUID, region, &participant.RiotIdGameName, &participant.RiotIdTagLine)
+			if err != nil {
+				logger.Logger.Error("failed to get summoner by PUUID", zap.Error(err)) // Updated code
+				continue
+			}
+		} else {
+			summonerIsKnown, err := databaseHelper.IsSummonerMappedToAnyChannel(summoner.PUUID)
+			if err != nil {
+				logger.Logger.Error("failed to check if summoner is mapped to any channel", zap.Error(err)) // Updated code
+			}
+			if !summonerIsKnown {
+				summoner.SoloRank, summoner.FlexRank, err = GetSummonerRank(summoner.ID, region)
+				if err != nil {
+					logger.Logger.Error("failed to get summoner rank", zap.Error(err)) // Updated code
+				}
+			}
+		}
+
+		if summoner == nil {
+			continue
+		}
+
+		// renew Summoner Data to reduce API calls
+		summoner.ProfileIconID = participant.ProfileIconID
+		summoner.Name = participant.RiotIdGameName
+		summoner.TagLine = participant.RiotIdTagLine
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to get summoner by PUUID: %v", err)
@@ -524,33 +594,26 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 		})
 	}
 
+	logger.Logger.Info("Match data", zap.Any("matchData", matchData)) // Updated code
 	return matchData, nil
 }
 
-// GetOngoingMatchByPUUID checks if there is an ongoing match for the given summoner's PUUID.
-//
-// Synopsis:
-//
-//	ongoingMatch, err := GetOngoingMatchByPUUID("puuid", "apiKey")
-//
-// Parameters:
-//   - puuid: string - The summoner's PUUID.
-//   - apiKey: string - The API key for authentication.
-//
-// Returns:
-//   - *match.Match: The ongoing match data, or nil if no match is found.
-//   - error: An error if the match data could not be fetched.
-//
-// Notes:
-//
-//	This function checks if there is an ongoing match for the summoner and returns the match data if found.
-func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
-	url := fmt.Sprintf("%s/by-summoner/%s?api_key=%s", riotSpectatorBaseURL, puuid, apiKey)
+func GetOngoingMatchByPUUID(puuid, region string) (*match.Match, error) {
+	apiKey := os.Getenv("RIOT_API_TOKEN")
+	if apiKey == "" {
+		return nil, fmt.Errorf("API token not found in environment variables")
+	}
+
+	baseUrl, err := getBaseURL(region, "")
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/lol/spectator/v5/active-games/by-summoner/%s?api_key=%s", baseUrl, puuid, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request to Riot Games API: %v", err)
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
 		// No ongoing match found
@@ -573,10 +636,12 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 		} `json:"participants"`
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
+
+	defer resp.Body.Close()
 
 	err = json.Unmarshal(body, &apiResponse)
 	if err != nil {
@@ -592,10 +657,21 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 		gameType = "UNRANKED"
 	}
 
+	gameIDStr := fmt.Sprintf("%d", apiResponse.GameID)
+
 	ongoingMatch := &match.Match{
-		GameID:   apiResponse.GameID,
+		GameID:   gameIDStr,
 		Teams:    [2]match.Team{{TeamID: 100}, {TeamID: 200}},
 		GameType: gameType,
+	}
+
+	gameIsKnown, err := databaseHelper.IsMatchExists(gameIDStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if match exists: %v", err)
+	}
+
+	if gameIsKnown {
+		return nil, fmt.Errorf("match is already known")
 	}
 
 	// Populate teams and participants
@@ -605,11 +681,29 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 			teamIndex = 1
 		}
 
-		summoner, err := GetSummonerByPUUID(participant.PUUID)
-
+		summoner, err := databaseHelper.GetSummonerByPUUIDFromDB(participant.PUUID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get summoner by PUUID: %v", err)
+			logger.Logger.Error("failed to get summoner by PUUID", zap.Error(err)) // Updated code
 		}
+
+		if summoner == nil {
+			summoner, err = GetSummonerByPUUID(participant.PUUID, region)
+			if err != nil {
+				logger.Logger.Error("failed to fetch summoner by PUUID", zap.Error(err)) // Updated code
+				continue
+			} else {
+				databaseHelper.SaveSummonerToDB(*summoner)
+			}
+		} else {
+			summoner.SoloRank, summoner.FlexRank, err = GetSummonerRank(summoner.ID, region)
+			if err != nil {
+				logger.Logger.Error("failed to get new summoner rank", zap.Error(err)) // Updated code
+			} else {
+				databaseHelper.SaveSummonerToDB(*summoner)
+			}
+		}
+
+		logger.Logger.Info("Summoner", zap.Any("summoner", summoner)) // Updated code
 
 		ongoingMatch.Teams[teamIndex].Participants = append(ongoingMatch.Teams[teamIndex].Participants, match.Participant{
 			Summoner:   *summoner,
@@ -625,40 +719,27 @@ func GetOngoingMatchByPUUID(puuid, apiKey string) (*match.Match, error) {
 	return ongoingMatch, nil
 }
 
-// GetNameTagByPUUID fetches the name and tag from a PUUID and returns them as two separate strings.
-//
-// Synopsis:
-//
-//	name, tagLine, err := GetNameTagByPUUID("puuid")
-//
-// Parameters:
-//   - puuid: string - The summoner's PUUID.
-//
-// Returns:
-//   - string: The summoner's name.
-//   - string: The summoner's tag line.
-//   - error: An error if the name and tag line could not be fetched.
-//
-// Notes:
-//
-//	This function fetches the summoner's name and tag line using the PUUID.
 func GetNameTagByPUUID(puuid string) (string, string, error) {
 	err := LoadEnv()
 	if err != nil {
 		return "", "", fmt.Errorf("error loading .env file")
 	}
 
-	apiKey := os.Getenv("ROPT_API_TOKEN")
+	apiKey := os.Getenv("RIOT_API_TOKEN")
 	if apiKey == "" {
 		return "", "", fmt.Errorf("API token not found in environment variables")
 	}
 
-	url := fmt.Sprintf("%s/by-puuid/%s?api_key=%s", riotAccountBaseURL, puuid, apiKey)
+	baseUrl, err := getBaseURL("", "EUROPE")
+	if err != nil {
+		return "", "", err
+	}
+
+	url := fmt.Sprintf("%s/riot/account/v1/accounts/by-puuid/%s?api_key=%s", baseUrl, puuid, apiKey)
 	resp, err := makeRequest(url)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to make request to Riot Games API: %v", err)
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", "", fmt.Errorf("failed to fetch account data: %s", resp.Status)
@@ -673,6 +754,8 @@ func GetNameTagByPUUID(puuid string) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decode response: %v", err)
 	}
+
+	defer resp.Body.Close()
 
 	return account.GameName, account.TagLine, nil
 }
