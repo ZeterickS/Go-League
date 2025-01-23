@@ -175,9 +175,16 @@ func GetSummonerByPUUIDFromDB(puuid string) (*summoner.Summoner, error) {
 
 // SaveChannelForSummoner saves a channel for a summoner by their PUUID
 func SaveChannelForSummoner(puuid, channel string) error {
-	_, err := db.Exec(`INSERT INTO SummonerChannel (SummonerPUUID, ChannelID) VALUES ($1, $2) ON CONFLICT DO NOTHING`, puuid, channel)
+	res, err := db.Exec(`INSERT INTO SummonerChannel (SummonerPUUID, ChannelID) VALUES ($1, $2) ON CONFLICT (SummonerPUUID, ChannelID) DO NOTHING`, puuid, channel)
 	if err != nil {
 		return fmt.Errorf("failed to save channel for summoner: %v", err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("channel for summoner already exists")
 	}
 	return nil
 }

@@ -39,6 +39,11 @@ func OnboardSummoner(name, tagLine, region, channelID string) (*discordgo.Messag
 
 	if summonerExists {
 		logger.Logger.Info("Summoner already exists", zap.String("name", name), zap.String("tagLine", tagLine), zap.String("region", region))
+		summoner, err = databaseHelper.GetDBSummonerByName(name, tagLine, region)
+		if err != nil {
+			logger.Logger.Error("Failed to fetch summoner data", zap.Error(err))
+			return nil, fmt.Errorf("failed to fetch summoner data: %v", err)
+		}
 	} else {
 		summoner, err = apiHelper.GetSummonerByTag(name, tagLine, region)
 		if err != nil {
@@ -55,7 +60,7 @@ func OnboardSummoner(name, tagLine, region, channelID string) (*discordgo.Messag
 
 	err = databaseHelper.SaveChannelForSummoner(summoner.PUUID, channelID)
 	if err != nil {
-		return nil, fmt.Errorf("summoner already exists: name=%s, tagLine=%s, region=%s, channelID=%s", name, tagLine, region, channelID)
+		return nil, fmt.Errorf("summoner already exists in this channel: name=%s, tagLine=%s, region=%s, channelID=%s", name, tagLine, region, channelID)
 	}
 
 	embedMessage := embed.NewEmbed().

@@ -216,8 +216,13 @@ func removeCommands(s *discordgo.Session) {
 
 func addCommandsIfNotRegistered(s *discordgo.Session, commands []*discordgo.ApplicationCommand) error {
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
+		commandName := i.ApplicationCommandData().Name
+		logger.Logger.Info("Interaction received", zap.String("commandName", commandName))
+		if i.Type == discordgo.InteractionApplicationCommand {
+			logger.Logger.Info("Command received", zap.String("commandName", commandName), zap.String("guildID", i.GuildID), zap.String("channelID", i.ChannelID), zap.String("userID", i.Member.User.ID))
+			if h, ok := commandHandlers[commandName]; ok {
+				h(s, i)
+			}
 		}
 	})
 	for _, guild := range s.State.Guilds {
@@ -272,8 +277,6 @@ func main() {
 	if err != nil {
 		logger.Logger.Fatal("Cannot open the session", zap.Error(err))
 	}
-
-	removeCommands(s)
 
 	addCommandsIfNotRegistered(s, commands)
 

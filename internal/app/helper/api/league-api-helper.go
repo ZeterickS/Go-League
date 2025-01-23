@@ -80,7 +80,6 @@ func makeRequest(url string) (*http.Response, error) {
 			}
 			continue
 		}
-		defer resp.Body.Close()
 
 		if resp.StatusCode == 404 {
 			return resp, fmt.Errorf("not found")
@@ -124,7 +123,6 @@ func GetSummonerByTag(name, tagLine, region string) (*summoner.Summoner, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch summoner data: %s", resp.Status)
@@ -134,6 +132,8 @@ func GetSummonerByTag(name, tagLine, region string) (*summoner.Summoner, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 
 	var accountData struct {
 		PUUID   string `json:"puuid"`
@@ -170,7 +170,6 @@ func GetSummonerProfileIconIDByPUUID(puuid, region string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return 0, fmt.Errorf("failed to fetch summoner data: %s", resp.Status)
@@ -180,6 +179,7 @@ func GetSummonerProfileIconIDByPUUID(puuid, region string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer resp.Body.Close()
 
 	var summonerData struct {
 		ID            string `json:"id"`
@@ -236,7 +236,6 @@ func GetSummonerByPUUID(puuid, region string, optionalArgs ...*string) (*summone
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch summoner data: %s", resp.Status)
@@ -246,6 +245,7 @@ func GetSummonerByPUUID(puuid, region string, optionalArgs ...*string) (*summone
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	var summonerData struct {
 		ID            string `json:"id"`
@@ -304,7 +304,6 @@ func GetSummonerRank(summonerID, region string) (rank.Rank, rank.Rank, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return 0, 0, fmt.Errorf("failed to fetch summoner rank: %s", resp.Status)
@@ -314,6 +313,7 @@ func GetSummonerRank(summonerID, region string) (rank.Rank, rank.Rank, error) {
 	if err != nil {
 		return 0, 0, err
 	}
+	defer resp.Body.Close()
 
 	var rankData []struct {
 		QueueType    string `json:"queueType"`
@@ -366,7 +366,6 @@ func GetLastRankedMatchIDbyPUUID(puuid string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("failed to fetch last ranked match: %s", resp.Status)
@@ -376,6 +375,8 @@ func GetLastRankedMatchIDbyPUUID(puuid string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	defer resp.Body.Close()
 
 	var matchIDs []string
 	err = json.Unmarshal(body, &matchIDs)
@@ -417,7 +418,6 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error making request: %v", err)
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch match data: %s", resp.Status)
@@ -427,6 +427,7 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
+	defer resp.Body.Close()
 
 	logger.Logger.Info("Response body", zap.ByteString("body", body)) // Updated code
 
@@ -510,9 +511,15 @@ func GetMatchByID(matchId string) (*match.Match, error) {
 				continue
 			}
 		} else {
-			summoner.SoloRank, summoner.FlexRank, err = GetSummonerRank(summoner.ID, region)
+			summonerIsKnown, err := databaseHelper.IsSummonerMappedToAnyChannel(summoner.PUUID)
 			if err != nil {
-				logger.Logger.Error("failed to get summoner rank", zap.Error(err)) // Updated code
+				logger.Logger.Error("failed to check if summoner is mapped to any channel", zap.Error(err)) // Updated code
+			}
+			if !summonerIsKnown {
+				summoner.SoloRank, summoner.FlexRank, err = GetSummonerRank(summoner.ID, region)
+				if err != nil {
+					logger.Logger.Error("failed to get summoner rank", zap.Error(err)) // Updated code
+				}
 			}
 		}
 
@@ -573,7 +580,6 @@ func GetOngoingMatchByPUUID(puuid, region string) (*match.Match, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request to Riot Games API: %v", err)
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
 		// No ongoing match found
@@ -600,6 +606,8 @@ func GetOngoingMatchByPUUID(puuid, region string) (*match.Match, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
+
+	defer resp.Body.Close()
 
 	err = json.Unmarshal(body, &apiResponse)
 	if err != nil {
@@ -698,7 +706,6 @@ func GetNameTagByPUUID(puuid string) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("failed to make request to Riot Games API: %v", err)
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", "", fmt.Errorf("failed to fetch account data: %s", resp.Status)
@@ -713,6 +720,8 @@ func GetNameTagByPUUID(puuid string) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("failed to decode response: %v", err)
 	}
+
+	defer resp.Body.Close()
 
 	return account.GameName, account.TagLine, nil
 }
