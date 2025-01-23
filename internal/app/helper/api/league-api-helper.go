@@ -21,7 +21,16 @@ import (
 	"go.uber.org/zap"
 )
 
-var client *http.Client
+var (
+	client       *http.Client
+	requestQueue chan request
+)
+
+type request struct {
+	url      string
+	response chan *http.Response
+	err      chan error
+}
 
 func init() {
 	// Create a custom transport with a shared TLS connection
@@ -38,6 +47,12 @@ func init() {
 		Transport: tr,
 		Timeout:   30 * time.Second,
 	}
+
+	// Initialize the request queue
+	requestQueue = make(chan request, 100)
+
+	// Start the request processor
+	go processRequests()
 }
 
 func getBaseURL(platform string, region string) (string, error) {
@@ -59,7 +74,7 @@ func LoadEnv() error {
 
 func waitForRateLimiters() {
 	for !rateLimiterPerSecond.Check() || !rateLimiterPer2Minutes.Check() {
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Second)
 	}
 	rateLimiterPer2Minutes.Allow()
 	rateLimiterPerSecond.Allow()
@@ -70,36 +85,55 @@ func makeRequest(url string) (*http.Response, error) {
 		return nil, fmt.Errorf("url cannot be empty")
 	}
 
-	for retries := 0; retries < 2; retries++ {
+	req := request{
+		url:      url,
+		response: make(chan *http.Response),
+		err:      make(chan error),
+	}
+
+	requestQueue <- req
+
+	select {
+	case resp := <-req.response:
+		return resp, nil
+	case err := <-req.err:
+		return nil, err
+	}
+}
+
+func processRequests() {
+	for req := range requestQueue {
 		waitForRateLimiters()
-		resp, err := client.Get(url)
+		resp, err := client.Get(req.url)
 		if err != nil {
-			if retries == 1 {
-				logger.Logger.Error("Failed to make request after retries", zap.Error(err)) // Updated code
-				return nil, fmt.Errorf("failed to make request after retries: %w", err)
-			}
+			logger.Logger.Error("Failed to make request", zap.Error(err))
+			req.err <- fmt.Errorf("failed to make request: %w", err)
 			continue
 		}
 
 		if resp.StatusCode == 404 {
-			return resp, fmt.Errorf("not found")
-		}
-		if resp.StatusCode == 429 && retries == 0 {
-			logger.Logger.Warn("Rate limit exceeded, waiting 20 seconds...") // Updated code
-			time.Sleep(20 * time.Second)
-			waitForRateLimiters()
+			req.err <- fmt.Errorf("not found")
 			continue
 		}
-		if resp.StatusCode != http.StatusOK {
-			if retries == 1 {
-				logger.Logger.Error("Failed to make request after retries", zap.Error(err)) // Updated code
-				return nil, fmt.Errorf("failed to make request after retries: %w", err)
+		if resp.StatusCode == 429 {
+			logger.Logger.Warn("Rate limit exceeded, waiting 20 seconds...")
+			time.Sleep(20 * time.Second)
+			waitForRateLimiters()
+			resp, err = client.Get(req.url)
+			if err != nil {
+				logger.Logger.Error("Failed to make request after retries", zap.Error(err))
+				req.err <- fmt.Errorf("failed to make request after retries: %w", err)
+				continue
 			}
-		} else {
-			return resp, nil
 		}
+		if resp.StatusCode != http.StatusOK {
+			logger.Logger.Error("Failed to make request", zap.Int("status", resp.StatusCode))
+			req.err <- fmt.Errorf("failed to make request: status %d", resp.StatusCode)
+			continue
+		}
+
+		req.response <- resp
 	}
-	return nil, fmt.Errorf("failed to make request after retries")
 }
 
 func GetSummonerByTag(name, tagLine, region string) (*summoner.Summoner, error) {
@@ -637,7 +671,7 @@ func GetOngoingMatchByPUUID(puuid, region string) (*match.Match, error) {
 	}
 
 	if gameIsKnown {
-		return nil, nil
+		return nil, fmt.Errorf("match is already known")
 	}
 
 	// Populate teams and participants

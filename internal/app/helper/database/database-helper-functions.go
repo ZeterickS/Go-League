@@ -174,8 +174,8 @@ func GetSummonerByPUUIDFromDB(puuid string) (*summoner.Summoner, error) {
 }
 
 // SaveChannelForSummoner saves a channel for a summoner by their PUUID
-func SaveChannelForSummoner(puuid, channel string) error {
-	res, err := db.Exec(`INSERT INTO SummonerChannel (SummonerPUUID, ChannelID) VALUES ($1, $2) ON CONFLICT (SummonerPUUID, ChannelID) DO NOTHING`, puuid, channel)
+func SaveChannelForSummoner(puuid, channel, guildID string) error {
+	res, err := db.Exec(`INSERT INTO SummonerChannel (SummonerPUUID, ChannelID, GuildID) VALUES ($1, $2, $3) ON CONFLICT (SummonerPUUID, ChannelID) DO NOTHING`, puuid, channel, guildID)
 	if err != nil {
 		return fmt.Errorf("failed to save channel for summoner: %v", err)
 	}
@@ -210,38 +210,126 @@ func GetChannelsForSummoner(puuid string) ([]string, error) {
 	return channels, nil
 }
 
-// DeleteChannelForSummoner deletes a channel for a summoner by their PUUID
-func DeleteChannelForSummoner(puuid, channel string) error {
-	_, err := db.Exec(`DELETE FROM SummonerChannel WHERE SummonerPUUID = $1 AND ChannelID = $2`, puuid, channel)
+// DeleteChannelForSummonerByName deletes a channel for a summoner by their name, tag, and region
+func DeleteChannelForSummonerByName(name, tag, region, channel string) error {
+	summoner, err := GetDBSummonerByName(name, tag, region)
+	if err != nil {
+		return fmt.Errorf("failed to get summoner by name, tag, and region: %v", err)
+	}
+
+	err = DeleteChannelForSummoner(summoner.PUUID, channel)
 	if err != nil {
 		return fmt.Errorf("failed to delete channel for summoner: %v", err)
+	}
+
+	return nil
+}
+
+// DeleteChannelForSummoner deletes a channel for a summoner by their PUUID
+func DeleteChannelForSummoner(puuid, channel string) error {
+	res, err := db.Exec(`DELETE FROM SummonerChannel WHERE SummonerPUUID = $1 AND ChannelID = $2`, puuid, channel)
+	if err != nil {
+		return fmt.Errorf("failed to delete channel for summoner: %v", err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("summoner with PUUID %s and channel %s not known", puuid, channel)
+	}
+	return nil
+}
+
+// DeleteChannel deletes a channel by its ID
+func DeleteChannel(channelID string) error {
+	res, err := db.Exec(`DELETE FROM SummonerChannel WHERE ChannelID = $1`, channelID)
+	if err != nil {
+		return fmt.Errorf("failed to delete channel: %v", err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("channel with ID %s not known", channelID)
+	}
+	return nil
+}
+
+// DeleteGuild deletes a guild by its ID
+func DeleteGuild(guildID string) error {
+	res, err := db.Exec(`DELETE FROM SummonerChannel WHERE GuildID = $1`, guildID)
+	if err != nil {
+		return fmt.Errorf("failed to delete guild: %v", err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("guild with ID %s not known", guildID)
 	}
 	return nil
 }
 
 // SaveOngoingMatchToDB saves an OngoingMatch instance to the database
 func SaveOngoingMatchToDB(ongoingMatch *match.Match) error {
-	teams, err := json.Marshal(ongoingMatch.Teams)
+	tx, err := db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to marshal teams: %v", err)
+		return fmt.Errorf("failed to begin transaction: %v", err)
 	}
 
-	_, err = db.Exec(`
-		INSERT INTO Match (GameID, GameType, Teams)
-		VALUES ($1, $2, $3)
-		ON CONFLICT (GameID) DO UPDATE SET
-			GameType = EXCLUDED.GameType,
-			Teams = EXCLUDED.Teams
-	`, ongoingMatch.GameID, ongoingMatch.GameType, teams)
+	_, err = tx.Exec(`
+        INSERT INTO Match (GameID, GameType)
+        VALUES ($1, $2)
+        ON CONFLICT (GameID) DO UPDATE SET
+            GameType = EXCLUDED.GameType
+    `, ongoingMatch.GameID, ongoingMatch.GameType)
 	if err != nil {
+		tx.Rollback()
 		return fmt.Errorf("failed to save ongoing match: %v", err)
 	}
+
+	for _, team := range ongoingMatch.Teams {
+		for _, participant := range team.Participants {
+			perks, err := json.Marshal(participant.Perks)
+			if err != nil {
+				tx.Rollback()
+				return fmt.Errorf("failed to marshal perks: %v", err)
+			}
+			spells, err := json.Marshal(participant.Spells)
+			if err != nil {
+				tx.Rollback()
+				return fmt.Errorf("failed to marshal spells: %v", err)
+			}
+			_, err = tx.Exec(`
+                INSERT INTO Participant (GameID, SummonerPUUID, ChampionID, TeamID, Perks, Spells)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (GameID, SummonerPUUID) DO UPDATE SET
+                    ChampionID = EXCLUDED.ChampionID,
+                    TeamID = EXCLUDED.TeamID,
+                    Perks = EXCLUDED.Perks,
+                    Spells = EXCLUDED.Spells
+            `, ongoingMatch.GameID, participant.Summoner.PUUID, participant.ChampionID, team.TeamID, perks, spells)
+			if err != nil {
+				tx.Rollback()
+				return fmt.Errorf("failed to save participant: %v", err)
+			}
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("failed to commit transaction: %v", err)
+	}
+
 	return nil
 }
 
 // LoadOngoingMatchFromDB loads an array of Matches instances from the database
 func LoadOngoingMatchFromDB() (map[string]*match.Match, error) {
-	rows, err := db.Query(`SELECT GameID, GameType, Teams FROM Match`)
+	rows, err := db.Query(`SELECT GameID, GameType FROM Match`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query ongoing matches: %v", err)
 	}
@@ -250,15 +338,45 @@ func LoadOngoingMatchFromDB() (map[string]*match.Match, error) {
 	ongoingMatches := make(map[string]*match.Match)
 	for rows.Next() {
 		var m match.Match
-		var teams []byte
-		err := rows.Scan(&m.GameID, &m.GameType, &teams)
+		err := rows.Scan(&m.GameID, &m.GameType)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan ongoing match: %v", err)
 		}
-		err = json.Unmarshal(teams, &m.Teams)
+
+		// Load participants for the match
+		participantRows, err := db.Query(`SELECT SummonerPUUID, ChampionID, TeamID, Perks, Spells FROM Participant WHERE GameID = $1`, m.GameID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal teams: %v", err)
+			return nil, fmt.Errorf("failed to query participants: %v", err)
 		}
+		defer participantRows.Close()
+
+		for participantRows.Next() {
+			var p match.Participant
+			var perks, spells []byte
+			var teamId int
+			err := participantRows.Scan(&p.Summoner.PUUID, &p.ChampionID, &teamId, &perks, &spells)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan participant: %v", err)
+			}
+			err = json.Unmarshal(perks, &p.Perks)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal perks: %v", err)
+			}
+			err = json.Unmarshal(spells, &p.Spells)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal spells: %v", err)
+			}
+			if teamId == 100 {
+				m.Teams[0].Participants = append(m.Teams[0].Participants, p)
+			} else if teamId == 200 {
+				m.Teams[1].Participants = append(m.Teams[1].Participants, p)
+			} else if teamId == 0 {
+				m.Teams[0].Participants = append(m.Teams[0].Participants, p)
+			} else if teamId == 1 {
+				m.Teams[1].Participants = append(m.Teams[1].Participants, p)
+			}
+		}
+
 		ongoingMatches[m.GameID] = &m
 	}
 
@@ -370,10 +488,6 @@ func GetOldestSummonerWithChannel() (string, error) {
 
 // UpdateOngoingToFinishedGame updates the entire match, including GameID, GameType, Teams, and Participants
 func UpdateOngoingToFinishedGame(oldGameID string, newMatch *match.Match) error {
-	teams, err := json.Marshal(newMatch.Teams)
-	if err != nil {
-		return fmt.Errorf("failed to marshal teams: %v", err)
-	}
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -383,10 +497,10 @@ func UpdateOngoingToFinishedGame(oldGameID string, newMatch *match.Match) error 
 	// Update the Match table
 	query := `
         UPDATE Match
-        SET GameID = $1, GameType = $2, Teams = $3
-        WHERE GameID = $4
+        SET GameID = $1, GameType = $2
+        WHERE GameID = $3
     `
-	_, err = tx.Exec(query, newMatch.GameID, newMatch.GameType, teams, oldGameID)
+	_, err = tx.Exec(query, newMatch.GameID, newMatch.GameType, oldGameID)
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("failed to update match with old GameID %s: %v", oldGameID, err)

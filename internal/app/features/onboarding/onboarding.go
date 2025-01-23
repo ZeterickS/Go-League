@@ -15,7 +15,7 @@ import (
 )
 
 // OnboardSummoner fetches summoner data by tag and saves it to the database
-func OnboardSummoner(name, tagLine, region, channelID string) (*discordgo.MessageEmbed, error) {
+func OnboardSummoner(name, tagLine, region, channelID, guildID string) (*discordgo.MessageEmbed, error) {
 	logger.Logger.Info("Onboarding summoner", zap.String("name", name), zap.String("tagLine", tagLine), zap.String("region", region), zap.String("channelID", channelID))
 	var summoner *summoner.Summoner
 
@@ -58,7 +58,7 @@ func OnboardSummoner(name, tagLine, region, channelID string) (*discordgo.Messag
 		}
 	}
 
-	err = databaseHelper.SaveChannelForSummoner(summoner.PUUID, channelID)
+	err = databaseHelper.SaveChannelForSummoner(summoner.PUUID, channelID, guildID)
 	if err != nil {
 		return nil, fmt.Errorf("summoner already exists in this channel: name=%s, tagLine=%s, region=%s, channelID=%s", name, tagLine, region, channelID)
 	}

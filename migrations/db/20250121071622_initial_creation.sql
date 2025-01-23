@@ -16,14 +16,14 @@ CREATE TABLE Summoner (
 CREATE TABLE SummonerChannel (
     SummonerPUUID VARCHAR(255) NOT NULL,
     ChannelID VARCHAR(255) NOT NULL,
+    GuildID VARCHAR(255) NOT NULL,
     PRIMARY KEY (SummonerPUUID, ChannelID),
     FOREIGN KEY (SummonerPUUID) REFERENCES Summoner(PUUID)
 );
 
 CREATE TABLE Match (
     GameID VARCHAR(255) PRIMARY KEY,
-    GameType VARCHAR(255) NOT NULL,
-    Teams JSONB NOT NULL
+    GameType VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE Participant (
@@ -35,7 +35,8 @@ CREATE TABLE Participant (
     Perks JSONB,
     Spells JSONB,
     FOREIGN KEY (GameID) REFERENCES Match(GameID),
-    FOREIGN KEY (SummonerPUUID) REFERENCES Summoner(PUUID)
+    FOREIGN KEY (SummonerPUUID) REFERENCES Summoner(PUUID),
+    UNIQUE (GameID, SummonerPUUID) -- Add this line to create the unique constraint
 );
 -- +goose StatementEnd
 

@@ -188,6 +188,7 @@ func checkForOngoingGames(checksummoner *summoner.Summoner) {
 	logger.Logger.Info("Checking for ongoing games for summoner", zap.String("nameTag", checksummoner.GetNameTag()))
 	logger.Logger.Info("Summoner PUUID", zap.String("PUUID", checksummoner.PUUID))
 
+	// This already checks if game exists in DB
 	ongoingMatch, err := apiHelper.GetOngoingMatchByPUUID(checksummoner.PUUID, checksummoner.Region)
 	if err != nil {
 		logger.Logger.Error("Failed to get ongoing match by PUUID", zap.Error(err))

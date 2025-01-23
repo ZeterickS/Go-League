@@ -7,6 +7,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"sort"
 	"time"
 
 	"discord-bot/internal/app/constants"
@@ -78,6 +79,9 @@ var (
 								Value: key,
 							})
 						}
+						sort.Slice(choices, func(i, j int) bool {
+							return choices[i].Name < choices[j].Name
+						})
 						return choices
 					}(),
 				},
@@ -137,7 +141,7 @@ var (
 					},
 				})
 			}()
-			message, err := onboarding.OnboardSummoner(name, tag, region, i.ChannelID)
+			message, err := onboarding.OnboardSummoner(name, tag, region, i.ChannelID, i.GuildID)
 			if err != nil {
 				errormessage := fmt.Sprintf("Failed to onboard summoner: %v", err)
 				s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
@@ -187,63 +191,34 @@ var (
 	}
 )
 
-func removeCommands(s *discordgo.Session) {
-	logger.Logger.Info("Removing commands...")
-
-	for _, Guild := range s.State.Guilds {
-		logger.Logger.Info("Removing commands for guild", zap.String("guildID", Guild.ID))
-
-		// Fetch all existing commands
-		commands, err := s.ApplicationCommands(s.State.User.ID, Guild.ID)
-		if err != nil {
-			logger.Logger.Error("Cannot fetch commands", zap.Error(err))
-			continue
-		}
-		for _, cmd := range commands {
-			logger.Logger.Debug("Existing command", zap.String("commandName", cmd.Name))
-		}
-
-		// Delete each command
-		for _, v := range commands {
-			err := s.ApplicationCommandDelete(s.State.User.ID, Guild.ID, v.ID)
-			logger.Logger.Debug("Deleting command", zap.String("commandName", v.Name))
-			if err != nil {
-				logger.Logger.Error("Cannot delete command", zap.String("commandName", v.Name), zap.Error(err))
-			}
-		}
+func addCommands(s *discordgo.Session, commands []*discordgo.ApplicationCommand) error {
+	for _, guild := range s.State.Guilds {
+		addCommandsForGuild(s, commands, guild.ID)
 	}
+	return nil
 }
 
-func addCommandsIfNotRegistered(s *discordgo.Session, commands []*discordgo.ApplicationCommand) error {
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		commandName := i.ApplicationCommandData().Name
-		logger.Logger.Info("Interaction received", zap.String("commandName", commandName))
-		if i.Type == discordgo.InteractionApplicationCommand {
-			logger.Logger.Info("Command received", zap.String("commandName", commandName), zap.String("guildID", i.GuildID), zap.String("channelID", i.ChannelID), zap.String("userID", i.Member.User.ID))
-			if h, ok := commandHandlers[commandName]; ok {
-				h(s, i)
-			}
-		}
-	})
-	for _, guild := range s.State.Guilds {
-		logger.Logger.Info("Registering commands for guild", zap.String("guildID", guild.ID))
-		existingCommands, err := s.ApplicationCommands(s.State.User.ID, guild.ID)
+func addCommandsForGuild(s *discordgo.Session, commands []*discordgo.ApplicationCommand, guildid string) error {
+
+	logger.Logger.Info("Registering commands for guild", zap.String("guildID", guildid))
+	existingCommands, err := s.ApplicationCommands(s.State.User.ID, guildid)
+	if err != nil {
+		return err
+	}
+
+	// Delete all existing commands
+	for _, cmd := range existingCommands {
+		err := s.ApplicationCommandDelete(s.State.User.ID, guildid, cmd.ID)
 		if err != nil {
 			return err
 		}
+	}
 
-		existingCommandNames := make(map[string]bool)
-		for _, cmd := range existingCommands {
-			existingCommandNames[cmd.Name] = true
-		}
-
-		for _, cmd := range commands {
-			if !existingCommandNames[cmd.Name] {
-				_, err := s.ApplicationCommandCreate(s.State.User.ID, guild.ID, cmd)
-				if err != nil {
-					return err
-				}
-			}
+	// Add all new commands
+	for _, cmd := range commands {
+		_, err := s.ApplicationCommandCreate(s.State.User.ID, guildid, cmd)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -253,17 +228,33 @@ func addCommandsIfNotRegistered(s *discordgo.Session, commands []*discordgo.Appl
 func onGuildCreate(s *discordgo.Session, g *discordgo.GuildCreate) {
 	logger.Logger.Info("Bot added to a new server", zap.String("server_name", g.Name), zap.String("server_id", g.ID))
 	// Add any additional logic you want to execute when the bot is added to a new server
-	addCommandsIfNotRegistered(s, commands)
+	addCommandsForGuild(s, commands, g.ID)
+}
+
+func onGuildDelete(s *discordgo.Session, g *discordgo.GuildDelete) {
+	logger.Logger.Info("Bot removed from a server", zap.String("server_name", g.Name), zap.String("server_id", g.ID))
+	// Add any additional logic you want to execute when the bot is removed from a server
+	offboarding.DeleteGuild(g.ID)
+
+}
+
+func onChannelDelete(s *discordgo.Session, c *discordgo.ChannelDelete) {
+	logger.Logger.Info("Channel deleted", zap.String("channel_id", c.ID))
+	// Add any additional logic you want to execute when a channel is deleted
+	offboarding.DeleteChannel(c.ID)
 }
 
 func main() {
 
+	// Logging initialization
 	logger.InitLogger()
 	logger.Logger.Info("Starting application... Waiting 60s to wait for Database and RateLimit to clear")
 
+	// Sleeping to give DB and RateLimit time to clear
 	time.Sleep(60 * time.Second)
 	logger.Logger.Info("Woke up after initial sleep")
 
+	// Initialize the database
 	err := databaseHelper.InitDB()
 	if err != nil {
 		logger.Logger.Fatal("Failed to initialize database", zap.Error(err))
@@ -274,20 +265,23 @@ func main() {
 		logger.Logger.Info("Logged in as", zap.String("username", s.State.User.Username), zap.String("discriminator", s.State.User.Discriminator))
 	})
 
+	// Add the new interaction handler
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
 		}
 	})
 
+	addCommands(s, commands)
+
 	s.AddHandler(onGuildCreate)
+	s.AddHandler(onGuildDelete)
+	s.AddHandler(onChannelDelete)
 
 	err = s.Open()
 	if err != nil {
 		logger.Logger.Fatal("Cannot open the session", zap.Error(err))
 	}
-
-	addCommandsIfNotRegistered(s, commands)
 
 	// Initialize the checkforsummonerupdate package
 	logger.Logger.Info("Initializing checkforsummonerupdate package")
