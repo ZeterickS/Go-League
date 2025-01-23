@@ -250,7 +250,14 @@ func addCommandsIfNotRegistered(s *discordgo.Session, commands []*discordgo.Appl
 	return nil
 }
 
+func onGuildCreate(s *discordgo.Session, g *discordgo.GuildCreate) {
+	logger.Logger.Info("Bot added to a new server", zap.String("server_name", g.Name), zap.String("server_id", g.ID))
+	// Add any additional logic you want to execute when the bot is added to a new server
+	addCommandsIfNotRegistered(s, commands)
+}
+
 func main() {
+
 	logger.InitLogger()
 	logger.Logger.Info("Starting application... Waiting 60s to wait for Database and RateLimit to clear")
 
@@ -272,6 +279,8 @@ func main() {
 			h(s, i)
 		}
 	})
+
+	s.AddHandler(onGuildCreate)
 
 	err = s.Open()
 	if err != nil {
