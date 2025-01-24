@@ -74,7 +74,7 @@ func LoadEnv() error {
 
 func waitForRateLimiters() {
 	for !rateLimiterPerSecond.Check() || !rateLimiterPer2Minutes.Check() {
-		time.Sleep(5 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 	rateLimiterPer2Minutes.Allow()
 	rateLimiterPerSecond.Allow()
