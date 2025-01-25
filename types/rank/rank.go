@@ -2,7 +2,6 @@ package rank
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type Rank int
@@ -51,14 +50,9 @@ func (r Rank) ToString() string {
 	// If the division is higher than 28, we need to adjust the division and level points
 	// We get the first two Digits from the Rank value as the division
 	if divisionInt > 28 {
-		for divisionInt >= 100 {
-			divisionInt /= 10
-		}
+		divisionInt = int(r) / 10000
+		levelPoints = int(r) % 10000
 	}
-
-	// Extract all numbers after the first two digits
-	// I was not able to make this mathematically correct, so I had to convert it to a string and cut the first two digits
-	levelPoints = CutFirstTwoDigits(int(r))
 
 	division, exists := divisions[divisionInt]
 	if !exists {
@@ -73,7 +67,7 @@ func (r Rank) ToString() string {
 }
 
 func FromString(rankStr string) Rank {
-	var tier, rank, divisionIntString, leaguePointsString string
+	var tier, rank string
 	var leaguePoints, divisionInt, rankInt int
 
 	_, err := fmt.Sscanf(rankStr, "%s %s %d LP", &tier, &rank, &leaguePoints)
@@ -93,62 +87,31 @@ func FromString(rankStr string) Rank {
 		return 0
 	}
 
-	// Convert the Integer values to Strings to add them to eachother
-	leaguePointsString = fmt.Sprintf("%02d", leaguePoints)
-	divisionIntString = fmt.Sprintf("%d", divisionInt)
-
-	rankInt, err = strconv.Atoi(divisionIntString + leaguePointsString)
-
-	if err != nil {
-		return 0
+	if divisionInt > 28 {
+		rankInt = divisionInt*10000 + leaguePoints
+	} else {
+		rankInt = divisionInt*100 + leaguePoints
 	}
 
 	return Rank(rankInt)
 }
 
 func RankDifference(rank1 Rank, rank2 Rank) int {
-	if rank1/100 <= 28 && rank2/100 <= 28 {
-		return int(rank1 - rank2)
-	}
+	rankChange := 0
 
-	// If the division is higher than 28, we need to adjust the division and level points
-	// We get the first two Digits from the Rank value as the division
-	var divisionInt1, divisionInt2, levelPoints1, levelPoints2 int
-	divisionInt1 = int(rank1) / 100
-	divisionInt2 = int(rank2) / 100
+	rankChange = int(rank1 - rank2)
 
-	i := 0
-	for divisionInt1 >= 100 {
-		divisionInt1 /= 10
-		i++
-	}
-
-	j := 0
-	for divisionInt2 >= 100 {
-		divisionInt2 /= 10
-		j++
-	}
-
-	if i == j {
-		return int(rank1 - rank2)
-	}
-
-	levelPoints1 = CutFirstTwoDigits(int(rank1))
-	levelPoints2 = CutFirstTwoDigits(int(rank2))
-
-	if i != j {
-		return levelPoints1 - levelPoints2
+	if abs(rankChange) > 1000 {
+		rankChange = 0
 	}
 
 	// This should never be reached
-	return 0
+	return rankChange
 }
 
-func CutFirstTwoDigits(value int) int {
-	valueStr := fmt.Sprintf("%d", value)
-	if len(valueStr) <= 2 {
-		return 0
+func abs(x int) int {
+	if x < 0 {
+		return -x
 	}
-	cutValue, _ := strconv.Atoi(valueStr[2:])
-	return cutValue
+	return x
 }
