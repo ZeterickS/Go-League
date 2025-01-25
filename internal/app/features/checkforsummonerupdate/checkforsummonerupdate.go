@@ -102,10 +102,10 @@ func checkAndSendRankUpdate(summoner summoner.Summoner) error {
 			switch rankType {
 			case "Solo":
 				currentRank = newparticipantSoloRank
-				rankChange = newparticipantSoloRank - participant.Summoner.SoloRank
+				rankChange = rank.Rank(rank.RankDifference(newparticipantSoloRank, participant.Summoner.SoloRank))
 			case "Flex":
 				currentRank = newparticipantFlexRank
-				rankChange = newparticipantFlexRank - participant.Summoner.FlexRank
+				rankChange = rank.Rank(rank.RankDifference(newparticipantFlexRank, participant.Summoner.FlexRank))
 			}
 
 			if rankChange < 0 {
