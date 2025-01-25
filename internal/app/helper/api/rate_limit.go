@@ -73,6 +73,14 @@ func (rl *RateLimiter) cleanup(now time.Time) {
 	logger.Logger.Debug("Tokens cleaned up", zap.Int("remainingTokens", len(rl.requests)))
 }
 
+func (rl *RateLimiter) GetInterval() time.Duration {
+	return rateLimiterPerSecond.interval
+}
+
+func (rl *RateLimiter) GetMaxTokens() int {
+	return rateLimiterPerSecond.maxTokens
+}
+
 func getEnvAsInt(name string, defaultValue int) int {
 	valueStr := os.Getenv(name)
 	if value, err := strconv.Atoi(valueStr); err == nil {
