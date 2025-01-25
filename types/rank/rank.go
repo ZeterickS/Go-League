@@ -46,6 +46,7 @@ var divisions = map[int]string{
 func (r Rank) ToString() string {
 	var divisionInt, levelPoints int
 	divisionInt = int(r) / 100
+	levelPoints = int(r) % 100
 
 	// If the division is higher than 28, we need to adjust the division and level points
 	// We get the first two Digits from the Rank value as the division
@@ -105,7 +106,6 @@ func RankDifference(rank1 Rank, rank2 Rank) int {
 		rankChange = 0
 	}
 
-	// This should never be reached
 	return rankChange
 }
 

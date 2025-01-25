@@ -139,8 +139,8 @@ func checkAndSendRankUpdate(summoner summoner.Summoner) error {
 			embedmessage := embed.NewEmbed().
 				SetAuthor(fmt.Sprintf("%v", participant.Summoner.GetNameTag()), cdragon.GetProfileIconURL(participant.Summoner.ProfileIconID), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", encodedSummonerName, participant.Summoner.TagLine), fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", participant.Summoner.Name, participant.Summoner.TagLine)).
 				SetTitle(fmt.Sprintf("%v-Rank Update | %v LP", pretttyRank, rankChangeString)).
-				AddField("Solo/Duo-Rank", participant.Summoner.SoloRank.ToString()).
-				AddField("Flex-Rank", participant.Summoner.FlexRank.ToString()).
+				AddField("Solo/Duo-Rank", newparticipantSoloRank.ToString()).
+				AddField("Flex-Rank", newparticipantFlexRank.ToString()).
 				SetThumbnail(cdragon.GetChampionSquareURL(participant.ChampionID)).
 				SetImage("attachment://lastgameimage.png").
 				SetFooter(currentRank.ToString(), rankTierURL, fmt.Sprintf("https://www.op.gg/summoners/euw/%v-%v", encodedSummonerName, participant.Summoner.TagLine)).
