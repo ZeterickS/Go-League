@@ -90,5 +90,5 @@ func getEnvAsInt(name string, defaultValue int) int {
 }
 
 var rateLimiterRequestPerTime = NewRateLimiter(1, time.Duration(1000/getEnvAsInt("API_RATE_LIMIT_SECOND", 1))* time.Millisecond )
-var rateLimiterPerSecond = NewRateLimiter(getEnvAsInt("API_RATE_LIMIT_SECOND", 1), time.Second)
+//var rateLimiterPerSecond = NewRateLimiter(getEnvAsInt("API_RATE_LIMIT_SECOND", 1), time.Second)
 //var rateLimiterPer2Minutes = NewRateLimiter(getEnvAsInt("API_RATE_LIMIT_2_MINUTE", 50), 2*time.Minute)
