@@ -53,6 +53,8 @@ func init() {
 
 	// Start the request processor
 	go processRequests()
+
+	logger.Logger.Info("set RateLimit is: %w per %w equals: %w ms", rateLimiterRequestPerTime.GetMaxTokens(), rateLimiterRequestPerTime.GetInterval(), rateLimiterRequestPerTime.GetInterval()/1000000)
 }
 
 func getBaseURL(platform string, region string) (string, error) {
