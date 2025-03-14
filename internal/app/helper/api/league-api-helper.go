@@ -73,10 +73,10 @@ func LoadEnv() error {
 }
 
 func waitForRateLimiters() {
-	for !rateLimiterPerSecond.Check() || !rateLimiterPer2Minutes.Check() {
-		time.Sleep(time.Duration(int(rateLimiterPerSecond.GetInterval().Seconds())/rateLimiterPerSecond.GetMaxTokens()*100) * time.Millisecond)
+	for !rateLimiterPerSecond.Check() || !rateLimiterRequestPerTime.Check() {
+		time.Sleep(rateLimiterRequestPerTime.GetInterval())
 	}
-	rateLimiterPer2Minutes.Allow()
+	rateLimiterRequestPerTime.Allow()
 	rateLimiterPerSecond.Allow()
 }
 
@@ -117,7 +117,7 @@ func processRequests() {
 		}
 		if resp.StatusCode == 429 {
 			logger.Logger.Warn("Rate limit exceeded, waiting 20 seconds...")
-			time.Sleep(20 * time.Second)
+			time.Sleep(rateLimiterRequestPerTime.GetInterval()*2)
 			waitForRateLimiters()
 			resp, err = client.Get(req.url)
 			if err != nil {
