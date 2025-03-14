@@ -54,7 +54,7 @@ func init() {
 	// Start the request processor
 	go processRequests()
 	logger.Logger.Info("set RateLimitperRequest", zap.Int("maxTokens", rateLimiterRequestPerTime.GetMaxTokens()),zap.Duration("interval", rateLimiterRequestPerTime.GetInterval()), zap.Int64("intervalMs", rateLimiterRequestPerTime.GetInterval().Milliseconds()),)
-	logger.Logger.Info("set RateLimitperSecond", zap.Int("maxTokens", rateLimiterPerSecond.GetMaxTokens()),zap.Duration("interval", rateLimiterPerSecond.GetInterval()), zap.Int64("intervalMs", rateLimiterPerSecond.GetInterval().Milliseconds()),)
+	//logger.Logger.Info("set RateLimitperSecond", zap.Int("maxTokens", rateLimiterPerSecond.GetMaxTokens()),zap.Duration("interval", rateLimiterPerSecond.GetInterval()), zap.Int64("intervalMs", rateLimiterPerSecond.GetInterval().Milliseconds()),)
 }
 
 func getBaseURL(platform string, region string) (string, error) {
@@ -75,11 +75,11 @@ func LoadEnv() error {
 }
 
 func waitForRateLimiters() {
-	for !rateLimiterPerSecond.Check() || !rateLimiterRequestPerTime.Check() {
+	for !rateLimiterRequestPerTime.Check() {
 		time.Sleep(rateLimiterRequestPerTime.GetInterval())
 	}
 	rateLimiterRequestPerTime.Allow()
-	rateLimiterPerSecond.Allow()
+	//rateLimiterPerSecond.Allow()
 }
 
 func makeRequest(url string) (*http.Response, error) {
