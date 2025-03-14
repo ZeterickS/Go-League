@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	zap "go.uber.org/zap"
 
 	"discord-bot/internal/app/constants"
 	databaseHelper "discord-bot/internal/app/helper/database"
@@ -53,8 +54,7 @@ func init() {
 
 	// Start the request processor
 	go processRequests()
-
-	logger.Logger.Info("set RateLimit is: %w per %w equals: %w ms", rateLimiterRequestPerTime.GetMaxTokens(), rateLimiterRequestPerTime.GetInterval(), rateLimiterRequestPerTime.GetInterval()/1000000)
+	logger.Logger.Info("set RateLimit", zap.Int("maxTokens", rateLimiterRequestPerTime.GetMaxTokens()),zap.Duration("interval", rateLimiterRequestPerTime.GetInterval()), zap.Int64("intervalMs", rateLimiterRequestPerTime.GetInterval().Milliseconds()),)
 }
 
 func getBaseURL(platform string, region string) (string, error) {
