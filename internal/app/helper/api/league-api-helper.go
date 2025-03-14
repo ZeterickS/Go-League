@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	zap "go.uber.org/zap"
 
 	"discord-bot/internal/app/constants"
 	databaseHelper "discord-bot/internal/app/helper/database"
