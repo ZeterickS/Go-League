@@ -74,11 +74,11 @@ func (rl *RateLimiter) cleanup(now time.Time) {
 }
 
 func (rl *RateLimiter) GetInterval() time.Duration {
-	return rateLimiterPerSecond.interval
+	return rl.interval
 }
 
 func (rl *RateLimiter) GetMaxTokens() int {
-	return rateLimiterPerSecond.maxTokens
+	return rl.maxTokens
 }
 
 func getEnvAsInt(name string, defaultValue int) int {
